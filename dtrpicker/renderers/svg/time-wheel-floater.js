@@ -1,0 +1,228 @@
+/**
+ * TimeWheelFloater — 时间滚轮放大镜浮层（SVG 原生渲染）
+ *
+ * 在 SVG 内部绘制一个放大镜面板，以放大字号展示时间列邻近可选值。
+ * 定位在 SVG 右上区域，不依赖外部 DOM。
+ *
+ * @file       时间滚轮放大镜浮层
+ * @version    1.0.0
+ * @license    MIT
+ */
+
+class TimeWheelFloater {
+  /**
+   * @param {Object} cfg
+   * @param {string} cfg.svgNS - SVG 命名空间
+   * @param {SVGSVGElement} cfg.svg - 父 SVG 元素
+   * @param {string} cfg.selectedColor
+   * @param {string} cfg.todayBarColor
+   * @param {string} cfg.textColor
+   * @param {string} cfg.selectedTextColor
+   * @param {Function} cfg.getTimeCell - (type) => TimeCell|null
+   * @param {Function} cfg.getBgColor - (type) => string|null
+   */
+  constructor(cfg) {
+    this.svgNS = cfg.svgNS;
+    this.svg = cfg.svg;
+    this.selectedColor = cfg.selectedColor;
+    this.todayBarColor = cfg.todayBarColor;
+    this.textColor = cfg.textColor;
+    this.selectedTextColor = cfg.selectedTextColor;
+    this.getTimeCell = cfg.getTimeCell;
+    this.getBgColor = cfg.getBgColor;
+    this._group = null;
+    this._type = null;
+    this._width = 48;
+    this._fontSize = 18;
+    this._lineHeight = 33;
+    this._radius = 8;
+    this._borderWidth = 3;
+    this._shadowOffsetX = 8;
+    this._shadowOffsetY = 12;
+    this._height = 240;
+    this._visibleRows = 7;
+    this._fontWeight = 'normal';
+    this._fontWeightCurrent = 'bold';
+    this._textNodes = [];
+    this._hlRect = null;
+  }
+
+  /**
+   * 显示浮层。
+   * @param {string} type - 列标识
+   */
+  show(type) {
+    if (this._group) this.hide();
+    this._type = type;
+    var tc = this.getTimeCell ? this.getTimeCell(type) : null;
+    if (!tc) return;
+    var bgColor = this.getBgColor ? this.getBgColor(type) : null;
+    if (!bgColor) return;
+
+    var W = this._width;
+    var H = this._height;
+    var svgW = Number(this.svg.getAttribute('width'));
+    var svgH = Number(this.svg.getAttribute('height'));
+    var fx = Math.floor(svgW / 3);
+    var fy = Math.floor((svgH - H) / 2);
+
+    var g = document.createElementNS(this.svgNS, 'g');
+    g.setAttribute('class', 'dtrpicker-floater');
+    g.style.pointerEvents = 'none';
+
+    var shadow = document.createElementNS(this.svgNS, 'rect');
+    shadow.setAttribute('x', fx + this._shadowOffsetX);
+    shadow.setAttribute('y', fy + this._shadowOffsetY);
+    shadow.setAttribute('width', W);
+    shadow.setAttribute('height', H);
+    shadow.setAttribute('rx', String(this._radius));
+    shadow.setAttribute('fill', 'rgba(0,0,0,0.3)');
+    g.appendChild(shadow);
+
+    var cg = document.createElementNS(this.svgNS, 'g');
+    cg.setAttribute('transform', 'translate(' + fx + ',' + fy + ')');
+    cg.setAttribute('data-floater-content', '');
+    cg.style.clipPath = 'inset(0 round ' + this._radius + 'px)';
+    this._renderMagnifierContent(cg, tc, bgColor);
+    g.appendChild(cg);
+
+    var border = document.createElementNS(this.svgNS, 'rect');
+    border.setAttribute('x', fx);
+    border.setAttribute('y', fy);
+    border.setAttribute('width', W);
+    border.setAttribute('height', H);
+    border.setAttribute('rx', String(this._radius));
+    border.setAttribute('fill', 'none');
+    border.setAttribute('stroke', this.todayBarColor);
+    border.setAttribute('stroke-width', String(this._borderWidth));
+    g.appendChild(border);
+
+    this._group = g;
+    this.svg.appendChild(g);
+  }
+
+  /** 更新浮层数值。 */
+  update() {
+    if (!this._group || !this._type) return;
+    var tc = this.getTimeCell ? this.getTimeCell(this._type) : null;
+    if (!tc) return;
+    if (this._textNodes.length === 0) return;
+
+    var curVal = tc.currentValue;
+    var min = tc.min;
+    var max = tc.max;
+    var range = max - min + 1;
+    var half = Math.floor(this._visibleRows / 2);
+
+    for (var i = 0; i < this._visibleRows; i++) {
+      var offset = i - half;
+      var val = (((curVal - min + offset) % range) + range) % range + min;
+      var isCurrent = i === half;
+      var text = String(val).padStart(2, '0');
+
+      if (isCurrent && this._hlRect) {
+        this._hlRect.setAttribute('fill', this.selectedColor);
+      }
+      var textNode = this._textNodes[i];
+      if (textNode) {
+        textNode.textContent = text;
+        textNode.setAttribute('fill', isCurrent ? this.selectedTextColor : this.textColor);
+      }
+    }
+  }
+
+  /** @private */
+  _renderMagnifierContent(target, tc, bgColor) {
+    var curVal = tc.currentValue;
+    var min = tc.min;
+    var max = tc.max;
+    var range = max - min + 1;
+    var half = Math.floor(this._visibleRows / 2);
+    var W = this._width;
+    var H = this._height;
+    var lh = this._lineHeight;
+    var fs = this._fontSize;
+    var rowsH = this._visibleRows * lh;
+    var offsetY = Math.floor((H - rowsH) / 2);
+    var selColor = this.selectedColor;
+    var txtColor = this.textColor;
+    var selTxtColor = this.selectedTextColor;
+
+    this._textNodes = [];
+    this._hlRect = null;
+
+    var bg = document.createElementNS(this.svgNS, 'rect');
+    bg.setAttribute('x', 0);
+    bg.setAttribute('y', 0);
+    bg.setAttribute('width', W);
+    bg.setAttribute('height', H);
+    bg.setAttribute('fill', bgColor);
+    target.appendChild(bg);
+
+    for (var i = 0; i < this._visibleRows; i++) {
+      var offset = i - half;
+      var val = (((curVal - min + offset) % range) + range) % range + min;
+      var y = offsetY + i * lh;
+      var isCurrent = i === half;
+
+      if (isCurrent) {
+        var hl = document.createElementNS(this.svgNS, 'rect');
+        hl.setAttribute('x', 0);
+        hl.setAttribute('y', y);
+        hl.setAttribute('width', W);
+        hl.setAttribute('height', lh);
+        hl.setAttribute('fill', selColor);
+        target.appendChild(hl);
+        this._hlRect = hl;
+      }
+
+      var t = this._createMagnifierText(
+        target, W / 2, y + lh / 2,
+        String(val).padStart(2, '0'),
+        isCurrent ? selTxtColor : txtColor,
+        isCurrent ? fs + 2 : fs,
+        isCurrent ? this._fontWeightCurrent : this._fontWeight,
+      );
+      this._textNodes.push(t);
+    }
+  }
+
+  /** @private */
+  _createMagnifierText(target, x, y, text, color, fontSize, fontWeight) {
+    var t = document.createElementNS(this.svgNS, 'text');
+    t.setAttribute('x', x);
+    t.setAttribute('y', y);
+    t.setAttribute('text-anchor', 'middle');
+    t.setAttribute('dominant-baseline', 'middle');
+    t.setAttribute('dy', '1.5');
+    t.setAttribute('fill', color);
+    t.setAttribute('font-size', String(fontSize));
+    t.setAttribute('font-weight', fontWeight || '700');
+    t.textContent = text;
+    target.appendChild(t);
+    return t;
+  }
+
+  /** 隐藏浮层。 */
+  hide() {
+    if (this._group) {
+      this._group.remove();
+      this._group = null;
+    }
+    this._type = null;
+    this._textNodes = [];
+    this._hlRect = null;
+  }
+
+  /** 销毁浮层。 */
+  destroy() {
+    this.hide();
+    this.getTimeCell = null;
+    this.getBgColor = null;
+    this.svg = null;
+    this._textNodes = [];
+    this._hlRect = null;
+  }
+}
+
+export default TimeWheelFloater;

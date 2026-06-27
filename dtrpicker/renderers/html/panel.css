@@ -1,0 +1,342 @@
+/* ================================================================
+   dtrPicker — HTML+CSS 渲染模式样式表
+   ================================================================
+   无外部依赖，全部样式通过 CSS 自定义属性（变量）驱动。
+   ================================================================ */
+
+/* ──── 颜色变量 — 由 JS 在 createPanel 中根据当前色系动态设置 ──── 
+.dtrpicker-panel {
+  颜色值在 JS 中通过 this.options 注入，详见 createPanel 
+}
+*/
+
+/* ──── 面板容器 ──── */
+.dtrpicker-container {
+  position: fixed;
+  z-index: 9999;
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(-8px);
+  transition: opacity 0.2s, visibility 0.2s, transform 0.2s;
+}
+
+.dtrpicker-container.dp-open {
+  opacity: 1;
+  visibility: visible;
+  transform: translateY(0);
+}
+
+/* ──── 面板主体 ──── */
+.dtrpicker-panel {
+  background: var(--dp-grid-color);
+  border-radius: 0;
+  box-shadow: 0 12px 32px rgba(0,0,0,0.12);
+  overflow: hidden;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", sans-serif;
+  display: flex;
+  flex-direction: column;
+  gap: var(--dp-gap);
+  padding: var(--dp-gap) var(--dp-gap) 0 var(--dp-gap);
+  /* 注：不用 touch-action:none——HTML 渲染器依赖浏览器原生滚动，禁用触摸会阻断滚动通道 */
+  -webkit-user-select: none;
+  user-select: none;
+}
+
+/* ──── 面板内容区（日历 + 时间面板并排） ──── */
+.dp-content {
+  display: flex;
+  flex-direction: row;
+  flex: 1;
+  min-height: 0;
+  gap: var(--dp-gap);
+  padding-bottom: var(--dp-gap);
+}
+
+/* ──── 日历主区域 ──── */
+.dp-calendar {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-width: 0;
+}
+
+/* ──── 表头（跨越全部列） ──── */
+.dp-header {
+  display: grid;
+  gap: var(--dp-gap);
+  background: transparent;
+}
+
+.dp-header-cell {
+  background: transparent;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--dp-text-sublabel);
+  height: var(--dp-cell-h);
+  position: relative;
+  overflow: hidden;
+  padding-bottom: 1px;
+}
+
+.dp-header-cell--weekend {
+  color: var(--dp-weekend-title);
+}
+
+/* 表头渐变背景条 */
+.dp-header-bar {
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+}
+
+/* ──── 日期内容区（可滚动，9 列） ──── */
+.dp-body {
+  overflow-y: scroll;
+  overscroll-behavior: contain;
+  background: transparent;
+  display: grid;
+  gap: var(--dp-gap);
+  flex: 1;
+  /* 性能优化：隔离布局/绘制，提升为合成器层。注：不用 contain:strict 以避免 size 约束干扰滚动溢出计算 */
+  contain: layout paint;
+  will-change: scroll-position;
+}
+
+.dp-body::-webkit-scrollbar {
+  display: none;
+}
+
+/* dp-week-row 已移除：Grid 属性在 dp-body 上 */
+
+
+
+/* ──── 边栏颜色覆盖层（年/月列背景） ──── */
+.dp-sidebar-bg {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  z-index: 0;
+  pointer-events: none;
+}
+
+/* ──── 通用格 ──── */
+.dp-cell {
+  background: var(--dp-cell-bg);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: var(--dp-cell-h);
+  position: relative;
+  cursor: pointer;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--dp-text);
+  box-sizing: border-box;
+  padding-bottom: 1px;
+}
+
+/* ──── 年列 ──── */
+.dp-year-cell {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--dp-text-sublabel);
+  cursor: pointer;
+}
+
+/* ──── 月列 ──── */
+.dp-month-cell {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--dp-text-sublabel);
+}
+
+/* ──── 日期格 ──── */
+.dp-day-cell {
+  flex-direction: column;
+  position: relative;
+}
+
+.dp-day-cell:hover {
+  background: color-mix(in srgb, var(--dp-selected) 7%, transparent);
+}
+
+/* 今日标记条 */
+.dp-day-cell--today::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 6px;
+  background: var(--dp-today-bar);
+}
+
+/* 选中起/止 */
+.dp-day-cell--start,
+.dp-day-cell--end {
+  background: var(--dp-selected) !important;
+  color: var(--dp-text-selected);
+  font-weight: 700;
+}
+
+/* 范围中段底线 */
+.dp-day-cell--in-range {
+  box-shadow: inset 0 -2px 0 var(--dp-selected);
+}
+
+/* 周末文字色—与表头六、日同色 */
+.dp-day-cell--weekend {
+  color: var(--dp-weekend);
+}
+
+/* ──── 时间区域 ──── */
+.dp-time-panel {
+  display: flex;
+  flex-direction: column;
+  background: transparent;
+  gap: var(--dp-gap);
+  /* 无边：不画 GAP 线，位置自然透出背景色 */
+}
+
+.dp-time-columns {
+  display: flex;
+  flex-direction: row;
+  gap: var(--dp-gap);
+  align-items: flex-start;
+  flex-shrink: 0;
+}
+
+.dp-time-col {
+  position: relative;
+}
+
+.dp-time-row {
+  height: var(--dp-cell-h);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 13px;
+  color: var(--dp-text);
+  cursor: pointer;
+  position: relative;
+  z-index: 1;
+}
+
+.dp-time-col span {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--dp-text);
+}
+
+.dp-time-col span.dp-selected {
+  background: var(--dp-selected);
+  color: var(--dp-text-selected);
+  font-weight: 700;
+}
+
+.dp-time-row--current {
+  color: var(--dp-text-selected);
+  font-weight: 700;
+}
+
+/* 当前值高亮底色（模拟 SVG TimeCell 的选中 rect） */
+.dp-time-row--current::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: var(--dp-selected);
+  z-index: -1;
+}
+
+/* ──── 标题栏（开始/结束） ──── */
+.dp-title-bar {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: var(--dp-cell-h);
+  flex-shrink: 0;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--dp-text);
+  gap: var(--dp-gap);
+}
+
+.dp-title-bar span {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  padding-bottom: 1px;
+}
+
+/* ──── 今日定位按钮 ──── */
+/* 尺寸 (width/height/bottom/left/box-shadow) 由 JS 通过 TODAY_BTN 常量统一设置 */
+.dp-today-btn {
+  position: absolute;
+  border-radius: 50%;
+  background: rgba(255,255,255,0.88);
+  border: 1px solid #e8e8e8;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 3;
+}
+
+.dp-today-btn:hover {
+  background: rgba(255,255,255,1);
+}
+
+.dp-today-btn svg {
+  width: 16px;
+  height: 16px;
+}
+
+/* ──── 放大浮层 ──── */
+.dp-floater {
+  position: fixed;
+  z-index: 10000;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.15s;
+}
+
+.dp-floater--visible {
+  opacity: 1;
+}
+
+.dp-floater-content {
+  background: var(--dp-cell-bg);
+  border: 3px solid var(--dp-today-bar);
+  border-radius: 8px;
+  box-shadow: 8px 12px rgba(0,0,0,0.3);
+  overflow: hidden;
+  padding: 4px 0;
+}
+
+.dp-floater-row {
+  height: 33px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 16px;
+  font-weight: 500;
+  color: var(--dp-text);
+  padding: 0 8px;
+  white-space: nowrap;
+}
+
+.dp-floater-row--current {
+  background: var(--dp-selected);
+  color: var(--dp-text-selected);
+  font-weight: 700;
+  font-size: 18px;
+}
