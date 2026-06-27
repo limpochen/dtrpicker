@@ -56,10 +56,12 @@ class SvgRenderer {
     this.GAP = DIM.GAP;
     this.STEP_X = 0;
     this.STEP_Y = 0;
-    this.SIDEBAR_COLS = DIM.SIDEBAR_COLS;
-    this.DATE_COL_START = DIM.DATE_COL_START;
+    /** 是否显示侧边栏（年/月列） */
+    this._hasSidebar = DIM.YEAR_MONTH_MODE === 'column';
+    this.SIDEBAR_COLS = this._hasSidebar ? DIM.SIDEBAR_COLS : 0;
+    this.DATE_COL_START = this._hasSidebar ? DIM.DATE_COL_START : 0;
     this.DATE_COLS = DIM.DATE_COLS;
-    this.TIME_COL_START = DIM.TIME_COL_START;
+    this.TIME_COL_START = this.SIDEBAR_COLS + this.DATE_COLS;
     this.TIME_COLS = DIM.TIME_COLS;
     this.SVG_H = 0;
     this.SVG_W = 0;
@@ -125,8 +127,13 @@ class SvgRenderer {
   }
 
   /** @private */
+  _calcTotalCols() {
+    return this.SIDEBAR_COLS + this.DATE_COLS + (this.state.isTimeEnabled() ? this.TIME_COLS : 0);
+  }
+
+  /** @private */
   _updateSVGSize() {
-    const totalCols = this.state.isTimeEnabled() ? 11 : 9;
+    const totalCols = this._calcTotalCols();
     this.SVG_W = this.CELL_W * totalCols + this.GAP * (totalCols + 1);
     if (this.svg) {
       this.svg.setAttribute('viewBox', '0 0 ' + this.SVG_W + ' ' + this.SVG_H);
@@ -193,7 +200,7 @@ class SvgRenderer {
     this.svg.appendChild(this.svgBg);
 
         // 网格常量引用
-    const totalCols = this.state.isTimeEnabled() ? 11 : 9;
+    const totalCols = this._calcTotalCols();
     const gridRef = {
       CELL_W: this.CELL_W, CELL_H: this.CELL_H, GAP: this.GAP,
       STEP_X: this.STEP_X, STEP_Y: this.STEP_Y, svgNS: this.svgNS,
@@ -201,12 +208,12 @@ class SvgRenderer {
 
     // 三个绘制区域（顺序：calendar → time → header）
     this.calendarArea = new DrawingArea({
-      r: 1, c: 0, rs: 8, cs: 9, scrollable: true,
+      r: 1, c: 0, rs: 8, cs: this.SIDEBAR_COLS + this.DATE_COLS, scrollable: true,
       parentSvg: this.svg, containerId: this.picker._instanceId + '-calendar',
       grid: gridRef, picker: this.picker,
     });
     this.timeArea = new DrawingArea({
-      r: 1, c: 9, rs: 8, cs: 2, scrollable: false,
+      r: 1, c: this.SIDEBAR_COLS + this.DATE_COLS, rs: 8, cs: 2, scrollable: false,
       parentSvg: this.svg, containerId: this.picker._instanceId + '-time',
       grid: gridRef, picker: this.picker,
     });
@@ -219,7 +226,7 @@ class SvgRenderer {
     // 日历区域视口裁剪：嵌套 <svg>
     const vpX = this.GAP;
     const vpY = this.GAP + 1 * this.STEP_Y;
-    const vpW = 9 * this.STEP_X - this.GAP;
+    const vpW = (this.SIDEBAR_COLS + this.DATE_COLS) * this.STEP_X - this.GAP;
     const vpH = 8 * this.STEP_Y - this.GAP;
     const viewportSvg = document.createElementNS(this.svgNS, 'svg');
     viewportSvg.setAttribute('x', vpX);
@@ -255,7 +262,7 @@ class SvgRenderer {
     const timeClip = document.createElementNS(this.svgNS, 'clipPath');
     timeClip.setAttribute('id', timeClipId);
     const timeClipRect = document.createElementNS(this.svgNS, 'rect');
-    timeClipRect.setAttribute('x', this.GAP + this.TIME_COL_START * this.STEP_X);
+    timeClipRect.setAttribute('x', this.GAP + (this.SIDEBAR_COLS + this.DATE_COLS) * this.STEP_X);
     timeClipRect.setAttribute('y', this.GAP + 1 * this.STEP_Y);
     timeClipRect.setAttribute('width', this.TIME_COLS * this.CELL_W + (this.TIME_COLS - 1) * this.GAP);
     timeClipRect.setAttribute('height', 8 * this.STEP_Y - this.GAP);
@@ -316,16 +323,18 @@ class SvgRenderer {
     const i18n = this._i18n;
 
         const headerCells = [];
-    const hTotalCols = this.state.isTimeEnabled() ? 11 : 9;
+    const hTotalCols = this._calcTotalCols();
 
-    headerCells.push(new HeaderCell({
-      r: 0, c: 0, rs: 1, cs: 1, grid: grid, picker: this.picker,
-      label: i18n.year,
-    }));
-    headerCells.push(new HeaderCell({
-      r: 0, c: 1, rs: 1, cs: 1, grid: grid, picker: this.picker,
-      label: i18n.month,
-    }));
+    if (this._hasSidebar) {
+      headerCells.push(new HeaderCell({
+        r: 0, c: 0, rs: 1, cs: 1, grid: grid, picker: this.picker,
+        label: i18n.year,
+      }));
+      headerCells.push(new HeaderCell({
+        r: 0, c: 1, rs: 1, cs: 1, grid: grid, picker: this.picker,
+        label: i18n.month,
+      }));
+    }
 
     if (this.state.isTimeEnabled()) {
       headerCells.push(new HeaderCell({
@@ -477,7 +486,8 @@ class SvgRenderer {
       rowYearColors[rowNum] = saturateColor(yColor, 0.08);
     }
 
-    // YearCell
+    // YearCell（仅 column 模式显示）
+    if (this._hasSidebar) {
     const coveredYearRows = {};
     for (let si = 0; si < pureYears.length; si++) {
       const seg = pureYears[si];
@@ -502,8 +512,10 @@ class SvgRenderer {
       ycBlend.render();
       this.cellManager.add(ycBlend);
     }
+    } // end if _hasSidebar
 
-    // MonthCell
+    // MonthCell（仅 column 模式显示）
+    if (this._hasSidebar) {
     const coveredMonthRows = {};
     for (let si = 0; si < pureSegments.length; si++) {
       const seg = pureSegments[si];
@@ -551,9 +563,12 @@ class SvgRenderer {
       mc.render();
       this.cellManager.add(mc);
     }
+    } // end if _hasSidebar
 
-    // 年份文字
-    this._renderYearLabel(pureYears, startRow, TOTAL_ROWS, this.GAP + this.CELL_W / 2);
+    // 年份文字（仅 column 模式显示）
+    if (this._hasSidebar) {
+      this._renderYearLabel(pureYears, startRow, TOTAL_ROWS, this.GAP + this.CELL_W / 2);
+    }
 
     // DayCell
     for (let i = 0; i < TOTAL_ROWS; i++) {
@@ -757,7 +772,12 @@ class SvgRenderer {
       selectedTextColor: this.options.selectedTextColor,
       onDragStateChange: (isDragging) => {
         this._setHoverDisabled(isDragging);
-        this._dragging = isDragging;
+        if (isDragging) {
+          this._dragging = true;
+        } else {
+          // 延迟清除拖拽标志，让紧随的 click 事件仍能看到 _dragging=true，避免关闭选择器
+          setTimeout(() => { this._dragging = false; }, 0);
+        }
       },
       isDragActive: () => this._hoverDisabled,
       picker: this.picker,
@@ -869,7 +889,8 @@ class SvgRenderer {
   }
 
   _onDragEnd() {
-    this._dragging = false;
+    // 延迟清除拖拽标志，让紧随的 click 事件仍能看到 _dragging=true，避免关闭选择器
+    setTimeout(() => { this._dragging = false; }, 0);
     this._setHoverDisabled(false);
     this._lastDragClientY = undefined;
     if (this._dragMoved) {
@@ -895,7 +916,7 @@ class SvgRenderer {
     const sy = this.SVG_H / rect.height;
     const svgX = x * sx;
     const svgY = y * sy;
-    const dateRight = this.GAP + 8 * this.STEP_X + this.CELL_W;
+    const dateRight = this.GAP + (this.SIDEBAR_COLS + this.DATE_COLS) * this.STEP_X;
     return svgX >= 0 && svgX <= dateRight && svgY >= this.STEP_Y && svgY <= this.SVG_H;
   }
 

@@ -42,8 +42,10 @@ class HtmlRenderer {
     this.GAP = DIM.GAP;
     this.STEP_X = this.CELL_W + DIM.GAP;
     this.STEP_Y = DIM.CELL_H + DIM.GAP;
-    this.SIDEBAR_COLS = DIM.SIDEBAR_COLS;
-    this.DATE_COL_START = DIM.DATE_COL_START;
+    /** 是否显示侧边栏（年/月列） */
+    this._hasSidebar = DIM.YEAR_MONTH_MODE === 'column';
+    this.SIDEBAR_COLS = this._hasSidebar ? DIM.SIDEBAR_COLS : 0;
+    this.DATE_COL_START = this._hasSidebar ? DIM.DATE_COL_START : 0;
     this.DATE_COLS = DIM.DATE_COLS;
     this.TIME_COL_START = DIM.TIME_COL_START;
     this.TIME_COLS = DIM.TIME_COLS;
@@ -119,8 +121,12 @@ class HtmlRenderer {
     this._timeW = this.CELL_W;
   }
 
+  _calcTotalCols() {
+    return this.SIDEBAR_COLS + this.DATE_COLS + (this.state.isTimeEnabled() ? this.TIME_COLS : 0);
+  }
+
   _calcTotalWidth() {
-    const totalCols = this.SIDEBAR_COLS + this.DATE_COLS + (this.state.isTimeEnabled() ? this.TIME_COLS : 0);
+    const totalCols = this._calcTotalCols();
     // 总宽 = GAP + (CELL_W + GAP) × 总列数
     return this.GAP + (this.CELL_W + this.GAP) * totalCols;
   }
@@ -149,7 +155,7 @@ class HtmlRenderer {
     // 将 JS 网格常量同步为 CSS 变量，panel.css 中不再写死
     this.panel.style.setProperty('--dp-cell-h', this.CELL_H + 'px');
     this.panel.style.setProperty('--dp-gap', this.GAP + 'px');
-    this.panel.style.setProperty('--dp-col-sidebar', this._sidebarW + 'px');
+    this.panel.style.setProperty('--dp-col-sidebar', this._hasSidebar ? this._sidebarW + 'px' : '0px');
     this.panel.style.setProperty('--dp-col-day', this._dayW + 'px');
     this.panel.style.setProperty('--dp-col-time', this._timeW + 'px');
     // 从当前色系同步颜色 CSS 变量
@@ -246,10 +252,12 @@ class HtmlRenderer {
     this._headerEl.innerHTML = '';
     this._headerCells = [];
 
-    const hTotalCols = this.state.isTimeEnabled() ? 11 : 9;
+    const hTotalCols = this._calcTotalCols();
     const cols = [];
-    cols.push(this._sidebarW + 'px');
-    cols.push(this._sidebarW + 'px');
+    if (this._hasSidebar) {
+      cols.push(this._sidebarW + 'px');
+      cols.push(this._sidebarW + 'px');
+    }
     for (let i = 0; i < 7; i++) cols.push(this._dayW + 'px');
     if (this.state.isTimeEnabled()) {
       cols.push(this._timeW + 'px');
@@ -259,8 +267,10 @@ class HtmlRenderer {
 
     const i18n = this._i18n;
 
-    this._addHeaderCell(i18n.year, false);
-    this._addHeaderCell(i18n.month, false);
+    if (this._hasSidebar) {
+      this._addHeaderCell(i18n.year, false);
+      this._addHeaderCell(i18n.month, false);
+    }
 
     const fd = this.options.firstDay || 0;
     const weeks = fd === 0
@@ -309,10 +319,12 @@ class HtmlRenderer {
     // body 的 CSS height 已在 createPanel 中固定为 8 行视口高度，
     // 52 行内容自然溢出形成滚动区，此处不重复设置
 
-    const totalCols = this.SIDEBAR_COLS + this.DATE_COLS + (this.state.isTimeEnabled() ? this.TIME_COLS : 0);
+    const totalCols = this._calcTotalCols();
     const cols = [];
-    cols.push(this._sidebarW + 'px');
-    cols.push(this._sidebarW + 'px');
+    if (this._hasSidebar) {
+      cols.push(this._sidebarW + 'px');
+      cols.push(this._sidebarW + 'px');
+    }
     for (let i = 0; i < 7; i++) cols.push(this._dayW + 'px');
     const colTemplate = cols.join(' ');
 
@@ -454,7 +466,8 @@ class HtmlRenderer {
       const rowBg = rowColors[i];
       const rowYearBg = rowYearColors[i];
 
-      // 年列 — 纯年段用跨行合并格，否则逐行
+      // 年列 — 纯年段用跨行合并格，否则逐行（仅 column 模式显示）
+      if (this._hasSidebar) {
       const ySeg = yearStartAt.get(i);
       if (ySeg) {
         const tall = document.createElement('div');
@@ -471,8 +484,10 @@ class HtmlRenderer {
         yearCell.style.background = saturateColor(rowYearBg, 0.08);
         fragment.appendChild(yearCell);
       }
+      } // end if _hasSidebar
 
-      // 月列 — 纯月段用跨行合并格，否则逐行
+      // 月列 — 纯月段用跨行合并格，否则逐行（仅 column 模式显示）（仅 column 模式显示）
+      if (this._hasSidebar) {
       const mSeg = monthStartAt.get(i);
       if (mSeg) {
         const tall = document.createElement('div');
@@ -489,6 +504,7 @@ class HtmlRenderer {
         monthCell.style.background = saturateColor(rowBg, 0.04);
         fragment.appendChild(monthCell);
       }
+      } // end if _hasSidebar
 
       // 7 天
       for (let col = 0; col < 7; col++) {
@@ -542,21 +558,21 @@ class HtmlRenderer {
 
     const colors = [];
 
-    // c0: 年列（与 YearCell._cellColor(year+2) 一致）
-    const yKeys = [rowDate.getFullYear()];
-    colors.push(saturateColor(schemeColors[(yKeys[0] + 2 + cs) % schemeLen], 0.08));
+    // 年/月列（仅 column 模式显示）
+    if (this._hasSidebar) {
+      const yKeys = [rowDate.getFullYear()];
+      colors.push(saturateColor(schemeColors[(yKeys[0] + 2 + cs) % schemeLen], 0.08));
+      colors.push(saturateColor(schemeColors[(rowDate.getMonth() + cs) % schemeLen], 0.04));
+    }
 
-    // c1: 月列
-    colors.push(saturateColor(schemeColors[(rowDate.getMonth() + cs) % schemeLen], 0.04));
-
-    // c2-c8: 日期列（7天逐列取月份色）
+    // 日期列（7天逐列取月份色）
     for (let col = 0; col < 7; col++) {
       const d = new Date(rowDate);
       d.setDate(rowDate.getDate() + col);
       colors.push(schemeColors[(d.getMonth() + cs) % schemeLen]);
     }
 
-    // c9-c10: 时间列（取首月色调，降低饱和度以示区分）
+    // 时间列（取首月色调，降低饱和度以示区分）
     if (this.state.isTimeEnabled()) {
       const baseTimeColor = schemeColors[(rowDate.getMonth() + cs) % schemeLen];
       colors.push(saturateColor(baseTimeColor, 0.06));
