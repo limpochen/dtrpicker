@@ -41,7 +41,7 @@ class DragController {
    */
   register(id, handlers) {
     if (this._sessions.has(id)) {
-      console.warn('DragController: session "' + id + '" 已存在，将被覆盖');
+      console.warn('DragController: session "' + id + '" already exists, will be overwritten');
     }
     this._sessions.set(id, {
       onDragMove: handlers.onDragMove,
@@ -67,7 +67,7 @@ class DragController {
    */
   activate(id) {
     if (!this._sessions.has(id)) {
-      console.warn('DragController: 未知 session "' + id + '"，activate 被忽略');
+      console.warn('DragController: unknown session "' + id + '", activate ignored');
       return;
     }
     this._activeSession = id;

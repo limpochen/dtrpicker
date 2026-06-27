@@ -2,7 +2,7 @@
  * dtrpicker.js — 日期范围选择器核心
  *
  * @file       日期范围选择器核心脚本
- * @version    3.2.0
+ * @version    3.2.1
  * @license    MIT
  */
 
@@ -59,7 +59,7 @@ class dtrPicker {
       trigger = document.querySelector(trigger);
     }
     if (!trigger || !(trigger instanceof HTMLElement)) {
-      throw new Error('dtrPicker: trigger 必须是有效的 DOM 元素或选择器');
+      throw new Error('dtrPicker: trigger must be a valid DOM element or selector');
     }
 
     // ---- renderMode 必选校验 ----

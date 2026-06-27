@@ -598,6 +598,89 @@ class SvgRenderer {
       }
     }
 
+    // 水印模式：每月矩形容器（1px 红色边框，供观察用）
+    if (!this._hasSidebar) {
+      const monthRanges = {}; // key: "year-month" => { startRow, endRow }
+      for (let i = 0; i < TOTAL_ROWS; i++) {
+        const rowNum = startRow + i;
+        const rowStart = this._getDateOfWeekRow(rowNum);
+        const monthsInRow = new Set();
+        for (let col = 0; col < this.DATE_COLS; col++) {
+          const d = new Date(rowStart);
+          d.setDate(rowStart.getDate() + col);
+          monthsInRow.add(d.getFullYear() + '-' + d.getMonth());
+        }
+        for (const key of monthsInRow) {
+          if (!monthRanges[key]) {
+            monthRanges[key] = { startRow: rowNum, endRow: rowNum };
+          } else {
+            monthRanges[key].endRow = rowNum;
+          }
+        }
+      }
+
+      const dateLeft = this.GAP + this.DATE_COL_START * this.STEP_X;
+      const dateWidth = this.DATE_COLS * this.CELL_W + (this.DATE_COLS - 1) * this.GAP;
+
+      for (const key in monthRanges) {
+        const seg = monthRanges[key];
+        const [yearNum, monthNum] = key.split('-').map(Number);
+        seg.year = yearNum;
+        seg.month = monthNum;
+        const rectX = dateLeft;
+        const rectY = this.GAP + seg.startRow * this.STEP_Y;
+        const rectH = (seg.endRow - seg.startRow + 1) * this.CELL_H
+                    + (seg.endRow - seg.startRow) * this.GAP;
+
+        const rect = document.createElementNS(this.svgNS, 'rect');
+        rect.setAttribute('x', rectX);
+        rect.setAttribute('y', rectY);
+        rect.setAttribute('width', dateWidth);
+        rect.setAttribute('height', rectH);
+        // 使用 inset 让 1px 描边完全位于矩形内缘以内，不伸入间隙
+        rect.setAttribute('x', rectX + 0.5);
+        rect.setAttribute('y', rectY + 0.5);
+        rect.setAttribute('width', dateWidth - 1);
+        rect.setAttribute('height', rectH - 1);
+        // 矩形容器（已无边框，仅用于占位参考，后续可移除）
+        rect.setAttribute('fill', 'none');
+        rect.setAttribute('stroke', 'none');
+        this.calendarArea.container.appendChild(rect);
+
+        // 年月水印文字（由 i18n 数据的 yearFirst 字段驱动格式）
+        const label = this._i18n.yearFirst
+          ? String(seg.year) + this._i18n.year + ' ' + this._i18n.months[seg.month]
+          : this._i18n.months[seg.month] + ' ' + String(seg.year);
+        const cx = rectX + dateWidth / 2;
+        const cy = rectY + rectH / 2;
+
+        const text = document.createElementNS(this.svgNS, 'text');
+        text.setAttribute('x', cx);
+        text.setAttribute('y', cy);
+        text.setAttribute('text-anchor', 'middle');
+        text.setAttribute('dominant-baseline', 'middle');
+        text.setAttribute('dy', '1.5');
+        text.setAttribute('fill', this.options.textColor);
+        text.setAttribute('fill-opacity', '0.2');
+        text.setAttribute('font-size', '42');
+        text.setAttribute('font-style', 'italic');
+        text.setAttribute('font-weight', '700');
+        text.textContent = label;
+        this.calendarArea.container.appendChild(text);
+      }
+
+      // 将 DayCell 的日期文字提升到水印层之上
+      const dayCells = this.cellManager.filter(function (c) { return c.type === 'day'; });
+      for (let di = 0; di < dayCells.length; di++) {
+        const els = dayCells[di].elements;
+        for (let ei = 0; ei < els.length; ei++) {
+          if (els[ei].tagName === 'text') {
+            this.calendarArea.container.appendChild(els[ei]);
+          }
+        }
+      }
+    }
+
     // 今日按钮
     this._drawTodayBtn();
 

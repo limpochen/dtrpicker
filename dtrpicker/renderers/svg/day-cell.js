@@ -75,13 +75,15 @@ class DayCell extends Cell {
 
   /** 绘制日期数字 */
   _drawText() {
-    this._createText(this.x + this.w / 2, this.y + this.h / 2, this.dayNum, {
+    const isWeekend = this.date.getDay() === 0 || this.date.getDay() === 6;
+    const attrs = {
       fill: this.textColor,
       'font-size': this.textSize,
       'font-weight': this.textWeight,
       'class': 'dtrpicker-day-text',
       'data-date': this.dateStr,
-    });
+    };
+    this._createText(this.x + this.w / 2, this.y + this.h / 2, this.dayNum, attrs);
   }
 
   render() {

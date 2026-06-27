@@ -31,6 +31,7 @@ export const locales = {
       end: '结束',
       schemeMorandi: '莫兰迪',
       schemeNature: '自然',
+      yearFirst: true,
     },
 
     /* ==============================
@@ -63,6 +64,7 @@ export const locales = {
       end: '結束',
       schemeMorandi: '莫蘭迪',
       schemeNature: '自然',
+      yearFirst: true,
     },
 
     /* ==============================
@@ -79,6 +81,7 @@ export const locales = {
       end: '終了',
       schemeMorandi: 'モランディ',
       schemeNature: 'ナチュラル',
+      yearFirst: true,
     },
 
     /* ==============================
@@ -95,6 +98,7 @@ export const locales = {
       end: '종료',
       schemeMorandi: '모란디',
       schemeNature: '내추럴',
+      yearFirst: true,
     },
 
     /* ==============================
@@ -306,20 +310,23 @@ export const locales = {
     },
   };
 
-  /**
-   * 获取指定语言的语言包字典。
-   *
-   * 查找顺序：
-   * 1. 完全匹配（如 'zh-CN'）
-   * 2. 语言前缀匹配（如 'zh' → 'zh-CN'）
-   * 3. 回退到英语 'en-US'
-   *
-   * @param {string} [locale] - BCP 47 语言标签。为空时自动检测浏览器语言。
-   * @returns {Object} 语言包对象
-   */
-  export function getLocale(locale) {
+/** 全局默认语言——检测不到语言时的唯一兜底 */
+export const DEFAULT_LOCALE = 'en-US';
+
+/**
+ * 获取指定语言的语言包字典。
+ *
+ * 查找顺序：
+ * 1. 完全匹配（如 'zh-CN'）
+ * 2. 语言前缀匹配（如 'zh' → 'zh-CN'）
+ * 3. 回退到全局默认语言 DEFAULT_LOCALE
+ *
+ * @param {string} [locale] - BCP 47 语言标签。为空时自动检测浏览器语言。
+ * @returns {Object} 语言包对象
+ */
+export function getLocale(locale) {
     if (!locale) {
-      locale = (navigator.language || navigator.browserLanguage || 'en-US');
+      locale = (navigator.language || navigator.browserLanguage || DEFAULT_LOCALE);
     }
     // 完全匹配
     if (locales[locale]) return locales[locale];
@@ -329,5 +336,5 @@ export const locales = {
       if (key.startsWith(lang)) return locales[key];
     }
     // 终极回退
-    return locales['en-US'];
+    return locales[DEFAULT_LOCALE];
   }

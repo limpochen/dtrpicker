@@ -169,7 +169,7 @@ class HtmlRenderer {
     this.panel.style.setProperty('--dp-text-sublabel', o.textColorSubLabel);
     this.panel.style.setProperty('--dp-weekend', o.textColorWeekend);
     this.panel.style.setProperty('--dp-weekend-title', o.textColorWeekendTitle);
-    this.panel.style.setProperty('--dp-today-bar', '#8c00ff');
+    this.panel.style.setProperty('--dp-today-bar', o.todayBarColor);
 
     // ── 表头（跨越全部列，与 SVG 一致） ──
     this._headerEl = document.createElement('div');
