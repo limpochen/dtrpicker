@@ -180,7 +180,6 @@ class SvgRenderer {
     this.svg.setAttribute('height', this.SVG_H);
     this.svg.style.display = 'block';
     this.svg.style.webkitTapHighlightColor = 'transparent';
-    this.svg.style.cursor = 'grab';
     this.svg.style.touchAction = 'none';
     this.svg.style.userSelect = 'none';
 
@@ -689,7 +688,6 @@ class SvgRenderer {
     base.setAttribute('fill-opacity', '0.88');              // 轻微透明，透出网格
     base.setAttribute('stroke', HARDCODED.todayBtnStroke);   // 描边使用淡灰色
     base.setAttribute('stroke-width', '1');
-    base.setAttribute('cursor', 'pointer');                 // 鼠标悬停显示手型
     this.todayBtnGroup.appendChild(base);
 
     // ── 2. 外圈圆环：空心圆圈 ────────────────────────────────────
@@ -700,7 +698,6 @@ class SvgRenderer {
     ring.setAttribute('fill', 'none');                       // 空心
     ring.setAttribute('stroke', this.options.todayBarColor); // 主题色描边
     ring.setAttribute('stroke-width', STROKE_W);
-    ring.setAttribute('cursor', 'pointer');
     this.todayBtnGroup.appendChild(ring);
 
     // ── 3. 中心圆点：实心圆点 ────────────────────────────────────
@@ -709,7 +706,6 @@ class SvgRenderer {
     dot.setAttribute('cy', cyIcon);
     dot.setAttribute('r', DOT_R);
     dot.setAttribute('fill', this.options.todayBarColor);   // 主题色填充
-    dot.setAttribute('cursor', 'pointer');
     this.todayBtnGroup.appendChild(dot);
 
     // ── 4. 透明点击层：覆盖整个按钮区域，接收点击事件 ──────────
@@ -719,7 +715,6 @@ class SvgRenderer {
     hit.setAttribute('cy', cyIcon);
     hit.setAttribute('r', SIZE / 2);
     hit.setAttribute('fill', 'transparent');                 // 完全透明
-    hit.setAttribute('cursor', 'pointer');
     const self = this;
     hit.addEventListener('click', function (e) {
       e.stopPropagation();   // 阻止事件冒泡，避免触发日历点击逻辑
@@ -760,7 +755,10 @@ class SvgRenderer {
       todayBarColor: this.options.todayBarColor,
       textColor: this.options.textColor,
       selectedTextColor: this.options.selectedTextColor,
-      onDragStateChange: (isDragging) => { this._setHoverDisabled(isDragging); },
+      onDragStateChange: (isDragging) => {
+        this._setHoverDisabled(isDragging);
+        this._dragging = isDragging;
+      },
       isDragActive: () => this._hoverDisabled,
       picker: this.picker,
     });
@@ -802,14 +800,16 @@ class SvgRenderer {
       e.preventDefault();
       if (this._isInDateArea(e)) {
         this._dragging = false;
-        this.state._wheelTargetY -= (e.deltaY / 100) * this.options.wheelStep;
+        const rowDelta = Math.round((e.deltaY / 100) * this.options.wheelStep / this.STEP_Y);
+        this.state._wheelTargetY -= rowDelta * this.STEP_Y;
         this._startWheelAnimation();
       }
     };
     this.container.addEventListener('wheel', this._onContainerWheel, { passive: false });
 
-    // 日期点击
+    // 日期点击（拖拽后不触发选择）
     this._onScrollGroupClick = (e) => {
+      if (this._dragMoved) return;
       const dateAttr = e.target.getAttribute('data-date');
       if (!dateAttr) return;
       const d = parseDate(dateAttr);
@@ -844,7 +844,6 @@ class SvgRenderer {
     this._dragStartY = clientY;
     this._dragStartTY = this.state.translateY;
     this._dragMoved = false;
-    this._setHoverDisabled(true);
   }
 
   _onDragMove(clientY) {
@@ -852,7 +851,10 @@ class SvgRenderer {
     const delta = clientY - this._dragStartY;
     this.state.translateY = this._dragStartTY + delta;
     this.state._wheelTargetY = this.state.translateY;
-    if (Math.abs(delta) > 5) this._dragMoved = true;
+    if (Math.abs(delta) > 5 && !this._dragMoved) {
+      this._dragMoved = true;
+      this._setHoverDisabled(true);
+    }
     this._applyScrollTransform();
     if (this._lastDragClientY !== undefined) {
       this._dragLastDY = clientY - this._lastDragClientY;
@@ -872,12 +874,10 @@ class SvgRenderer {
     this._lastDragClientY = undefined;
     if (this._dragMoved) {
       const momentum = Math.max(-300, Math.min(300, this._dragLastDY * 5));
-      if (Math.abs(momentum) > 3) {
-        this.state._wheelTargetY = this.state.translateY + momentum;
-        this._startWheelAnimation();
-      } else {
-        this.renderCalendar();
-      }
+      const currentRow = Math.round(this.state.translateY / this.STEP_Y);
+      const targetRow = currentRow + Math.round(momentum / this.STEP_Y);
+      this.state._wheelTargetY = targetRow * this.STEP_Y;
+      this._startWheelAnimation();
     }
   }
 
@@ -1031,10 +1031,11 @@ class SvgRenderer {
   // ════════════════════════════════════════════════════════════════
 
   _setHoverDisabled(disabled) {
+    this._hoverDisabled = disabled;
+    this.picker._hoverDisabled = disabled;
     if (disabled) {
       this._clearHoverFills();
     }
-    this._hoverDisabled = disabled;
   }
 
   _clearHoverFills() {

@@ -1,6 +1,6 @@
 # dtrPicker — API 规范
 
-> 版本: 3.0.0
+> 版本: 3.2.0
 > 本文件定义了 `dtrPicker` 作为可嵌入部件的对外接口。
 > **核心原则**: 组件不关心 trigger 的样式、布局、placeholder 或表单集成——那些是调用方的职责。
 
@@ -19,7 +19,7 @@ import dtrPicker from 'dtrpicker/dtrpicker.js';
 ```html
 <script src="dist/dtrpicker.umd.js"></script>
 <script>
-  var picker = new dtrPicker('#my-input', { renderMode: 'svg' });
+  const picker = new dtrPicker('#my-input', { renderMode: 'svg' });
 </script>
 ```
 
@@ -40,18 +40,26 @@ const picker = new dtrPicker(trigger, options);
 | `options.locale`      | `string`               | `'en-US'`   | —                                                                            | BCP 47 语言标签：`'zh-CN'` `'en-US'` `'ja-JP'` 等             |
 | `options.firstDay`    | `0 \| 1`                | `0`         | —                                                                            | 周起始日：`0`=周日, `1`=周一                                    |
 | `options.colorScheme` | `string`               | `'morandi'` | —                                                                            | 色系：`'morandi'`(莫兰迪) / `'nature'`(自然)                    |
-| `options.zIndex`      | `number`               | —            | 面板 z-index（默认`9999`）                                                  |                                                                     |
+| `options.zIndex`      | `number`               | `9999`      | 面板 z-index                                                            |                                                                     |
+| `options.todayBarHeight` | `number`            | `6`         | —                                                                            | 今日标记条高度（px）                                                  |
+| `options.wheelStep`   | `number`               | `40`        | —                                                                            | 滚轮翻页步长系数                                                        |
 
 > ⚠️ `renderMode`、`mode`、`locale`、`firstDay`、`colorScheme` **构造后不可更改**。
 
 颜色选项：
 
-| 参数              | 默认值（morandi） | 说明        |
-| ----------------- | ----------------- | ----------- |
-| `selectedColor` | `'#2f54eb'`     | 选中/高亮色 |
-| `gridColor`     | `'#d0d0d0'`     | 网格线色    |
-| `cellColor`     | `'#ffffff'`     | 格子背景色  |
-| `textColor`     | `'#262626'`     | 主文字色    |
+| 参数                     | 默认值（morandi） | 说明                |
+| ------------------------ | ----------------- | ------------------- |
+| `selectedColor`        | `'#2f54eb'`     | 选中/高亮色         |
+| `selectedTextColor`    | `'#ffffff'`     | 选中态文字色        |
+| `gridColor`            | `'#d0d0d0'`     | 网格线色            |
+| `cellColor`            | `'#ffffff'`     | 格子背景色          |
+| `textColor`            | `'#262626'`     | 主文字色            |
+| `textColorDisabled`    | `'#d9d9d9'`     | 禁用日期文字色      |
+| `textColorSubLabel`    | `'#595959'`     | 次要标签色          |
+| `textColorWeekend`     | `'#f04040'`     | 周末日期文字色      |
+| `textColorWeekendTitle`| `'#f08080'`     | 周末表头文字色      |
+| `todayBarColor`        | `'#8c00ff'`     | 今日标记条颜色      |
 
 ---
 
@@ -91,6 +99,9 @@ picker.setValue({ start: "2026-06-01 08:30", end: "2026-06-15 17:00" });
 - `value` 为 ValueObject（见 §3）
 - 自动校验格式，非法日期静默忽略
 - 触发 `onChange` 回调（`meta.source = 'programmatic'`）
+
+> ⚠️ **组件不跨边界读取 trigger 显示文本**。`setValue()` 接受的是 ValueObject（`{start, end}`），不是 trigger 输入框的原始字符串。
+> 调用方负责将 trigger 的显示值解析为正确的 JSON 格式后再传入。格式错误由调用方承担。
 
 ### picker.getValue([format])
 

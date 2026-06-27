@@ -54,15 +54,15 @@ class YearCell extends Cell {
     this._animDir = dir;
     this._animStart = performance.now();
 
-    var DURATION = 300;
-    var DISTANCE = centerY - areaY;
-    var POWER = 1.3;
-    var svgNS = this.g.svgNS;
-    var yearGroup = this.picker.yearGroup;
-    var self = this;
+    const DURATION = 300;
+    const DISTANCE = centerY - areaY;
+    const POWER = 1.3;
+    const svgNS = this.g.svgNS;
+    const yearGroup = this.picker.yearGroup;
+    const self = this;
 
     function mkText(year, y) {
-      var el = document.createElementNS(svgNS, 'text');
+      const el = document.createElementNS(svgNS, 'text');
       el.setAttribute('x', cx);
       el.setAttribute('y', y);
       el.setAttribute('text-anchor', 'middle');
@@ -76,17 +76,17 @@ class YearCell extends Cell {
     }
 
     function frame() {
-      var elapsed = performance.now() - self._animStart;
-      var t = Math.min(1, elapsed / DURATION);
+      const elapsed = performance.now() - self._animStart;
+      const t = Math.min(1, elapsed / DURATION);
 
       while (yearGroup.firstChild) yearGroup.removeChild(yearGroup.firstChild);
 
       if (t < 1) {
-        var oldY = centerY - dir * DISTANCE * Math.pow(t, POWER);
+        const oldY = centerY - dir * DISTANCE * Math.pow(t, POWER);
         yearGroup.appendChild(mkText(self._animOldYear, oldY));
       }
 
-      var newY = centerY + dir * DISTANCE * Math.pow(1 - t, POWER);
+      const newY = centerY + dir * DISTANCE * Math.pow(1 - t, POWER);
       yearGroup.appendChild(mkText(self._animNewYear, newY));
 
       if (t < 1) {

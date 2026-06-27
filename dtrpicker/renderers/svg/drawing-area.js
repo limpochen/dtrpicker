@@ -46,14 +46,14 @@ class DrawingArea {
    * @returns {Cell|null}
    */
   addChild(cfg) {
-    var relR = cfg.r, relC = cfg.c;
-    var rs = cfg.rs || 1, cs = cfg.cs || 1;
+    const relR = cfg.r; const relC = cfg.c;
+    const rs = cfg.rs || 1; const cs = cfg.cs || 1;
     if (relR < 0 || relR + rs > this.rs) return null;
     if (relC < 0 || relC + cs > this.cs) return null;
-    var absR = this.r + relR;
-    var absC = this.c + relC;
-    var extra = cfg.extra || {};
-    var cell = new cfg.cellClass(
+    const absR = this.r + relR;
+    const absC = this.c + relC;
+    const extra = cfg.extra || {};
+    const cell = new cfg.cellClass(
       Object.assign({
         bgColor: extra.bgColor || null,
       }, extra, {

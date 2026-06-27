@@ -37,7 +37,7 @@
       <label for="picker-trigger" data-i18n="dateRangeLabel">Date Range:</label>
       <div class="picker-wrapper">
         <input type="text" id="picker-trigger" class="dtrpicker-trigger"
-               placeholder="Please select a date range" readonly autocomplete="off">
+               placeholder="Please select a date range" autocomplete="off">
         <button type="button" class="dtrpicker-clear-btn" id="picker-clear-btn"
                 title="Clear selection">✕</button>
       </div>
@@ -130,7 +130,7 @@
 window.__esModuleLoaded = false;
 setTimeout(function() {
   if (window.__esModuleLoaded) return;
-  var msg = document.createElement('div');
+  const msg = document.createElement('div');
   msg.style.cssText = 'position:fixed;top:0;left:0;right:0;z-index:99999;padding:16px 24px;background:#fff2f0;border-bottom:2px solid #ff4d4f;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;font-size:14px;color:#cf1322;line-height:1.6';
   msg.innerHTML = '<strong>⚠️ Demo page failed to load</strong><br>'
     + 'Your browser blocks loading ES Module scripts under the <code>file://</code> protocol.<br>';

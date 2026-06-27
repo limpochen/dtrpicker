@@ -87,10 +87,10 @@ class Cell {
    * @returns {string} 颜色值
    */
   _cellColor(offset) {
-    var scheme = getActiveScheme(this.picker.options);
-    var schemeColors = scheme.colors;
-    var schemeLen = schemeColors.length;
-    var cs = this.picker.state._colorShift;
+    const scheme = getActiveScheme(this.picker.options);
+    const schemeColors = scheme.colors;
+    const schemeLen = schemeColors.length;
+    const cs = this.picker.state._colorShift;
     return schemeColors[(offset + cs) % schemeLen];
   }
 
@@ -149,7 +149,6 @@ class Cell {
     rect.setAttribute('width', this.w);
     rect.setAttribute('height', this.h);
     rect.style.fill = 'transparent';
-    rect.style.cursor = 'pointer';
     Object.keys(dataAttrs).forEach(function (k) { rect.setAttribute(k, dataAttrs[k]); });
     if (this._borderWidth > 0 && this._borderColor) {
       rect.setAttribute('stroke', this._borderColor);
@@ -170,7 +169,7 @@ class Cell {
 
   _drawDebugBorder() {
     if (!(this._borderWidth > 0 && this._borderColor)) return;
-    var rect = document.createElementNS(this.g.svgNS, 'rect');
+    const rect = document.createElementNS(this.g.svgNS, 'rect');
     rect.setAttribute('x', this.x + 0.5);
     rect.setAttribute('y', this.y + 0.5);
     rect.setAttribute('width', this.w - 1);

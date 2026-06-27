@@ -30,7 +30,7 @@ class DayCell extends Cell {
   // 文字色优先级：选中 > 周末标题 > 周末 > 默认
   get textColor() {
     if (this.role) return this.picker.options.selectedTextColor;
-    var dow = this.date.getDay();
+    const dow = this.date.getDay();
     if (dow === 0 || dow === 6) return this.picker.options.textColorWeekend;
     return this.picker.options.textColor;
   }
@@ -48,7 +48,7 @@ class DayCell extends Cell {
   /** 绘制起/止选中色块 */
   _drawSelectedState() {
     if (!this.role) return;
-    var cls = this.role === 'start' ? 'dtrpicker-range-start-cell' : 'dtrpicker-range-end-cell';
+    const cls = this.role === 'start' ? 'dtrpicker-range-start-cell' : 'dtrpicker-range-end-cell';
     this._createRect(this.x, this.y, this.w, this.h, {
       fill: this.picker.options.selectedColor,
       'class': cls,

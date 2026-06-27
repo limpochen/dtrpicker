@@ -44,10 +44,12 @@ class TimeWheel {
     this._dragState = null;
     this._dragActive = false;
     this._colLayouts = {};
-    /** @type {SVGRectElement[]} 时/分列的热区 rect，用于清除 hover */
-    this._timeHitRects = [];
     /** @type {Object<string,string>} 各列背景色映射（供放大器直读） */
     this._colBgColors = {};
+    /** @type {Object<string,TimeCell>} 各列 TimeCell 实例映射 */
+    this._timeCells = {};
+    /** @type {boolean} 本次拖拽是否发生过位移（用于区分点击/拖拽） */
+    this._dragMoved = false;
 
     /** @type {DragController} 拖拽事件共享层（由父级传入） */
     this._dragController = cfg.dragController;
@@ -96,7 +98,7 @@ class TimeWheel {
     }
     const singleCol = sc[this._singleColorIdx % sLen];
 
-    var grid = {
+    const grid = {
       CELL_W: this.cellW, CELL_H: this.cellH, GAP: this.gap,
       STEP_X: this.stepX, STEP_Y: this.stepY, svgNS: this.svgNS,
     };
@@ -105,10 +107,10 @@ class TimeWheel {
     this._colBgColors['minute'] = this.saturateColor(singleCol, 0.02);
     this._drawTimeWheel(this.timeColStart, 1, 8,
       0, 23, this.startHour, 'hour', 9, grid,
-      this.saturateColor(singleCol, 0.06));
+      this.saturateColor(singleCol, 0.06), this._isDragActive);
     this._drawTimeWheel(this.timeColStart + 1, 1, 8,
       0, 59, this.startMinute, 'minute', 9, grid,
-      this.saturateColor(singleCol, 0.02));
+      this.saturateColor(singleCol, 0.02), this._isDragActive);
   }
 
   /** @private */
@@ -119,7 +121,7 @@ class TimeWheel {
     const sc = scheme.colors;
     const sLen = sc.length;
 
-    var grid = {
+    const grid = {
       CELL_W: this.cellW, CELL_H: this.cellH, GAP: this.gap,
       STEP_X: this.stepX, STEP_Y: this.stepY, svgNS: this.svgNS,
     };
@@ -141,15 +143,15 @@ class TimeWheel {
     });
     this._titleBarStart.render();
 
-    var colAreaY = startTop + this.gap + this.cellH + this.gap;
+    const colAreaY = startTop + this.gap + this.cellH + this.gap;
     this._colBgColors['startHour'] = this.saturateColor(sc[startIdx], 0.04);
     this._colBgColors['startMinute'] = this.saturateColor(sc[startIdx], 0.02);
     this._drawTimeWheel(this.timeColStart, 2, 3,
       0, 23, this.startHour, 'startHour', 5, grid,
-      this.saturateColor(sc[startIdx], 0.04));
+      this.saturateColor(sc[startIdx], 0.04), this._isDragActive);
     this._drawTimeWheel(this.timeColStart + 1, 2, 3,
       0, 59, this.startMinute, 'startMinute', 5, grid,
-      this.saturateColor(sc[startIdx], 0.02));
+      this.saturateColor(sc[startIdx], 0.02), this._isDragActive);
 
     const endTop = sepY;
 
@@ -161,22 +163,22 @@ class TimeWheel {
     });
     this._titleBarEnd.render();
 
-    var colAreaYEnd = endTop + this.gap + this.cellH + this.gap;
+    const colAreaYEnd = endTop + this.gap + this.cellH + this.gap;
     this._colBgColors['endHour'] = this.saturateColor(sc[endIdx], 0.04);
     this._colBgColors['endMinute'] = this.saturateColor(sc[endIdx], 0.02);
     this._drawTimeWheel(this.timeColStart, 6, 3,
       0, 23, this.endHour, 'endHour', 5, grid,
-      this.saturateColor(sc[endIdx], 0.04));
+      this.saturateColor(sc[endIdx], 0.04), this._isDragActive);
     this._drawTimeWheel(this.timeColStart + 1, 6, 3,
       0, 59, this.endMinute, 'endMinute', 5, grid,
-      this.saturateColor(sc[endIdx], 0.02));
+      this.saturateColor(sc[endIdx], 0.02), this._isDragActive);
   }
 
   /** @private */
-  _drawTimeWheel(col, row, rowSpan, min, max, current, type, rowCount, grid, bgColor) {
-    var tc = new TimeCell({
+  _drawTimeWheel(col, row, rowSpan, min, max, current, type, rowCount, grid, bgColor, isDragActive) {
+    const tc = new TimeCell({
       r: row, c: col, rs: rowSpan, cs: 1, grid: grid,
-      container: this.timeGroup, picker: { options: this.options, timeGroup: this.timeGroup },
+      container: this.timeGroup, picker: { options: this.options, timeGroup: this.timeGroup, isDragActive: isDragActive },
       subType: type,
       currentValue: current,
       min: min,
@@ -189,24 +191,6 @@ class TimeWheel {
     this._timeCells = this._timeCells || {};
     if (this._timeCells[type]) this._timeCells[type].destroy();
     this._timeCells[type] = tc;
-
-    const hit = document.createElementNS(this.svgNS, 'rect');
-    hit.setAttribute('x', tc.x);
-    hit.setAttribute('y', tc.y);
-    hit.setAttribute('width', this.cellW);
-    hit.setAttribute('height', tc.h);
-    hit.setAttribute('class', 'dtrpicker-cell-hit');
-    hit.setAttribute('data-time-type', type);
-    hit.style.fill = 'transparent';
-    hit.style.cursor = 'pointer';
-    hit.addEventListener('mouseenter', () => {
-      if (this._dragActive) return;
-      if (this._isDragActive()) return;
-      hit.style.fill = 'rgba(47,84,235,0.07)';
-    });
-    hit.addEventListener('mouseleave', () => { hit.style.fill = 'transparent'; });
-    this._timeHitRects.push(hit);
-    this.timeGroup.appendChild(hit);
   }
 
   /** @private */
@@ -256,8 +240,12 @@ class TimeWheel {
   }
 
   clearHoverFills() {
-    for (var i = 0; i < this._timeHitRects.length; i++) {
-      this._timeHitRects[i].style.fill = 'transparent';
+    const cells = this._timeCells;
+    if (!cells) return;
+    const keys = Object.keys(cells);
+    for (let i = 0; i < keys.length; i++) {
+      const tc = cells[keys[i]];
+      if (tc && tc.clearHoverFills) tc.clearHoverFills();
     }
   }
 
@@ -297,9 +285,9 @@ class TimeWheel {
       if (!type) return;
       self._dragState = { type, startY: clientY };
       self._dragActive = true;
+      self._dragMoved = false;
       if (self.onDragStart) self.onDragStart(type);
       if (self.onDragStateChange) self.onDragStateChange(true);
-      if (self._floater) self._floater.show(type);
       if (self._dragController) self._dragController.activate(self._dragSessionId);
     }
 
@@ -308,6 +296,14 @@ class TimeWheel {
       if (!type) return;
       e.preventDefault();
       onDragStart(e.clientY, type);
+      // onDragStart → onDragStateChange(true) → clearHoverFills 清掉了所有热区，
+      // 需要重新在被点击的热区上设置点击反馈色和文字白色
+      if (e.target.style) {
+        e.target.style.fill = self.selectedColor;
+        if (e.target._timeText) {
+          e.target._timeText.setAttribute('fill', self.selectedTextColor);
+        }
+      }
     };
     this.timeGroup.addEventListener('mousedown', this._onTimeGroupMouseDown);
 
@@ -324,6 +320,8 @@ class TimeWheel {
       const stepPx = 20;
       const steps = Math.floor(Math.abs(dy) / stepPx);
       if (steps > 0) {
+        self._dragMoved = true;
+        self.clearHoverFills();
         const dirVal = dy > 0 ? -1 : 1;
         const dirBaseline = dy > 0 ? 1 : -1;
         for (let i = 0; i < steps; i++) {
@@ -331,7 +329,10 @@ class TimeWheel {
         }
         self._dragState.startY += dirBaseline * steps * stepPx;
         self._refreshColumn(self._dragState.type);
-        if (self._floater) self._floater.update();
+        if (self._floater) {
+          if (!self._floater._group) self._floater.show(self._dragState.type);
+          self._floater.update();
+        }
       }
     }
 
@@ -339,7 +340,6 @@ class TimeWheel {
       if (!self._dragState) return;
       self._dragActive = false;
       if (self._floater) self._floater.hide();
-      self.clearHoverFills();
       if (self.onTimeChange) self.onTimeChange();
       if (self.onDragStateChange) self.onDragStateChange(false);
       self._dragState = null;
@@ -351,6 +351,38 @@ class TimeWheel {
         onDragEnd: function () { onDragEnd(); },
       });
     }
+
+    // 点击数值直接设置
+    this._onTimeGroupClick = function (e) {
+      if (self._dragMoved) return;
+      const type = getType(e);
+      if (!type) return;
+      const target = e.target;
+      let valStr = target.getAttribute ? target.getAttribute('data-time-val') : null;
+      if (!valStr) {
+        const p = target.parentNode;
+        valStr = p && p.getAttribute ? p.getAttribute('data-time-val') : null;
+      }
+      if (valStr === null) return;
+      const val = parseInt(valStr, 10);
+      if (isNaN(val)) return;
+      self._setTimeValue(type, val);
+    };
+    this.timeGroup.addEventListener('click', this._onTimeGroupClick);
+  }
+
+  /** @private 直接设置某列的值为指定数值 */
+  _setTimeValue(type, val) {
+    if (type === 'startHour' || type === 'hour') this.startHour = val;
+    else if (type === 'startMinute' || type === 'minute') this.startMinute = val;
+    else if (type === 'endHour') this.endHour = val;
+    else if (type === 'endMinute') this.endMinute = val;
+    if (!this._isTimeRange()) {
+      this.endHour = this.startHour;
+      this.endMinute = this.startMinute;
+    }
+    this._refreshColumn(type);
+    if (this.onTimeChange) this.onTimeChange();
   }
 
   destroy() {
@@ -361,10 +393,11 @@ class TimeWheel {
     if (this._onTimeGroupWheel) this.timeGroup.removeEventListener('wheel', this._onTimeGroupWheel);
     if (this._onTimeGroupMouseDown) this.timeGroup.removeEventListener('mousedown', this._onTimeGroupMouseDown);
     if (this._onTimeGroupTouchStart) this.timeGroup.removeEventListener('touchstart', this._onTimeGroupTouchStart);
+    if (this._onTimeGroupClick) this.timeGroup.removeEventListener('click', this._onTimeGroupClick);
     if (this._floater) { this._floater.destroy(); this._floater = null; }
     this._dragState = null;
     this.onTimeChange = null;
-    this._timeHitRects = [];
+    this._timeCells = {};
   }
 }
 

@@ -214,7 +214,7 @@ class HtmlRenderer {
 
     // 版本号（由 DIM.SHOW_VERSION 控制是否显示）
     if (DIM.SHOW_VERSION) {
-      var verEl = document.createElement('div');
+      const verEl = document.createElement('div');
       verEl.textContent = DIM.VERSION;
       verEl.style.cssText = 'position:absolute;bottom:2px;left:4px;font-size:9px;color:#aaa;pointer-events:none;user-select:none;';
       this.container.appendChild(verEl);

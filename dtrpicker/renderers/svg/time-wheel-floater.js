@@ -54,23 +54,23 @@ class TimeWheelFloater {
   show(type) {
     if (this._group) this.hide();
     this._type = type;
-    var tc = this.getTimeCell ? this.getTimeCell(type) : null;
+    const tc = this.getTimeCell ? this.getTimeCell(type) : null;
     if (!tc) return;
-    var bgColor = this.getBgColor ? this.getBgColor(type) : null;
+    const bgColor = this.getBgColor ? this.getBgColor(type) : null;
     if (!bgColor) return;
 
-    var W = this._width;
-    var H = this._height;
-    var svgW = Number(this.svg.getAttribute('width'));
-    var svgH = Number(this.svg.getAttribute('height'));
-    var fx = Math.floor(svgW / 3);
-    var fy = Math.floor((svgH - H) / 2);
+    const W = this._width;
+    const H = this._height;
+    const svgW = Number(this.svg.getAttribute('width'));
+    const svgH = Number(this.svg.getAttribute('height'));
+    const fx = Math.floor(svgW / 3);
+    const fy = Math.floor((svgH - H) / 2);
 
-    var g = document.createElementNS(this.svgNS, 'g');
+    const g = document.createElementNS(this.svgNS, 'g');
     g.setAttribute('class', 'dtrpicker-floater');
     g.style.pointerEvents = 'none';
 
-    var shadow = document.createElementNS(this.svgNS, 'rect');
+    const shadow = document.createElementNS(this.svgNS, 'rect');
     shadow.setAttribute('x', fx + this._shadowOffsetX);
     shadow.setAttribute('y', fy + this._shadowOffsetY);
     shadow.setAttribute('width', W);
@@ -79,14 +79,14 @@ class TimeWheelFloater {
     shadow.setAttribute('fill', 'rgba(0,0,0,0.3)');
     g.appendChild(shadow);
 
-    var cg = document.createElementNS(this.svgNS, 'g');
+    const cg = document.createElementNS(this.svgNS, 'g');
     cg.setAttribute('transform', 'translate(' + fx + ',' + fy + ')');
     cg.setAttribute('data-floater-content', '');
     cg.style.clipPath = 'inset(0 round ' + this._radius + 'px)';
     this._renderMagnifierContent(cg, tc, bgColor);
     g.appendChild(cg);
 
-    var border = document.createElementNS(this.svgNS, 'rect');
+    const border = document.createElementNS(this.svgNS, 'rect');
     border.setAttribute('x', fx);
     border.setAttribute('y', fy);
     border.setAttribute('width', W);
@@ -104,26 +104,26 @@ class TimeWheelFloater {
   /** 更新浮层数值。 */
   update() {
     if (!this._group || !this._type) return;
-    var tc = this.getTimeCell ? this.getTimeCell(this._type) : null;
+    const tc = this.getTimeCell ? this.getTimeCell(this._type) : null;
     if (!tc) return;
     if (this._textNodes.length === 0) return;
 
-    var curVal = tc.currentValue;
-    var min = tc.min;
-    var max = tc.max;
-    var range = max - min + 1;
-    var half = Math.floor(this._visibleRows / 2);
+    const curVal = tc.currentValue;
+    const min = tc.min;
+    const max = tc.max;
+    const range = max - min + 1;
+    const half = Math.floor(this._visibleRows / 2);
 
-    for (var i = 0; i < this._visibleRows; i++) {
-      var offset = i - half;
-      var val = (((curVal - min + offset) % range) + range) % range + min;
-      var isCurrent = i === half;
-      var text = String(val).padStart(2, '0');
+    for (let i = 0; i < this._visibleRows; i++) {
+      const offset = i - half;
+      const val = (((curVal - min + offset) % range) + range) % range + min;
+      const isCurrent = i === half;
+      const text = String(val).padStart(2, '0');
 
       if (isCurrent && this._hlRect) {
         this._hlRect.setAttribute('fill', this.selectedColor);
       }
-      var textNode = this._textNodes[i];
+      const textNode = this._textNodes[i];
       if (textNode) {
         textNode.textContent = text;
         textNode.setAttribute('fill', isCurrent ? this.selectedTextColor : this.textColor);
@@ -133,25 +133,25 @@ class TimeWheelFloater {
 
   /** @private */
   _renderMagnifierContent(target, tc, bgColor) {
-    var curVal = tc.currentValue;
-    var min = tc.min;
-    var max = tc.max;
-    var range = max - min + 1;
-    var half = Math.floor(this._visibleRows / 2);
-    var W = this._width;
-    var H = this._height;
-    var lh = this._lineHeight;
-    var fs = this._fontSize;
-    var rowsH = this._visibleRows * lh;
-    var offsetY = Math.floor((H - rowsH) / 2);
-    var selColor = this.selectedColor;
-    var txtColor = this.textColor;
-    var selTxtColor = this.selectedTextColor;
+    const curVal = tc.currentValue;
+    const min = tc.min;
+    const max = tc.max;
+    const range = max - min + 1;
+    const half = Math.floor(this._visibleRows / 2);
+    const W = this._width;
+    const H = this._height;
+    const lh = this._lineHeight;
+    const fs = this._fontSize;
+    const rowsH = this._visibleRows * lh;
+    const offsetY = Math.floor((H - rowsH) / 2);
+    const selColor = this.selectedColor;
+    const txtColor = this.textColor;
+    const selTxtColor = this.selectedTextColor;
 
     this._textNodes = [];
     this._hlRect = null;
 
-    var bg = document.createElementNS(this.svgNS, 'rect');
+    const bg = document.createElementNS(this.svgNS, 'rect');
     bg.setAttribute('x', 0);
     bg.setAttribute('y', 0);
     bg.setAttribute('width', W);
@@ -159,14 +159,14 @@ class TimeWheelFloater {
     bg.setAttribute('fill', bgColor);
     target.appendChild(bg);
 
-    for (var i = 0; i < this._visibleRows; i++) {
-      var offset = i - half;
-      var val = (((curVal - min + offset) % range) + range) % range + min;
-      var y = offsetY + i * lh;
-      var isCurrent = i === half;
+    for (let i = 0; i < this._visibleRows; i++) {
+      const offset = i - half;
+      const val = (((curVal - min + offset) % range) + range) % range + min;
+      const y = offsetY + i * lh;
+      const isCurrent = i === half;
 
       if (isCurrent) {
-        var hl = document.createElementNS(this.svgNS, 'rect');
+        const hl = document.createElementNS(this.svgNS, 'rect');
         hl.setAttribute('x', 0);
         hl.setAttribute('y', y);
         hl.setAttribute('width', W);
@@ -176,7 +176,7 @@ class TimeWheelFloater {
         this._hlRect = hl;
       }
 
-      var t = this._createMagnifierText(
+      const t = this._createMagnifierText(
         target, W / 2, y + lh / 2,
         String(val).padStart(2, '0'),
         isCurrent ? selTxtColor : txtColor,
@@ -189,7 +189,7 @@ class TimeWheelFloater {
 
   /** @private */
   _createMagnifierText(target, x, y, text, color, fontSize, fontWeight) {
-    var t = document.createElementNS(this.svgNS, 'text');
+    const t = document.createElementNS(this.svgNS, 'text');
     t.setAttribute('x', x);
     t.setAttribute('y', y);
     t.setAttribute('text-anchor', 'middle');

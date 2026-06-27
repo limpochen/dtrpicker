@@ -115,7 +115,7 @@ let lastValue = null;
 
 function toggleClearBtn(val) {
   const btn = document.getElementById('picker-clear-btn');
-  btn.style.display = val ? '' : 'none';
+  btn.classList.toggle('visible', !!val);
 }
 
 function updateTriggerDisplay(val) {
@@ -142,7 +142,7 @@ function syntaxHighlightJSON(json) {
   return json
     .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
     .replace(/("(\\u[a-zA-Z0-9]{4}|\\[^u]|[^\\"])*"(\s*:)?|\b(true|false|null)\b|-?\d+(?:\.\d*)?(?:[eE][+\-]?\d+)?)/g, function (m) {
-      var cls = 'json-null';
+      let cls = 'json-null';
       if (/^"/.test(m)) {
         if (/:$/.test(m)) cls = 'json-key';
         else cls = 'json-string';
@@ -162,21 +162,25 @@ function getCurrentParams() {
 }
 
 function updateParamsDisplay() {
-  document.getElementById('params-display').textContent = JSON.stringify(getCurrentParams(), null, 2);
+  const el = document.getElementById('params-display');
+  el.innerHTML = '<span class="json-section">// 初始化参数</span>\n'
+    + syntaxHighlightJSON(JSON.stringify(getCurrentParams(), null, 2))
+    + '\n\n<span class="json-section">// 弹出时传值</span>\n'
+    + syntaxHighlightJSON(JSON.stringify(lastValue || null, null, 2));
 }
 
 function generateCodeSnippet(params) {
   const source = document.getElementById('source-select')?.value || 'dev';
   const importPath = source === 'bundle' ? 'dist/dtrpicker.js' : 'dtrpicker/dtrpicker.js';
-  var opts = [];
-  var currentLocale = document.getElementById('lang-select').value;
+  const opts = [];
+  const currentLocale = document.getElementById('lang-select').value;
   opts.push('  renderMode: "' + params.renderMode + '"');
   opts.push('  mode: "' + params.mode + '"');
   if (currentLocale !== 'en-US') opts.push('  locale: "' + currentLocale + '"');
   if (params.firstDay !== 0) opts.push('  firstDay: ' + params.firstDay);
   if (params.colorScheme !== 'morandi') opts.push('  colorScheme: "' + params.colorScheme + '"');
 
-  var code = '// Import & Create\nimport dtrPicker from \'' + importPath + '\';\n\n'
+  let code = '// Import & Create\nimport dtrPicker from \'' + importPath + '\';\n\n'
     + 'const picker = new dtrPicker("#my-input", {\n' + opts.join(',\n') + '\n});\n\n'
     + '// Set value\npicker.setValue(' + JSON.stringify(lastValue || { start: '...' }) + ');\n';
   return code;
@@ -187,7 +191,7 @@ function updateCodeDisplay() {
 }
 
 function highlightCode(code) {
-  var html = code.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+  const html = code.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
   return html
     .replace(/(\/\/[^\n]*)/g, '<span class="code-cmt">$1</span>')
     .replace(/("(?:[^"\\]|\\.)*")/g, '<span class="code-str">$1</span>')
@@ -202,14 +206,14 @@ function highlightCode(code) {
 
 async function ensurePickerSource(source) {
   if (source === currentPickerSource && dtrPicker) return dtrPicker;
-  var mod = await import(PICKER_SOURCES[source] || PICKER_SOURCES.dev);
+  const mod = await import(PICKER_SOURCES[source] || PICKER_SOURCES.dev);
   dtrPicker = mod.default || mod;
   currentPickerSource = source;
   return dtrPicker;
 }
 
 function destroyAllPickers() {
-  for (var key in pickers) {
+  for (const key in pickers) {
     if (pickers[key]) pickers[key].destroy();
   }
   pickers = {};
@@ -227,16 +231,16 @@ function onChangeHandler(val) {
 async function initAllPickers() {
   destroyAllPickers();
 
-  var source = document.getElementById('source-select')?.value || 'dev';
-  var PickerClass = await ensurePickerSource(source);
-  var renderMode = document.getElementById('param-renderMode').value;
-  var locale = document.getElementById('lang-select').value;
-  var firstDay = parseInt(document.querySelector('input[name="param-firstDay"]:checked').value);
-  var colorScheme = document.getElementById('param-colorScheme').value;
-  var triggerEl = document.getElementById('picker-trigger');
+  const source = document.getElementById('source-select')?.value || 'dev';
+  const PickerClass = await ensurePickerSource(source);
+  const renderMode = document.getElementById('param-renderMode').value;
+  const locale = document.getElementById('lang-select').value;
+  const firstDay = parseInt(document.querySelector('input[name="param-firstDay"]:checked').value);
+  const colorScheme = document.getElementById('param-colorScheme').value;
+  const triggerEl = document.getElementById('picker-trigger');
 
   ALL_MODES.forEach(function (mode) {
-    var p = new PickerClass(triggerEl, {
+    const p = new PickerClass(triggerEl, {
       renderMode: renderMode,
       mode: mode,
       locale: locale,
@@ -286,10 +290,53 @@ document.getElementById('lang-select').addEventListener('change', applyParams);
 document.querySelectorAll('input[name="param-firstDay"]').forEach(function (el) { el.addEventListener('change', applyParams); });
 document.getElementById('source-select').addEventListener('change', applyParams);
 
-// Trigger 点击：切换当前实例
+/**
+ * 将 trigger 显示文本解析为选择器 setValue 接受的 JSON 格式。
+ * 消费方职责：格式错误返回 null，选择器不跨边界读取 trigger。
+ * @param {string} text - trigger.value
+ * @param {string} mode - 当前选择模式
+ * @returns {{start:string, end?:string}|null}
+ */
+function parseTriggerValue(text, mode) {
+  if (!text) return null;
+  const isRange = mode === 'dateRange' || mode === 'dateTimeRange';
+  const parts = text.split(' ~ ');
+  if (isRange) {
+    if (parts.length !== 2) return null;
+    return { start: parts[0].trim(), end: parts[1].trim() };
+  }
+  return { start: parts[0].trim() };
+}
+
+// Trigger 输入变化：为空时通知所有 picker 清空
+document.getElementById('picker-trigger').addEventListener('input', function () {
+  if (!this.value) {
+    for (const key in pickers) {
+      if (pickers[key]) pickers[key].clear();
+    }
+    lastValue = null;
+    updateJSONDisplay(null);
+    updateParamsDisplay();
+    updateCodeDisplay();
+  }
+});
+
+// Trigger 点击：解析当前值传给选择器后再弹出
 document.getElementById('picker-trigger').addEventListener('click', function (e) {
   e.stopPropagation();
-  if (pickers[currentMode]) pickers[currentMode].toggle();
+  const picker = pickers[currentMode];
+  if (!picker) return;
+
+  const parsed = parseTriggerValue(this.value, currentMode);
+  if (parsed) {
+    picker.setValue(parsed);
+    lastValue = parsed;
+  } else if (!this.value) {
+    picker.clear();
+    lastValue = null;
+  }
+
+  picker.toggle();
 });
 
 // Mode 下拉切换：关闭旧实例，标记新 mode，等待用户点击 trigger 打开
@@ -301,11 +348,11 @@ document.getElementById('param-mode').addEventListener('change', function () {
 //  Bootstrap
 // ================================================================
 
-var browserLang = navigator.language || navigator.browserLanguage || 'en-US';
-var detectedLocale = (function () {
+const browserLang = navigator.language || navigator.browserLanguage || 'en-US';
+const detectedLocale = (function () {
   if (locales[browserLang]) return browserLang;
-  var lang = browserLang.split('-')[0];
-  for (var key of Object.keys(locales)) { if (key.startsWith(lang)) return key; }
+  const lang = browserLang.split('-')[0];
+  for (const key of Object.keys(locales)) { if (key.startsWith(lang)) return key; }
   return 'en-US';
 })();
 
