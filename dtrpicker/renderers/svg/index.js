@@ -50,7 +50,7 @@ class SvgRenderer {
     /** @type {string} */
     this.svgNS = 'http://www.w3.org/2000/svg';
 
-    // 网格常量（CELL_W 由 _detectCellW 动态决定，STEP_X/STEP_Y 在 createPanel 中计算）
+    // 网格常量（CELL_W 取自 DIM.CELL_W，STEP_X/STEP_Y 在 createPanel 中计算）
     this.CELL_W = 0;
     this.CELL_H = DIM.CELL_H;
     this.GAP = DIM.GAP;
@@ -112,6 +112,9 @@ class SvgRenderer {
     // 时间滚轮
     /** @type {TimeWheel|null} */
     this.timeWheel = null;
+
+    /** 移动端 CSS scale 因子（1 = 无缩放） */
+    this._scaleFactor = 1;
   }
 
   // ════════════════════════════════════════════════════════════════
@@ -120,10 +123,7 @@ class SvgRenderer {
 
   /** @private */
   _detectCellW() {
-    const isMobile = window.innerWidth < 768;
-    if (!isMobile) return DIM.CELL_W.DESKTOP;
-    if (this.state.isTimeEnabled()) return DIM.CELL_W.MOBILE_TIME;
-    return DIM.CELL_W.MOBILE;
+    return DIM.CELL_W;
   }
 
   /** @private */
@@ -146,6 +146,55 @@ class SvgRenderer {
         }
       }
     }
+  }
+
+  /**
+   * 移动端自适应缩放。
+   *
+   * 当移动端 SVG 总宽超出可用宽度时，对 SVG 应用 CSS transform: scale()，
+   * SVG 内部坐标系统不变，所有绘制元素无感知。
+   * 这是 GPU 合成层操作，不触发 SVG 重计算。
+   *
+   * 注意：仅设 transform 不修改 CSS width/height，因为
+   * getBoundingClientRect() 返回 post-transform 值，
+   * 坐标映射（_isInDateArea 等）自动正确。
+   * @private
+   */
+  _applyScale() {
+    const isMobile = window.innerWidth < 768;
+    if (!isMobile) {
+      this._removeScale();
+      return;
+    }
+
+    // 面板左右安全边距
+    const MARGIN = 16;
+    const availableWidth = window.innerWidth - MARGIN * 2;
+
+    if (availableWidth >= this.SVG_W) {
+      this._removeScale();
+      return;
+    }
+
+    const scale = availableWidth / this.SVG_W;
+    this._scaleFactor = scale;
+
+    this.svg.style.transformOrigin = '0 0';
+    this.svg.style.transform = 'scale(' + scale + ')';
+
+    // 面板宽度同步设为 scaledW（panel overflow:hidden 裁剪 SVG 溢出）
+    this.panel.style.width = (this.SVG_W * scale) + 'px';
+  }
+
+  /** @private */
+  _removeScale() {
+    if (this._scaleFactor === 1) return;
+    this._scaleFactor = 1;
+    if (!this.svg) return;
+    this.svg.style.transformOrigin = '';
+    this.svg.style.transform = '';
+    // 还原面板宽度
+    this.panel.style.width = '';
   }
 
   /**
@@ -307,6 +356,9 @@ class SvgRenderer {
     this.renderWeekHeader();
     this.renderCalendar();
     this._initTimeWheel();
+
+    // 移动端自适应缩放（CSS transform，不影响 SVG 内部坐标）
+    this._applyScale();
   }
 
   // ════════════════════════════════════════════════════════════════
@@ -662,7 +714,7 @@ class SvgRenderer {
         text.setAttribute('dy', '1.5');
         text.setAttribute('fill', this.options.textColor);
         text.setAttribute('fill-opacity', '0.2');
-        text.setAttribute('font-size', '42');
+        text.setAttribute('font-size', '40');
         text.setAttribute('font-style', 'italic');
         text.setAttribute('font-weight', '700');
         text.textContent = label;

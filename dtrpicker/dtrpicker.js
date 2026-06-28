@@ -2,7 +2,7 @@
  * dtrpicker.js — 日期范围选择器核心
  *
  * @file       日期范围选择器核心脚本
- * @version    3.2.1
+ * @version    3.3.0
  * @license    MIT
  */
 
@@ -151,9 +151,13 @@ class dtrPicker {
     };
     document.addEventListener('keydown', this._onDocumentKeyDown);
 
-    // 窗口 resize 重定位
+    // 窗口 resize：SVG 渲染器先重算缩放，再重定位
     this._onWindowResize = () => {
-      if (this.visible) this._positionDropdown();
+      if (!this.visible) return;
+      if (typeof this._renderer._applyScale === 'function') {
+        this._renderer._applyScale();
+      }
+      this._positionDropdown();
     };
     window.addEventListener('resize', this._onWindowResize);
   }
@@ -207,18 +211,34 @@ class dtrPicker {
     const spaceBelow = window.innerHeight - rect.bottom;
     const spaceAbove = rect.top;
 
-    let top, left;
-    left = rect.left;
-
+    let top;
     if (spaceBelow >= panelH || spaceBelow >= spaceAbove) {
       top = rect.bottom + 4;
     } else {
       top = rect.top - panelH - 4;
     }
 
+    // ── 支持 _applyScale 的渲染器（SVG / HTML）：CSS transform 缩放 ──
+    if (typeof this._renderer._applyScale === 'function') {
+      this._renderer._applyScale();
+      const scaledW = this._renderer.SVG_W * this._renderer._scaleFactor;
+
+      // 面板宽度已在各渲染器 _applyScale 中设置完毕，此处只做定位
+      let left = rect.left;
+      if (left + scaledW > window.innerWidth) {
+        left = window.innerWidth - scaledW - 10;
+      }
+      if (left < 0) left = 4;
+
+      this._renderer.container.style.top = top + 'px';
+      this._renderer.container.style.left = left + 'px';
+      return;
+    }
+
+    // ── 旧版渲染器（降级）：直接约束面板宽度 ──
     const availW = window.innerWidth - 10;
     let renderW = this._renderer.SVG_W;
-    left = rect.left;
+    let left = rect.left;
     if (renderW > availW) {
       renderW = availW;
       left = 4;
@@ -227,18 +247,7 @@ class dtrPicker {
     }
     if (left < 0) { renderW = availW; left = 4; }
 
-    const scale = renderW / this._renderer.SVG_W;
-    const renderH = Math.round(this._renderer.SVG_H * scale);
     this._renderer.panel.style.width = renderW + 'px';
-    // 兼容 SVG 和 HTML 渲染器
-    if (this._renderer.svg && this._renderer.svg.setAttribute) {
-      this._renderer.svg.setAttribute('width', renderW);
-      this._renderer.svg.setAttribute('height', renderH);
-    } else if (this._renderer.svg) {
-      this._renderer.svg.style.width = renderW + 'px';
-      this._renderer.svg.style.height = renderH + 'px';
-    }
-
     this._renderer.container.style.top = top + 'px';
     this._renderer.container.style.left = left + 'px';
   }

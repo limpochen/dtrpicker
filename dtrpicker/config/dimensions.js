@@ -12,18 +12,12 @@ export const DIM = {
   //  网格布局常量
   // ══════════════════════════════════════════════════════════════
 
+  /** 单元格宽度（px）
+   * 注：移动端超出页面时由 SvgRenderer._applyScale() 整体 CSS transform 缩放，
+   * 无需单独区分移动端 CELL_W。 */
+  CELL_W: 40,
   /** 单元格高度（px） */
   CELL_H: 36,
-
-  /** 单元格宽度（px），按场景分三种取值 */
-  CELL_W: {
-    /** 桌面端宽度 */
-    DESKTOP: 40,
-    /** 移动端无时间模式宽度 */
-    MOBILE: 36,
-    /** 移动端+时间模式宽度 */
-    MOBILE_TIME: 30,
-  },
   /** 网格间隙（px） */
   GAP: 1,
   /** 侧边栏列数（年 + 月） */
@@ -44,7 +38,7 @@ export const DIM = {
   BUFFER_ROWS: 12,
 
   /** 版本号 */
-  VERSION: 'v2.1.0',
+  VERSION: 'v2.2.0',
   /** 是否在容器左下角显示版本号 */
   SHOW_VERSION: true,
 

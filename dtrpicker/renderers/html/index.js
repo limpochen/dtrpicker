@@ -91,6 +91,9 @@ class HtmlRenderer {
 
     // 行缓存
     this._rowCache = new Map();
+
+    /** 移动端 CSS scale 因子（1 = 无缩放） */
+    this._scaleFactor = 1;
   }
 
   // ════════════════════════════════════════════════════════════════
@@ -108,17 +111,50 @@ class HtmlRenderer {
   }
 
   _detectCellW() {
-    const isMobile = window.innerWidth < 768;
-    if (!isMobile) {
-      this.CELL_W = DIM.CELL_W.DESKTOP;
-    } else if (this.state.isTimeEnabled()) {
-      this.CELL_W = DIM.CELL_W.MOBILE_TIME;
-    } else {
-      this.CELL_W = DIM.CELL_W.MOBILE;
-    }
+    this.CELL_W = DIM.CELL_W;
     this._dayW = this.CELL_W;
     this._sidebarW = this.CELL_W;
     this._timeW = this.CELL_W;
+  }
+
+  /**
+   * 移动端自适应缩放（CSS transform，HTML 版）。
+   *
+   * 与 SVG 版原理相同：对 panel 应用 transform: scale()，
+   * panel 的 CSS width 保持 SVG_W（Grid 布局不重排），
+   * 视觉缩放由 GPU 合成层完成。
+   * @private
+   */
+  _applyScale() {
+    const isMobile = window.innerWidth < 768;
+    if (!isMobile) {
+      this._removeScale();
+      return;
+    }
+
+    const MARGIN = 16;
+    const availableWidth = window.innerWidth - MARGIN * 2;
+
+    if (availableWidth >= this.SVG_W) {
+      this._removeScale();
+      return;
+    }
+
+    const scale = availableWidth / this.SVG_W;
+    this._scaleFactor = scale;
+
+    // panel 的 CSS width 保持 SVG_W（Grid 布局不变），仅视觉缩放
+    this.panel.style.transformOrigin = '0 0';
+    this.panel.style.transform = 'scale(' + scale + ')';
+  }
+
+  /** @private */
+  _removeScale() {
+    if (this._scaleFactor === 1) return;
+    this._scaleFactor = 1;
+    if (!this.panel) return;
+    this.panel.style.transformOrigin = '';
+    this.panel.style.transform = '';
   }
 
   _calcTotalCols() {
@@ -242,6 +278,9 @@ class HtmlRenderer {
     this.renderWeekHeader();
     this.renderCalendar();
     this._initTimeWheel();
+
+    // 移动端自适应缩放（CSS transform，不改变 Grid 布局）
+    this._applyScale();
   }
 
   // ════════════════════════════════════════════════════════════════
