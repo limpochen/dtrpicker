@@ -717,6 +717,7 @@ class SvgRenderer {
         text.setAttribute('font-size', '40');
         text.setAttribute('font-style', 'italic');
         text.setAttribute('font-weight', '700');
+        text.style.pointerEvents = 'none';
         text.textContent = label;
         this.calendarArea.container.appendChild(text);
       }

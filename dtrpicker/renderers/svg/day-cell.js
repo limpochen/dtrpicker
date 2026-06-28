@@ -83,7 +83,8 @@ class DayCell extends Cell {
       'class': 'dtrpicker-day-text',
       'data-date': this.dateStr,
     };
-    this._createText(this.x + this.w / 2, this.y + this.h / 2, this.dayNum, attrs);
+    const text = this._createText(this.x + this.w / 2, this.y + this.h / 2, this.dayNum, attrs);
+    text.style.pointerEvents = 'none';
   }
 
   render() {
