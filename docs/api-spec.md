@@ -31,36 +31,36 @@ import dtrPicker from 'dtrpicker/dtrpicker.js';
 const picker = new dtrPicker(trigger, options);
 ```
 
-| 参数                    | 类型                     | 默认值        | 必填                                                                          | 说明                                                                |
-| ----------------------- | ------------------------ | ------------- | ----------------------------------------------------------------------------- | ------------------------------------------------------------------- |
-| `trigger`             | `HTMLElement \| string` | —            | ✅                                                                            | 触发器元素或其 CSS 选择器。组件用它作为面板定位锚点及点击切换面板。 |
-| `options`             | `Object`               | `{}`        | —                                                                            | 配置对象                                                            |
-| `options.renderMode`    | `'svg' \| 'html'`        | —          | ✅ | 渲染模式                                                          |
-| `options.mode`          | `string`                  | —          | ✅ | 选择模式：`'date'` / `'dateTime'` / `'dateRange'` / `'dateTimeRange'` |
-| `options.yearMonthMode` | `'watermark' \| 'column'` | `'watermark'` | — | 年月显示方式：`'watermark'` 水印叠加 / `'column'` 单独列       |
-| `options.locale`        | `string`                  | `'en-US'`  | — | BCP 47 语言标签：`'zh-CN'` `'en-US'` `'ja-JP'` 等             |
-| `options.firstDay`      | `0 \| 1`                   | `0`        | — | 周起始日：`0`=周日, `1`=周一                                    |
-| `options.colorScheme`   | `string`                  | `'morandi'` | — | 色系：`'morandi'`(莫兰迪) / `'nature'`(自然)                    |
-| `options.zIndex`        | `number`                  | —          | ✅ | 面板 z-index                                                      |
-| `options.todayBarHeight`| `number`                  | `6`        | — | 今日标记条高度（px）                                              |
-| `options.wheelStep`     | `number`                  | `40`       | — | 滚轮翻页步长系数                                                    |
+| 参数 | 类型 | 默认值 | 必填 | 说明 |
+| --- | --- | --- | --- | --- |
+| `trigger` | `HTMLElement \| string` | — | ✅ | 触发器元素或其 CSS 选择器。组件用它作为面板定位锚点及点击切换面板。 |
+| `options` | `Object` | `{}` | — | 配置对象 |
+| `options.renderMode` | `'svg' \| 'html'` | — | ✅ | 渲染模式 |
+| `options.mode` | `string` | — | ✅ | 选择模式：`'date'` / `'dateTime'` / `'dateRange'` / `'dateTimeRange'` |
+| `options.yearMonthMode` | `'watermark' \| 'column'` | `'watermark'` | — | 年月显示方式：`'watermark'` 水印叠加 / `'column'` 单独列 |
+| `options.locale` | `string` | `'en-US'` | — | BCP 47 语言标签：`'zh-CN'` `'en-US'` `'ja-JP'` 等 |
+| `options.firstDay` | `0 \| 1` | `0` | — | 周起始日：`0`=周日, `1`=周一 |
+| `options.colorScheme` | `string` | `'morandi'` | — | 色系：`'morandi'`(莫兰迪) / `'nature'`(自然) |
+| `options.zIndex` | `number` | — | ✅ | 面板 z-index |
+| `options.todayBarHeight` | `number` | `6` | — | 今日标记条高度（px） |
+| `options.wheelStep` | `number` | `40` | — | 滚轮翻页步长系数 |
 
 > ⚠️ `renderMode`、`mode`、`zIndex`、`yearMonthMode`、`locale`、`firstDay`、`colorScheme` **构造后不可更改**。
 
 颜色选项：
 
-| 参数                     | 默认值（morandi） | 说明                |
-| ------------------------ | ----------------- | ------------------- |
-| `selectedColor`        | `'#2f54eb'`     | 选中/高亮色         |
-| `selectedTextColor`    | `'#ffffff'`     | 选中态文字色        |
-| `gridColor`            | `'#d0d0d0'`     | 网格线色            |
-| `cellColor`            | `'#ffffff'`     | 格子背景色          |
-| `textColor`            | `'#262626'`     | 主文字色            |
-| `textColorDisabled`    | `'#d9d9d9'`     | 禁用日期文字色      |
-| `textColorSubLabel`    | `'#595959'`     | 次要标签色          |
-| `textColorWeekend`     | `'#f04040'`     | 周末日期文字色      |
-| `textColorWeekendTitle`| `'#f08080'`     | 周末表头文字色      |
-| `todayBarColor`        | `'#8c00ff'`     | 今日标记条颜色      |
+| 参数 | 默认值（morandi） | 说明 |
+| --- | --- | --- |
+| `selectedColor` | `'#2f54eb'` | 选中/高亮色 |
+| `selectedTextColor` | `'#ffffff'` | 选中态文字色 |
+| `gridColor` | `'#d0d0d0'` | 网格线色 |
+| `cellColor` | `'#ffffff'` | 格子背景色 |
+| `textColor` | `'#262626'` | 主文字色 |
+| `textColorDisabled` | `'#d9d9d9'` | 禁用日期文字色 |
+| `textColorSubLabel` | `'#595959'` | 次要标签色 |
+| `textColorWeekend` | `'#f04040'` | 周末日期文字色 |
+| `textColorWeekendTitle` | `'#f08080'` | 周末日期文字色 |
+| `todayBarColor` | `'#8c00ff'` | 今日标记条颜色 |
 
 ---
 
@@ -120,11 +120,11 @@ picker.getValue('object');
 // → { start: { year, month, day, hour, minute }, end: { ... } | null } | null
 ```
 
-| format               | 返回类型                                         | 说明                                                |
-| -------------------- | ------------------------------------------------ | --------------------------------------------------- |
-| `'string'`（默认） | `ValueObject \| null`                           | YYYY-MM-DD HH:mm 格式字符串。单日模式无`end` 字段 |
-| `'date'`           | `{start:Date, end:Date\|null} \| null`           | JavaScript Date 对象                                |
-| `'object'`         | `{start:DateParts, end:DateParts\|null} \| null` | 展开的数字对象                                      |
+| format | 返回类型 | 说明 |
+| --- | --- | --- |
+| `'string'`（默认） | `ValueObject \| null` | YYYY-MM-DD HH:mm 格式字符串。单日模式无`end` 字段 |
+| `'date'` | `{start:Date, end:Date\|null} \| null` | JavaScript Date 对象 |
+| `'object'` | `{start:DateParts, end:DateParts\|null} \| null` | 展开的数字对象 |
 
 `DateParts`:
 
@@ -148,13 +148,13 @@ picker.onChange(function(value, meta) {
 });
 ```
 
-| meta 字段  | 值                 | 说明                                |
-| ---------- | ------------------ | ----------------------------------- |
-| `source` | `'user'`         | 由用户点击/交互触发                 |
+| meta 字段 | 值 | 说明 |
+| --- | --- | --- |
+| `source` | `'user'` | 由用户点击/交互触发 |
 | `source` | `'programmatic'` | 由`setValue()` / `clear()` 触发 |
-| `action` | `'selecting'`    | 选择中（单日期已选、范围选了起点）  |
-| `action` | `'confirmed'`    | 选择完成                            |
-| `action` | `'cleared'`      | 被清除                              |
+| `action` | `'selecting'` | 选择中（单日期已选、范围选了起点） |
+| `action` | `'confirmed'` | 选择完成 |
+| `action` | `'cleared'` | 被清除 |
 
 ### picker.destroy()
 
