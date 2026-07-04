@@ -43,7 +43,7 @@ class HtmlRenderer {
     this.STEP_X = this.CELL_W + DIM.GAP;
     this.STEP_Y = DIM.CELL_H + DIM.GAP;
     /** 是否显示侧边栏（年/月列） */
-    this._hasSidebar = DIM.YEAR_MONTH_MODE === 'column';
+    this._hasSidebar = this.options.yearMonthMode === 'column';
     this.SIDEBAR_COLS = this._hasSidebar ? DIM.SIDEBAR_COLS : 0;
     this.DATE_COL_START = this._hasSidebar ? DIM.DATE_COL_START : 0;
     this.DATE_COLS = DIM.DATE_COLS;
@@ -182,6 +182,7 @@ class HtmlRenderer {
     // ── 容器 ──
     this.container = document.createElement('div');
     this.container.className = 'dtrpicker-container';
+    this.container.style.zIndex = this.options.zIndex;
 
     // ── 面板 ──
     this.panel = document.createElement('div');
@@ -579,10 +580,85 @@ class HtmlRenderer {
     // 一次性挂载所有行到 DOM
     this._bodyEl.appendChild(fragment);
 
+    // 水印模式：年月叠加显示
+    if (!this._hasSidebar) {
+      this._renderWatermark(baseRow, totalRenderRows);
+    }
+
     // 更新年份（基于当前 baseRow）
     const centerRow = Math.floor(totalRenderRows / 2);
     const centerDate = this._getDateOfWeekRow(centerRow + baseRow);
     this.state._visibleYear = centerDate.getFullYear();
+  }
+
+  /**
+   * 水印模式：在日期区叠加显示年月大字号文字。
+   * 参照 SvgRenderer.renderCalendar() 中水印实现，使用 DOM 绝对定位模拟。
+   * @private
+   * @param {number} baseRow - 当前渲染基行偏移（数据行号偏移，用于 _getDateOfWeekRow）
+   * @param {number} totalRows - 本次渲染总行数
+   */
+  _renderWatermark(baseRow, totalRows) {
+    // 收集各年月在网格中的行范围 key: "year-month" => { startRow, endRow }
+    const monthRanges = {};
+    for (let i = 0; i < totalRows; i++) {
+      const rowDate = this._getDateOfWeekRow(i + baseRow);
+      const monthsInRow = new Set();
+      for (let col = 0; col < this.DATE_COLS; col++) {
+        const d = new Date(rowDate);
+        d.setDate(rowDate.getDate() + col);
+        monthsInRow.add(d.getFullYear() + '-' + d.getMonth());
+      }
+      for (const key of monthsInRow) {
+        if (!monthRanges[key]) {
+          monthRanges[key] = { startRow: i, endRow: i };
+        } else {
+          monthRanges[key].endRow = i;
+        }
+      }
+    }
+
+    const dateLeft = this.GAP;
+    const dateWidth = this.DATE_COLS * this.CELL_W + (this.DATE_COLS - 1) * this.GAP;
+
+    // 确保 _bodyEl 作为水印绝对定位的锚点
+    this._bodyEl.style.position = 'relative';
+
+    for (const key in monthRanges) {
+      const seg = monthRanges[key];
+      const [yearNum, monthNum] = key.split('-').map(Number);
+
+      const topPx = this.GAP + seg.startRow * this.STEP_Y;
+      const heightPx = (seg.endRow - seg.startRow + 1) * this.CELL_H
+                     + (seg.endRow - seg.startRow) * this.GAP;
+
+      const label = this._i18n.yearFirst
+        ? String(yearNum) + this._i18n.year + ' ' + this._i18n.months[monthNum]
+        : this._i18n.months[monthNum] + ' ' + String(yearNum);
+
+      const el = document.createElement('div');
+      el.textContent = label;
+      el.style.cssText = [
+        'position:absolute',
+        'left:' + dateLeft + 'px',
+        'top:' + topPx + 'px',
+        'width:' + dateWidth + 'px',
+        'height:' + heightPx + 'px',
+        'display:flex',
+        'align-items:center',
+        'justify-content:center',
+        'color:' + this.options.textColor,
+        'opacity:0.2',
+        'font-size:40px',
+        'font-style:italic',
+        'font-weight:700',
+        'pointer-events:none',
+        'user-select:none',
+        'white-space:nowrap',
+        'overflow:hidden',
+      ].join(';');
+      this._bodyEl.appendChild(el);
+    }
   }
 
   /** 表头颜色同步：按列取第一行数据格的颜色，给每个表头格设背景色 */

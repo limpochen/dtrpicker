@@ -71,7 +71,7 @@ export interface PickerOptions {
   /** 色系 */
   colorScheme?: string;
   /** 面板 z-index */
-  zIndex?: number;
+  zIndex: number;
   /** 今日标记条高度(px) */
   todayBarHeight?: number;
   /** 滚轮步进(px) */

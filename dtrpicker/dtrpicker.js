@@ -25,9 +25,10 @@ const DEFAULTS = Object.assign({}, BASE_DEFAULTS, {
   firstDay: 0,
   locale: '',
   colorScheme: 'morandi',
-  zIndex: 9999,
   todayBarHeight: 6,
   wheelStep: 40,
+  /** 年月显示方式：'watermark' 水印叠加 | 'column' 单独列显示 */
+  yearMonthMode: 'watermark',
 });
 
 // ==================== 主类 ====================
@@ -44,8 +45,8 @@ const DEFAULTS = Object.assign({}, BASE_DEFAULTS, {
  * @param {Object} options - 配置选项
  * @param {string} options.renderMode - 必选！渲染模式（如 'svg'）
  * @param {string} options.mode - 必选！选择模式（'date'|'dateTime'|'dateRange'|'dateTimeRange'）
+ * @param {number} options.zIndex - 必选！下拉面板 z-index
  * @param {number} [options.firstDay=0] - 周起始日（0=周日, 1=周一）
- * @param {number} [options.zIndex=9999] - 下拉面板 z-index
  * @throws {Error} 缺少 renderMode 或 mode 或 trigger 无效时抛出
  */
 class dtrPicker {
@@ -75,6 +76,11 @@ class dtrPicker {
     const validModes = ['date', 'dateTime', 'dateRange', 'dateTimeRange'];
     if (!options.mode || validModes.indexOf(options.mode) === -1) {
       throw new Error('dtrPicker: "mode" is required (' + validModes.join('|') + ')');
+    }
+
+    // ---- zIndex 必选校验 ----
+    if (options.zIndex === undefined) {
+      throw new Error('dtrPicker: "zIndex" is required (e.g. 9999)');
     }
 
     /** @type {HTMLElement} 触发器 DOM 元素 */

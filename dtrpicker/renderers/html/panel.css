@@ -13,7 +13,6 @@
 /* ──── 面板容器 ──── */
 .dtrpicker-container {
   position: fixed;
-  z-index: 9999;
   opacity: 0;
   visibility: hidden;
   transform: translateY(-8px);
@@ -157,6 +156,7 @@
 .dp-day-cell {
   flex-direction: column;
   position: relative;
+  z-index: 1;
 }
 
 .dp-day-cell:hover {

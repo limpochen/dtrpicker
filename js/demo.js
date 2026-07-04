@@ -24,6 +24,9 @@ const demoI18n = {
     renderModeLabel: '渲染模式',
     renderModeSvg: 'SVG',
     renderModeHtml: 'HTML+CSS',
+    yearMonthModeLabel: '年月显示',
+    yearMonthWatermark: '水印',
+    yearMonthColumn: '列',
     schemeMorandi: '莫兰迪',
     schemeNature: '自然',
     firstDayLabel: '周起始日',
@@ -51,6 +54,9 @@ const demoI18n = {
     renderModeLabel: 'Render Mode',
     renderModeSvg: 'SVG',
     renderModeHtml: 'HTML+CSS',
+    yearMonthModeLabel: 'Year/Month',
+    yearMonthWatermark: 'Watermark',
+    yearMonthColumn: 'Column',
     schemeMorandi: 'Morandi',
     schemeNature: 'Nature',
     firstDayLabel: 'Week starts',
@@ -154,6 +160,8 @@ function syntaxHighlightJSON(json) {
 function getCurrentParams() {
   return {
     renderMode: document.getElementById('param-renderMode').value,
+    yearMonthMode: document.getElementById('param-yearMonthMode').value,
+    zIndex: 9999,
     locale: document.getElementById('lang-select').value,
     firstDay: parseInt(document.querySelector('input[name="param-firstDay"]:checked').value),
     mode: currentMode,
@@ -176,6 +184,8 @@ function generateCodeSnippet(params) {
   const currentLocale = document.getElementById('lang-select').value;
   opts.push('  renderMode: "' + params.renderMode + '"');
   opts.push('  mode: "' + params.mode + '"');
+  opts.push('  zIndex: ' + params.zIndex);
+  if (params.yearMonthMode !== 'watermark') opts.push('  yearMonthMode: "' + params.yearMonthMode + '"');
   if (currentLocale !== 'en-US') opts.push('  locale: "' + currentLocale + '"');
   if (params.firstDay !== 0) opts.push('  firstDay: ' + params.firstDay);
   if (params.colorScheme !== 'morandi') opts.push('  colorScheme: "' + params.colorScheme + '"');
@@ -234,6 +244,7 @@ async function initAllPickers() {
   const source = document.getElementById('source-select')?.value || 'dev';
   const PickerClass = await ensurePickerSource(source);
   const renderMode = document.getElementById('param-renderMode').value;
+  const yearMonthMode = document.getElementById('param-yearMonthMode').value;
   const locale = document.getElementById('lang-select').value;
   const firstDay = parseInt(document.querySelector('input[name="param-firstDay"]:checked').value);
   const colorScheme = document.getElementById('param-colorScheme').value;
@@ -242,7 +253,9 @@ async function initAllPickers() {
   ALL_MODES.forEach(function (mode) {
     const p = new PickerClass(triggerEl, {
       renderMode: renderMode,
+      yearMonthMode: yearMonthMode,
       mode: mode,
+      zIndex: 9999,
       locale: locale,
       firstDay: firstDay,
       colorScheme: colorScheme,
@@ -255,18 +268,6 @@ async function initAllPickers() {
 
   // 所有实例保持关闭，等待用户交互
   currentMode = document.getElementById('param-mode').value;
-}
-
-function switchMode(mode) {
-  // 关闭旧实例，标记当前 mode，但不打开
-  if (pickers[currentMode]) pickers[currentMode].close();
-  currentMode = mode;
-  document.getElementById('param-mode').value = mode;
-  if (lastValue && pickers[mode]) {
-    pickers[mode].setValue(lastValue);
-  }
-  updateParamsDisplay();
-  updateCodeDisplay();
 }
 
 // ================================================================
@@ -285,6 +286,7 @@ function applyParams() {
 }
 
 document.getElementById('param-renderMode').addEventListener('change', applyParams);
+document.getElementById('param-yearMonthMode').addEventListener('change', applyParams);
 document.getElementById('param-colorScheme').addEventListener('change', applyParams);
 document.getElementById('lang-select').addEventListener('change', applyParams);
 document.querySelectorAll('input[name="param-firstDay"]').forEach(function (el) { el.addEventListener('change', applyParams); });
@@ -339,10 +341,8 @@ document.getElementById('picker-trigger').addEventListener('click', function (e)
   picker.toggle();
 });
 
-// Mode 下拉切换：关闭旧实例，标记新 mode，等待用户点击 trigger 打开
-document.getElementById('param-mode').addEventListener('change', function () {
-  switchMode(this.value);
-});
+// Mode 变化同其他配置参数：重新初始化全部实例
+document.getElementById('param-mode').addEventListener('change', applyParams);
 
 // ================================================================
 //  Bootstrap

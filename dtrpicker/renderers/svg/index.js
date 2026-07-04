@@ -57,7 +57,7 @@ class SvgRenderer {
     this.STEP_X = 0;
     this.STEP_Y = 0;
     /** 是否显示侧边栏（年/月列） */
-    this._hasSidebar = DIM.YEAR_MONTH_MODE === 'column';
+    this._hasSidebar = this.options.yearMonthMode === 'column';
     this.SIDEBAR_COLS = this._hasSidebar ? DIM.SIDEBAR_COLS : 0;
     this.DATE_COL_START = this._hasSidebar ? DIM.DATE_COL_START : 0;
     this.DATE_COLS = DIM.DATE_COLS;

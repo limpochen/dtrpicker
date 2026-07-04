@@ -1,6 +1,6 @@
 # dtrPicker — API 规范
 
-> 版本: 3.2.0
+> 版本: 3.3.0
 > 本文件定义了 `dtrPicker` 作为可嵌入部件的对外接口。
 > **核心原则**: 组件不关心 trigger 的样式、布局、placeholder 或表单集成——那些是调用方的职责。
 
@@ -35,16 +35,17 @@ const picker = new dtrPicker(trigger, options);
 | ----------------------- | ------------------------ | ------------- | ----------------------------------------------------------------------------- | ------------------------------------------------------------------- |
 | `trigger`             | `HTMLElement \| string` | —            | ✅                                                                            | 触发器元素或其 CSS 选择器。组件用它作为面板定位锚点及点击切换面板。 |
 | `options`             | `Object`               | `{}`        | —                                                                            | 配置对象                                                            |
-| `options.renderMode`  | `'svg' \| 'html'`       | ✅            | 渲染模式                                                                      |                                                                     |
-| `options.mode`        | `string`               | ✅            | 选择模式：`'date'` / `'dateTime'` / `'dateRange'` / `'dateTimeRange'` |                                                                     |
-| `options.locale`      | `string`               | `'en-US'`   | —                                                                            | BCP 47 语言标签：`'zh-CN'` `'en-US'` `'ja-JP'` 等             |
-| `options.firstDay`    | `0 \| 1`                | `0`         | —                                                                            | 周起始日：`0`=周日, `1`=周一                                    |
-| `options.colorScheme` | `string`               | `'morandi'` | —                                                                            | 色系：`'morandi'`(莫兰迪) / `'nature'`(自然)                    |
-| `options.zIndex`      | `number`               | `9999`      | 面板 z-index                                                            |                                                                     |
-| `options.todayBarHeight` | `number`            | `6`         | —                                                                            | 今日标记条高度（px）                                                  |
-| `options.wheelStep`   | `number`               | `40`        | —                                                                            | 滚轮翻页步长系数                                                        |
+| `options.renderMode`    | `'svg' \| 'html'`        | —          | ✅ | 渲染模式                                                          |
+| `options.mode`          | `string`                  | —          | ✅ | 选择模式：`'date'` / `'dateTime'` / `'dateRange'` / `'dateTimeRange'` |
+| `options.yearMonthMode` | `'watermark' \| 'column'` | `'watermark'` | — | 年月显示方式：`'watermark'` 水印叠加 / `'column'` 单独列       |
+| `options.locale`        | `string`                  | `'en-US'`  | — | BCP 47 语言标签：`'zh-CN'` `'en-US'` `'ja-JP'` 等             |
+| `options.firstDay`      | `0 \| 1`                   | `0`        | — | 周起始日：`0`=周日, `1`=周一                                    |
+| `options.colorScheme`   | `string`                  | `'morandi'` | — | 色系：`'morandi'`(莫兰迪) / `'nature'`(自然)                    |
+| `options.zIndex`        | `number`                  | —          | ✅ | 面板 z-index                                                      |
+| `options.todayBarHeight`| `number`                  | `6`        | — | 今日标记条高度（px）                                              |
+| `options.wheelStep`     | `number`                  | `40`       | — | 滚轮翻页步长系数                                                    |
 
-> ⚠️ `renderMode`、`mode`、`locale`、`firstDay`、`colorScheme` **构造后不可更改**。
+> ⚠️ `renderMode`、`mode`、`zIndex`、`yearMonthMode`、`locale`、`firstDay`、`colorScheme` **构造后不可更改**。
 
 颜色选项：
 
