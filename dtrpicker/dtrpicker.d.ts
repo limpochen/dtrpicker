@@ -55,13 +55,13 @@ export type LifecycleCallback = () => void;
    配置选项
    ================================================================ */
 
-export type RenderMode = 'svg' | 'html';
+export type RenderMode = 'svg';
 
 export type PickerMode = 'date' | 'dateTime' | 'dateRange' | 'dateTimeRange';
 
 export interface PickerOptions {
-  /** 渲染模式（必选） */
-  renderMode: RenderMode;
+  /** 渲染模式（默认 'svg'，'html' 已移除） */
+  renderMode?: RenderMode;
   /** 选择模式（必选） */
   mode: PickerMode;
   /** BCP 47 语言标签 */

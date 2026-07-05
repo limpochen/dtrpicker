@@ -19,9 +19,7 @@ const demoI18n = {
     demoHint: '💡 点击输入框弹出日历 · 拖拽浏览月份 · 点击起止日期 · JSON 实时返回',
     paramConfig: '参数配置',
     colorSchemeLabel: '色系',
-    renderModeLabel: '渲染模式',
     renderModeSvg: 'SVG',
-    renderModeHtml: 'HTML+CSS',
     yearMonthModeLabel: '年月显示',
     yearMonthWatermark: '水印',
     yearMonthColumn: '列',
@@ -49,9 +47,7 @@ const demoI18n = {
     demoHint: '💡 Click to open calendar · Drag to browse months · Click start/end dates · Real-time JSON',
     paramConfig: 'Configuration',
     colorSchemeLabel: 'Scheme',
-    renderModeLabel: 'Render Mode',
     renderModeSvg: 'SVG',
-    renderModeHtml: 'HTML+CSS',
     yearMonthModeLabel: 'Year/Month',
     yearMonthWatermark: 'Watermark',
     yearMonthColumn: 'Column',
@@ -157,7 +153,6 @@ function syntaxHighlightJSON(json) {
 
 function getCurrentParams() {
   return {
-    renderMode: document.querySelector('input[name="param-renderMode"]:checked').value,
     yearMonthMode: document.querySelector('input[name="param-yearMonthMode"]:checked').value,
     locale: document.getElementById('lang-select').value,
     firstDay: parseInt(document.querySelector('input[name="param-firstDay"]:checked').value),
@@ -179,7 +174,6 @@ function generateCodeSnippet(params) {
   const importPath = source === 'bundle' ? 'dist/dtrpicker.js' : 'dtrpicker/dtrpicker.js';
   const opts = [];
   const currentLocale = document.getElementById('lang-select').value;
-  opts.push('  renderMode: "' + params.renderMode + '"');
   opts.push('  mode: "' + params.mode + '"');
   if (params.yearMonthMode !== 'watermark') opts.push('  yearMonthMode: "' + params.yearMonthMode + '"');
   if (currentLocale !== 'en-US') opts.push('  locale: "' + currentLocale + '"');
@@ -239,7 +233,6 @@ async function initAllPickers() {
 
   const source = document.getElementById('source-select')?.value || 'dev';
   const PickerClass = await ensurePickerSource(source);
-  const renderMode = document.querySelector('input[name="param-renderMode"]:checked').value;
   const yearMonthMode = document.querySelector('input[name="param-yearMonthMode"]:checked').value;
   const locale = document.getElementById('lang-select').value;
   const firstDay = parseInt(document.querySelector('input[name="param-firstDay"]:checked').value);
@@ -248,7 +241,6 @@ async function initAllPickers() {
 
   currentMode = document.getElementById('param-mode').value;
   const p = new PickerClass(triggerEl, {
-    renderMode: renderMode,
     yearMonthMode: yearMonthMode,
     mode: currentMode,
     locale: locale,
@@ -276,7 +268,6 @@ function applyParams() {
   updateCodeDisplay();
 }
 
-document.querySelectorAll('input[name="param-renderMode"]').forEach(function (el) { el.addEventListener('change', applyParams); });
 document.querySelectorAll('input[name="param-yearMonthMode"]').forEach(function (el) { el.addEventListener('change', applyParams); });
 document.getElementById('param-colorScheme').addEventListener('change', applyParams);
 document.getElementById('lang-select').addEventListener('change', applyParams);

@@ -5,7 +5,7 @@
  * @extends Cell
  */
 import Cell from './cell.js';
-import { saturateColor } from '../../utils/color.js';
+import { saturateColor } from '../utils/color.js';
 
 class YearCell extends Cell {
   /**

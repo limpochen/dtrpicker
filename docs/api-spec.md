@@ -35,7 +35,7 @@ const picker = new dtrPicker(trigger, options);
 | --- | --- | --- | --- | --- |
 | `trigger` | `HTMLElement \| string` | — | ✅ | 触发器元素或其 CSS 选择器。组件用它作为面板定位锚点及点击切换面板。 |
 | `options` | `Object` | `{}` | — | 配置对象 |
-| `options.renderMode` | `'svg' \| 'html'` | — | ✅ | 渲染模式 |
+| `options.renderMode` | `'svg'` | `'svg'` | — | 渲染模式（'html' 已移除） |
 | `options.mode` | `string` | — | ✅ | 选择模式：`'date'` / `'dateTime'` / `'dateRange'` / `'dateTimeRange'` |
 | `options.yearMonthMode` | `'watermark' \| 'column'` | `'watermark'` | — | 年月显示方式：`'watermark'` 水印叠加 / `'column'` 单独列 |
 | `options.locale` | `string` | `'en-US'` | — | BCP 47 语言标签：`'zh-CN'` `'en-US'` `'ja-JP'` 等 |

@@ -9,15 +9,7 @@
 import { BASE_DEFAULTS } from './config/colors.js';
 import { getLocale } from './config/i18n.js';
 import PickerState from './state/pickerstate.js';
-import SvgRenderer from './renderers/svg/index.js';
-import HtmlRenderer from './renderers/html/index.js';
-
-// ==================== 渲染器注册表 ====================
-
-const RENDERERS = {
-  svg: SvgRenderer,
-  html: HtmlRenderer,
-};
+import SvgRenderer from './renderers/index.js';
 
 // ==================== 默认配置 ====================
 
@@ -36,17 +28,16 @@ const DEFAULTS = Object.assign({}, BASE_DEFAULTS, {
 /**
  * dtrPicker — 流式日期范围/时间选择器。
  *
- * 支持 SVG 和 HTML+CSS 等多种渲染模式（由 renderMode 选项指定）。
+ * 仅支持 SVG 渲染（2026 年起 HTML+CSS 模式已移除）。
  * 每个实例的 mode 在构造时设定，不可在运行时更改。
  * 如需使用不同 mode，请创建多个实例。
  *
  * @class
  * @param {HTMLElement|string} trigger - 触发器 DOM 元素或 CSS 选择器
  * @param {Object} options - 配置选项
- * @param {string} options.renderMode - 必选！渲染模式（如 'svg'）
  * @param {string} options.mode - 必选！选择模式（'date'|'dateTime'|'dateRange'|'dateTimeRange'）
  * @param {number} [options.firstDay=0] - 周起始日（0=周日, 1=周一）
- * @throws {Error} 缺少 renderMode 或 mode 或 trigger 无效时抛出
+ * @throws {Error} 缺少 mode 或 trigger 无效时抛出
  */
 class dtrPicker {
 
@@ -62,16 +53,7 @@ class dtrPicker {
       throw new Error('dtrPicker: trigger must be a valid DOM element or selector');
     }
 
-    // ---- renderMode 必选校验 ----
-    if (!options.renderMode) {
-      throw new Error('dtrPicker: "renderMode" is required (e.g. "svg")');
-    }
-    const RendererClass = RENDERERS[options.renderMode];
-    if (!RendererClass) {
-      throw new Error('dtrPicker: unknown renderMode "' + options.renderMode + '"');
-    }
-
-        // ---- mode 必选校验 ----
+    // ---- mode 必选校验 ----
     const validModes = ['date', 'dateTime', 'dateRange', 'dateTimeRange'];
     if (!options.mode || validModes.indexOf(options.mode) === -1) {
       throw new Error('dtrPicker: "mode" is required (' + validModes.join('|') + ')');
@@ -99,8 +81,8 @@ class dtrPicker {
     this._instanceId = 'dp-' + Math.random().toString(36).substring(2, 10);
 
     // ---- 创建渲染器 ----
-    /** @type {SvgRenderer|HtmlRenderer} 渲染器实例 */
-    this._renderer = new RendererClass(this);
+    /** @type {SvgRenderer} 渲染器实例 */
+    this._renderer = new SvgRenderer(this);
     this._renderer.createPanel();
     this._renderer.bindEvents();
 
@@ -154,9 +136,7 @@ class dtrPicker {
     // 窗口 resize：SVG 渲染器先重算缩放，再重定位
     this._onWindowResize = () => {
       if (!this.visible) return;
-      if (typeof this._renderer._applyScale === 'function') {
-        this._renderer._applyScale();
-      }
+      this._renderer._applyScale();
       this._positionDropdown();
     };
     window.addEventListener('resize', this._onWindowResize);
@@ -233,36 +213,16 @@ class dtrPicker {
       top = rect.top - panelH - 4;
     }
 
-    // ── 支持 _applyScale 的渲染器（SVG / HTML）：CSS transform 缩放 ──
-    if (typeof this._renderer._applyScale === 'function') {
-      this._renderer._applyScale();
-      const scaledW = this._renderer.SVG_W * this._renderer._scaleFactor;
+    // SVG 渲染器：CSS transform 缩放
+    this._renderer._applyScale();
+    const scaledW = this._renderer.SVG_W * this._renderer._scaleFactor;
 
-      // 面板宽度已在各渲染器 _applyScale 中设置完毕，此处只做定位
-      let left = rect.left;
-      if (left + scaledW > window.innerWidth) {
-        left = window.innerWidth - scaledW - 10;
-      }
-      if (left < 0) left = 4;
-
-      this._renderer.container.style.top = top + 'px';
-      this._renderer.container.style.left = left + 'px';
-      return;
-    }
-
-    // ── 旧版渲染器（降级）：直接约束面板宽度 ──
-    const availW = window.innerWidth - 10;
-    let renderW = this._renderer.SVG_W;
     let left = rect.left;
-    if (renderW > availW) {
-      renderW = availW;
-      left = 4;
-    } else if (left + renderW > window.innerWidth) {
-      left = window.innerWidth - renderW - 10;
+    if (left + scaledW > window.innerWidth) {
+      left = window.innerWidth - scaledW - 10;
     }
-    if (left < 0) { renderW = availW; left = 4; }
+    if (left < 0) left = 4;
 
-    this._renderer.panel.style.width = renderW + 'px';
     this._renderer.container.style.top = top + 'px';
     this._renderer.container.style.left = left + 'px';
   }
