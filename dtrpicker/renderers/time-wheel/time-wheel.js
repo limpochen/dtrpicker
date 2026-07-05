@@ -3,8 +3,8 @@
  *
  * 在给定的 SVG <g> 容器内渲染时分滚轮列，支持鼠标滚轮滚动和拖拽调节。
  */
-import TimeCell from './time-cell.js';
-import TitleBarCell from './title-bar-cell.js';
+import TimeCell from '../cells/time-cell.js';
+import TitleBarCell from '../cells/title-bar-cell.js';
 import TimeWheelFloater from './time-wheel-floater.js';
 
 class TimeWheel {

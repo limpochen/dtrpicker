@@ -10,19 +10,19 @@ import { getActiveScheme, HARDCODED } from '../config/colors.js';
 import { DIM } from '../config/dimensions.js';
 import { saturateColor, blendColors } from '../utils/color.js';
 import { dateEqual, dateStr, parseDate } from '../utils/date.js';
-import DragController from '../utils/dragcontroller.js';
+import DragController from '../services/drag-controller.js';
 
-import Cell from './cell.js';
-import DayCell from './day-cell.js';
-import MonthCell from './month-cell.js';
-import YearCell from './year-cell.js';
-import HeaderCell from './header-cell.js';
-import HeaderBarCell from './header-bar-cell.js';
-import TimeCell from './time-cell.js';
-import TitleBarCell from './title-bar-cell.js';
+import Cell from './cells/cell.js';
+import DayCell from './cells/day-cell.js';
+import MonthCell from './cells/month-cell.js';
+import YearCell from './cells/year-cell.js';
+import HeaderCell from './cells/header-cell.js';
+import HeaderBarCell from './cells/header-bar-cell.js';
+import TimeCell from './cells/time-cell.js';
+import TitleBarCell from './cells/title-bar-cell.js';
 import DrawingArea from './drawing-area.js';
 import CellManager from './cell-manager.js';
-import TimeWheel from './time-wheel.js';
+import TimeWheel from './time-wheel/time-wheel.js';
 
 class SvgRenderer {
   /**

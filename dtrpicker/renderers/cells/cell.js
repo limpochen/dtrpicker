@@ -3,7 +3,7 @@
  * 所有格子类型的共同抽象。
  * 定位基于行列号 (row, col)，不存绝对像素。
  */
-import { getActiveScheme } from '../config/colors.js';
+import { getActiveScheme } from '../../config/colors.js';
 
 class Cell {
   /**

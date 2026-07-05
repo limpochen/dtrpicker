@@ -4,7 +4,7 @@
  * @extends Cell
  */
 import Cell from './cell.js';
-import { saturateColor, blendColors } from '../utils/color.js';
+import { saturateColor, blendColors } from '../../utils/color.js';
 
 class MonthCell extends Cell {
   /**

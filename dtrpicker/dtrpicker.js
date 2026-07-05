@@ -9,7 +9,7 @@
 import { BASE_DEFAULTS } from './config/colors.js';
 import { getLocale } from './config/i18n.js';
 import PickerState from './state/pickerstate.js';
-import SvgRenderer from './renderers/index.js';
+import SvgRenderer from './renderers/svg-renderer.js';
 
 // ==================== 默认配置 ====================
 
