@@ -211,7 +211,6 @@ class SvgRenderer {
     this.container = document.createElement('div');
     this.container.className = 'dtrpicker-container';
     this.container.style.position = 'fixed';
-    this.container.style.zIndex = this.options.zIndex;
     this.container.style.opacity = '0';
     this.container.style.visibility = 'hidden';
     this.container.style.transform = 'translateY(-8px)';

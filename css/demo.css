@@ -152,8 +152,10 @@ body {
 .json-section {
   color: #6a9955;
   font-style: italic;
+  -webkit-user-select: none;
   user-select: none;
 }
+
 .params-text-area pre {
   background: #fafafa;
   border: 1px solid #f0f0f0;

@@ -63,17 +63,13 @@
       </div>
       <div class="param-row">
         <label data-i18n="renderModeLabel">Render Mode</label>
-        <select id="param-renderMode" title="Render mode">
-          <option value="svg" data-i18n="renderModeSvg" selected>SVG</option>
-          <option value="html" data-i18n="renderModeHtml">HTML+CSS</option>
-        </select>
+        <label class="radio-label" data-i18n="renderModeSvg"><input type="radio" name="param-renderMode" value="svg" checked> SVG</label>
+        <label class="radio-label" data-i18n="renderModeHtml"><input type="radio" name="param-renderMode" value="html"> HTML+CSS</label>
       </div>
       <div class="param-row">
         <label data-i18n="yearMonthModeLabel">Year/Month Display</label>
-        <select id="param-yearMonthMode" title="Year/Month display mode">
-          <option value="watermark" data-i18n="yearMonthWatermark" selected>Watermark</option>
-          <option value="column" data-i18n="yearMonthColumn">Column</option>
-        </select>
+        <label class="radio-label" data-i18n="yearMonthWatermark"><input type="radio" name="param-yearMonthMode" value="watermark" checked> Watermark</label>
+        <label class="radio-label" data-i18n="yearMonthColumn"><input type="radio" name="param-yearMonthMode" value="column"> Column</label>
       </div>
       <div class="param-row">
         <label data-i18n="firstDayLabel">Week starts on</label>

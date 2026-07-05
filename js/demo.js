@@ -6,8 +6,6 @@ const PICKER_SOURCES = {
   dev: '../dtrpicker/dtrpicker.js',
   bundle: '../dist/dtrpicker.js',
 };
-const ALL_MODES = ['date', 'dateTime', 'dateRange', 'dateTimeRange'];
-
 import { locales } from '../dtrpicker/config/i18n.js';
 
 // ================================================================
@@ -159,9 +157,8 @@ function syntaxHighlightJSON(json) {
 
 function getCurrentParams() {
   return {
-    renderMode: document.getElementById('param-renderMode').value,
-    yearMonthMode: document.getElementById('param-yearMonthMode').value,
-    zIndex: 9999,
+    renderMode: document.querySelector('input[name="param-renderMode"]:checked').value,
+    yearMonthMode: document.querySelector('input[name="param-yearMonthMode"]:checked').value,
     locale: document.getElementById('lang-select').value,
     firstDay: parseInt(document.querySelector('input[name="param-firstDay"]:checked').value),
     mode: currentMode,
@@ -184,7 +181,6 @@ function generateCodeSnippet(params) {
   const currentLocale = document.getElementById('lang-select').value;
   opts.push('  renderMode: "' + params.renderMode + '"');
   opts.push('  mode: "' + params.mode + '"');
-  opts.push('  zIndex: ' + params.zIndex);
   if (params.yearMonthMode !== 'watermark') opts.push('  yearMonthMode: "' + params.yearMonthMode + '"');
   if (currentLocale !== 'en-US') opts.push('  locale: "' + currentLocale + '"');
   if (params.firstDay !== 0) opts.push('  firstDay: ' + params.firstDay);
@@ -243,31 +239,26 @@ async function initAllPickers() {
 
   const source = document.getElementById('source-select')?.value || 'dev';
   const PickerClass = await ensurePickerSource(source);
-  const renderMode = document.getElementById('param-renderMode').value;
-  const yearMonthMode = document.getElementById('param-yearMonthMode').value;
+  const renderMode = document.querySelector('input[name="param-renderMode"]:checked').value;
+  const yearMonthMode = document.querySelector('input[name="param-yearMonthMode"]:checked').value;
   const locale = document.getElementById('lang-select').value;
   const firstDay = parseInt(document.querySelector('input[name="param-firstDay"]:checked').value);
   const colorScheme = document.getElementById('param-colorScheme').value;
   const triggerEl = document.getElementById('picker-trigger');
 
-  ALL_MODES.forEach(function (mode) {
-    const p = new PickerClass(triggerEl, {
-      renderMode: renderMode,
-      yearMonthMode: yearMonthMode,
-      mode: mode,
-      zIndex: 9999,
-      locale: locale,
-      firstDay: firstDay,
-      colorScheme: colorScheme,
-    });
-    p.onChange(onChangeHandler);
-    // 移除实例自带的 trigger 点击，由 demo 统一管理
-    triggerEl.removeEventListener('click', p._onTriggerClick);
-    pickers[mode] = p;
-  });
-
-  // 所有实例保持关闭，等待用户交互
   currentMode = document.getElementById('param-mode').value;
+  const p = new PickerClass(triggerEl, {
+    renderMode: renderMode,
+    yearMonthMode: yearMonthMode,
+    mode: currentMode,
+    locale: locale,
+    firstDay: firstDay,
+    colorScheme: colorScheme,
+  });
+  p.onChange(onChangeHandler);
+  // 移除实例自带的 trigger 点击，由 demo 统一管理
+  triggerEl.removeEventListener('click', p._onTriggerClick);
+  pickers[currentMode] = p;
 }
 
 // ================================================================
@@ -285,8 +276,8 @@ function applyParams() {
   updateCodeDisplay();
 }
 
-document.getElementById('param-renderMode').addEventListener('change', applyParams);
-document.getElementById('param-yearMonthMode').addEventListener('change', applyParams);
+document.querySelectorAll('input[name="param-renderMode"]').forEach(function (el) { el.addEventListener('change', applyParams); });
+document.querySelectorAll('input[name="param-yearMonthMode"]').forEach(function (el) { el.addEventListener('change', applyParams); });
 document.getElementById('param-colorScheme').addEventListener('change', applyParams);
 document.getElementById('lang-select').addEventListener('change', applyParams);
 document.querySelectorAll('input[name="param-firstDay"]').forEach(function (el) { el.addEventListener('change', applyParams); });
@@ -310,12 +301,11 @@ function parseTriggerValue(text, mode) {
   return { start: parts[0].trim() };
 }
 
-// Trigger 输入变化：为空时通知所有 picker 清空
+// Trigger 输入变化：为空时清空当前 picker
 document.getElementById('picker-trigger').addEventListener('input', function () {
   if (!this.value) {
-    for (const key in pickers) {
-      if (pickers[key]) pickers[key].clear();
-    }
+    const picker = pickers[currentMode];
+    if (picker) picker.clear();
     lastValue = null;
     updateJSONDisplay(null);
     updateParamsDisplay();

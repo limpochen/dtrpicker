@@ -182,7 +182,6 @@ class HtmlRenderer {
     // ── 容器 ──
     this.container = document.createElement('div');
     this.container.className = 'dtrpicker-container';
-    this.container.style.zIndex = this.options.zIndex;
 
     // ── 面板 ──
     this.panel = document.createElement('div');
