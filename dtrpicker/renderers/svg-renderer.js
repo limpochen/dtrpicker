@@ -9,7 +9,7 @@
 import { getActiveScheme, HARDCODED } from '../config/colors.js';
 import { DIM } from '../config/dimensions.js';
 import { saturateColor, blendColors } from '../utils/color.js';
-import { dateEqual, dateStr, parseDate } from '../utils/date.js';
+import DateTime from '../utils/date.js';
 import DragController from '../services/drag-controller.js';
 
 import Cell from './cells/cell.js';
@@ -31,7 +31,7 @@ class SvgRenderer {
   constructor(picker) {
     this.picker = picker;
     this.options = picker.options;
-    this.state = picker.state;
+    this.value = picker.value;
     this._i18n = picker._i18n;
 
     // SVG DOM 元素
@@ -113,6 +113,25 @@ class SvgRenderer {
     /** @type {TimeWheel|null} */
     this.timeWheel = null;
 
+    // ── 从 PickerState 迁入的滚动/渲染状态 ──
+    /** @type {number} 当前垂直滚动偏移（px） */
+    this._translateY = 0;
+    /** @type {number} 滚轮目标偏移（平滑动画用） */
+    this._wheelTargetY = 0;
+    /** @type {number} 色系随机偏移 */
+    this._colorShift = Math.floor(Math.random() * 100);
+    /** @type {number|null} 当前可见年份 */
+    this._visibleYear = null;
+    /** @type {DateTime|null} 鼠标悬停日期 */
+    this._hoverDate = null;
+    /** @type {DateTime} 今日（构造时快照） */
+    this._today = DateTime.today();
+    /** @type {DateTime} startOfWeekZero 基准 */
+    this._startOfWeekZero = this._today.startOfWeek(this.options.firstDay === 0);
+
+    // 暴露给 picker，供 Cell 子类访问
+    this.picker._colorShift = this._colorShift;
+
     /** 移动端 CSS scale 因子（1 = 无缩放） */
     this._scaleFactor = 1;
   }
@@ -128,7 +147,7 @@ class SvgRenderer {
 
   /** @private */
   _calcTotalCols() {
-    return this.SIDEBAR_COLS + this.DATE_COLS + (this.state.isTimeEnabled() ? this.TIME_COLS : 0);
+    return this.SIDEBAR_COLS + this.DATE_COLS + (this.value.isTimeEnabled ? this.TIME_COLS : 0);
   }
 
   /** @private */
@@ -387,7 +406,7 @@ class SvgRenderer {
       }));
     }
 
-    if (this.state.isTimeEnabled()) {
+    if (this.value.isTimeEnabled) {
       headerCells.push(new HeaderCell({
         r: 0, c: this.TIME_COL_START, rs: 1, cs: 1, grid: grid, picker: this.picker,
         label: i18n.hour,
@@ -434,15 +453,15 @@ class SvgRenderer {
     const scheme = getActiveScheme(this.options);
     const schemeColors = scheme.colors;
     const schemeLen = schemeColors.length;
-    const cs = this.state._colorShift;
+    const cs = this._colorShift;
 
     const TOTAL_ROWS = this.VISIBLE_DATE_ROWS + this.BUFFER_ROWS * 2;
-    const startRow = Math.floor(-this.state.translateY / this.STEP_Y) - this.BUFFER_ROWS;
+    const startRow = Math.floor(-this._translateY / this.STEP_Y) - this.BUFFER_ROWS;
     this._lastRenderRow = startRow;
 
     this.calendarArea.clear();
     this.cellManager.clear();
-    this.calendarArea.setScroll(this.state.translateY);
+    this.calendarArea.setScroll(this._translateY);
 
         const grid = {
       CELL_W: this.CELL_W, CELL_H: this.CELL_H, GAP: this.GAP,
@@ -450,15 +469,15 @@ class SvgRenderer {
     };
 
     const isStartOrEnd = (d) => {
-      if (!this.state.rangeStart) return false;
-      if (dateEqual(d, this.state.rangeStart)) return 'start';
-      if (this.state.rangeEnd && dateEqual(d, this.state.rangeEnd)) return 'end';
+      if (!this.value.start) return false;
+      if (d.equals(this.value.start)) return 'start';
+      if (this.value.end && d.equals(this.value.end)) return 'end';
       return false;
     };
     const isInSelectedRange = (d) => {
-      if (!this.state.rangeStart || !this.state.rangeEnd) return false;
-      const t = d.getTime();
-      return t > this.state.rangeStart.getTime() && t < this.state.rangeEnd.getTime();
+      if (!this.value.start || !this.value.end) return false;
+      const t = d.timestamp;
+      return t > this.value.start.timestamp && t < this.value.end.timestamp;
     };
 
     // 纯月段
@@ -466,12 +485,12 @@ class SvgRenderer {
     for (let i = 0; i < TOTAL_ROWS; i++) {
       const rowNum = startRow + i;
       const rowStart = this._getDateOfWeekRow(rowNum);
-      const firstMonth = rowStart.getMonth();
+      const firstMonth = rowStart.month;
       let pure = true;
       for (let col = 1; col < this.DATE_COLS; col++) {
-        const d = new Date(rowStart);
-        d.setDate(rowStart.getDate() + col);
-        if (d.getMonth() !== firstMonth) { pure = false; break; }
+        const d = rowStart.clone();
+        d.setDate(rowStart.date + col);
+        if (d.month !== firstMonth) { pure = false; break; }
       }
       if (!pure) continue;
       const last = pureSegments[pureSegments.length - 1];
@@ -487,12 +506,12 @@ class SvgRenderer {
     for (let i = 0; i < TOTAL_ROWS; i++) {
       const rowNum = startRow + i;
       const rowStart = this._getDateOfWeekRow(rowNum);
-      const firstYear = rowStart.getFullYear();
+      const firstYear = rowStart.year;
       let pure = true;
       for (let col = 1; col < this.DATE_COLS; col++) {
-        const d = new Date(rowStart);
-        d.setDate(rowStart.getDate() + col);
-        if (d.getFullYear() !== firstYear) { pure = false; break; }
+        const d = rowStart.clone();
+        d.setDate(rowStart.date + col);
+        if (d.year !== firstYear) { pure = false; break; }
       }
       if (!pure) continue;
       const last = pureYears[pureYears.length - 1];
@@ -510,10 +529,10 @@ class SvgRenderer {
       const rowStart = this._getDateOfWeekRow(rowNum);
       const monthCounts = {}; const yearCounts = {};
       for (let col = 0; col < this.DATE_COLS; col++) {
-        const dayDate = new Date(rowStart);
-        dayDate.setDate(rowStart.getDate() + col);
-        const m = dayDate.getMonth();
-        const y = dayDate.getFullYear();
+        const dayDate = rowStart.clone();
+        dayDate.setDate(rowStart.date + col);
+        const m = dayDate.month;
+        const y = dayDate.year;
         monthCounts[m] = (monthCounts[m] || 0) + 1;
         yearCounts[y] = (yearCounts[y] || 0) + 1;
       }
@@ -588,9 +607,9 @@ class SvgRenderer {
       const rowStart = this._getDateOfWeekRow(rowNum);
       const monthCounts = {};
       for (let col = 0; col < this.DATE_COLS; col++) {
-        const d = new Date(rowStart);
-        d.setDate(rowStart.getDate() + col);
-        const m = d.getMonth();
+        const d = rowStart.clone();
+        d.setDate(rowStart.date + col);
+        const m = d.month;
         monthCounts[m] = (monthCounts[m] || 0) + 1;
       }
       const mKeys = Object.keys(monthCounts).map(Number);
@@ -626,14 +645,14 @@ class SvgRenderer {
       const rowNum = startRow + i;
       const rowStart = this._getDateOfWeekRow(rowNum);
       for (let col = 0; col < this.DATE_COLS; col++) {
-        const dayDate = new Date(rowStart);
-        dayDate.setDate(rowStart.getDate() + col);
+        const dayDate = rowStart.clone();
+        dayDate.setDate(rowStart.date + col);
         const svgCol = this.DATE_COL_START + col;
-        const dayNum = dayDate.getDate();
+        const dayNum = dayDate.date;
         const se = isStartOrEnd(dayDate);
         const inRange = isInSelectedRange(dayDate);
-        const isToday = dateEqual(dayDate, this.state.today);
-        const dateStrVal = dateStr(dayDate);
+        const isToday = dayDate.equals(this._today);
+        const dateStrVal = dayDate.toDateString();
 
                 const dc = new DayCell({
           r: rowNum, c: svgCol, rs: 1, cs: 1, grid: grid,
@@ -657,9 +676,9 @@ class SvgRenderer {
         const rowStart = this._getDateOfWeekRow(rowNum);
         const monthsInRow = new Set();
         for (let col = 0; col < this.DATE_COLS; col++) {
-          const d = new Date(rowStart);
-          d.setDate(rowStart.getDate() + col);
-          monthsInRow.add(d.getFullYear() + '-' + d.getMonth());
+          const d = rowStart.clone();
+          d.setDate(rowStart.date + col);
+          monthsInRow.add(d.year + '-' + d.month);
         }
         for (const key of monthsInRow) {
           if (!monthRanges[key]) {
@@ -769,8 +788,8 @@ class SvgRenderer {
     }
     if (currentYear === null) return;
 
-    const prevYear = this.state._visibleYear;
-    this.state._visibleYear = currentYear;
+    const prevYear = this._visibleYear;
+    this._visibleYear = currentYear;
 
     if (prevYear === null || prevYear === currentYear) {
       while (this.yearGroup.firstChild) this.yearGroup.removeChild(this.yearGroup.firstChild);
@@ -890,14 +909,14 @@ class SvgRenderer {
       stepY: this.STEP_Y,
       svgH: this.SVG_H,
       timeColStart: this.TIME_COL_START,
-      colorShift: this.state._colorShift,
+      colorShift: this._colorShift,
       options: this.options,
       dragController: this.dragController,
       dragSessionId: this.picker._instanceId + '-tw',
       getActiveScheme: getActiveScheme,
       saturateColor: saturateColor,
-      isTimeRange: () => this.state.isTimeRange(),
-      isTimeEnabled: () => this.state.isTimeEnabled(),
+      isTimeRange: () => this.value.isTimeRange,
+      isTimeEnabled: () => this.value.isTimeEnabled,
       onTimeChange: () => this.picker._fireChange(),
       i18n: this._i18n,
       svg: this.svg,
@@ -956,7 +975,7 @@ class SvgRenderer {
       if (this._isInDateArea(e)) {
         this._dragging = false;
         const rowDelta = Math.round((e.deltaY / 100) * this.options.wheelStep / this.STEP_Y);
-        this.state._wheelTargetY -= rowDelta * this.STEP_Y;
+        this._wheelTargetY -= rowDelta * this.STEP_Y;
         this._startWheelAnimation();
       }
     };
@@ -967,14 +986,14 @@ class SvgRenderer {
       if (this._dragMoved) return;
       const dateAttr = e.target.getAttribute('data-date');
       if (!dateAttr) return;
-      const d = parseDate(dateAttr);
+      const d = DateTime.parse(dateAttr);
       if (d) this.picker._handleDateClick(d);
     };
     this.calendarArea.container.addEventListener('click', this._onScrollGroupClick);
 
     this._onScrollGroupMouseLeave = () => {
-      this.state.hoverDate = null;
-      if (this.state.rangeStart && !this.state.rangeEnd) {
+      this._hoverDate = null;
+      if (this.value.start && !this.value.end) {
         this.renderCalendar();
       }
     };
@@ -997,15 +1016,15 @@ class SvgRenderer {
     this.cellManager.filter(function (c) { return c instanceof YearCell; }).forEach(function (c) { c.stopAnim(); });
     this._dragging = true;
     this._dragStartY = clientY;
-    this._dragStartTY = this.state.translateY;
+    this._dragStartTY = this._translateY;
     this._dragMoved = false;
   }
 
   _onDragMove(clientY) {
     if (!this._dragging) return;
     const delta = clientY - this._dragStartY;
-    this.state.translateY = this._dragStartTY + delta;
-    this.state._wheelTargetY = this.state.translateY;
+    this._translateY = this._dragStartTY + delta;
+    this._wheelTargetY = this._translateY;
     if (Math.abs(delta) > 5 && !this._dragMoved) {
       this._dragMoved = true;
       this._setHoverDisabled(true);
@@ -1016,7 +1035,7 @@ class SvgRenderer {
     }
     this._lastDragClientY = clientY;
     if (this._dragMoved) {
-      const row = Math.floor(-this.state.translateY / this.STEP_Y) - this.BUFFER_ROWS;
+      const row = Math.floor(-this._translateY / this.STEP_Y) - this.BUFFER_ROWS;
       if (Math.abs(row - this._lastRenderRow) > this.BUFFER_ROWS / 2) {
         this.renderCalendar();
       }
@@ -1030,16 +1049,16 @@ class SvgRenderer {
     this._lastDragClientY = undefined;
     if (this._dragMoved) {
       const momentum = Math.max(-300, Math.min(300, this._dragLastDY * 5));
-      const currentRow = Math.round(this.state.translateY / this.STEP_Y);
+      const currentRow = Math.round(this._translateY / this.STEP_Y);
       const targetRow = currentRow + Math.round(momentum / this.STEP_Y);
-      this.state._wheelTargetY = targetRow * this.STEP_Y;
+      this._wheelTargetY = targetRow * this.STEP_Y;
       this._startWheelAnimation();
     }
   }
 
   /** @private */
   _applyScrollTransform() {
-    this.calendarArea.setScroll(this.state.translateY);
+    this.calendarArea.setScroll(this._translateY);
   }
 
   /** @private */
@@ -1064,17 +1083,17 @@ class SvgRenderer {
     this._setHoverDisabled(true);
     const self = this;
     const step = () => {
-      const diff = self.state._wheelTargetY - self.state.translateY;
+      const diff = self._wheelTargetY - self._translateY;
       if (Math.abs(diff) < 0.5) {
-        self.state.translateY = self.state._wheelTargetY;
+        self._translateY = self._wheelTargetY;
         self.renderCalendar();
         self._wheelAnimId = null;
         self._setHoverDisabled(false);
         return;
       }
-      self.state.translateY += diff * 0.2;
+      self._translateY += diff * 0.2;
       self._applyScrollTransform();
-      const row = Math.floor(-self.state.translateY / self.STEP_Y) - self.BUFFER_ROWS;
+      const row = Math.floor(-self._translateY / self.STEP_Y) - self.BUFFER_ROWS;
       if (Math.abs(row - self._lastRenderRow) > self.BUFFER_ROWS / 2) {
         self.renderCalendar();
       }
@@ -1091,30 +1110,40 @@ class SvgRenderer {
   }
 
   // ════════════════════════════════════════════════════════════════
+  //  滚动控制
+  // ════════════════════════════════════════════════════════════════
+
+  /** 重置滚动偏移到起始位置。 */
+  resetScroll() {
+    this._translateY = 0;
+    this._wheelTargetY = 0;
+  }
+
+  // ════════════════════════════════════════════════════════════════
   //  导航
   // ════════════════════════════════════════════════════════════════
 
   goToDate(date) {
     const MS_PER_DAY = 86400000;
-    const targetDate = new Date(date.getFullYear(), date.getMonth(), date.getDate());
-    const daysDiff = Math.round((targetDate - this.state.startOfWeekZero) / MS_PER_DAY);
+    const targetDate = new DateTime(date.year, date.month, date.date);
+    const daysDiff = Math.round((targetDate.timestamp - this._startOfWeekZero.timestamp) / MS_PER_DAY);
     const targetRow = Math.floor(daysDiff / 7);
     const targetSVG_Y = this.GAP + this.STEP_Y + 3 * this.STEP_Y;
-    this.state._wheelTargetY = targetSVG_Y - targetRow * this.STEP_Y - this.GAP;
+    this._wheelTargetY = targetSVG_Y - targetRow * this.STEP_Y - this.GAP;
     this._startWheelAnimation();
   }
 
   /** @private */
   _goToToday() {
-    this.goToDate(this.state.today);
+    this.goToDate(this._today);
   }
 
   /** @private */
   _getDateOfWeekRow(rowOffset) {
     const MAX_WEEK_OFFSET = 52000;
     rowOffset = Math.max(-MAX_WEEK_OFFSET, Math.min(MAX_WEEK_OFFSET, rowOffset));
-    const d = new Date(this.state.startOfWeekZero.getTime());
-    d.setDate(d.getDate() + rowOffset * 7);
+    const d = this._startOfWeekZero.clone();
+    d.setDate(d.date + rowOffset * 7);
     return d;
   }
 
@@ -1149,7 +1178,7 @@ class SvgRenderer {
     /** @private */
   _probeCellAt(x, y) {
     const all = this.cellManager._all;
-    const sy = this.state.translateY;
+    const sy = this._translateY;
     for (let ci = 0; ci < all.length; ci++) {
       const cell = all[ci];
       if (x >= cell.x && x < cell.x + cell.w &&

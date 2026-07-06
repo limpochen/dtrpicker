@@ -1,4 +1,4 @@
-# DateTime 类化方案
+# DateTime 类化方案 ✅ 已完成
 
 将 `utils/date.js` 从纯函数模块重构为 `DateTime` 类，让日期选择器的核心领域对象以正式类形式存在。
 

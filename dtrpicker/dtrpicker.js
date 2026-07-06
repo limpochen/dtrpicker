@@ -2,13 +2,14 @@
  * dtrpicker.js — 日期范围选择器核心
  *
  * @file       日期范围选择器核心脚本
- * @version    3.3.0
+ * @version    3.5.0
  * @license    MIT
  */
 
 import { BASE_DEFAULTS } from './config/colors.js';
 import { getLocale } from './config/i18n.js';
-import PickerState from './state/pickerstate.js';
+import DateTime from './utils/date.js';
+import DateTimeValue from './utils/datetime-value.js';
 import SvgRenderer from './renderers/svg-renderer.js';
 
 // ==================== 默认配置 ====================
@@ -64,9 +65,9 @@ class dtrPicker {
     /** @type {Object} 合并后的完整配置 */
     this.options = Object.assign({}, DEFAULTS, options);
 
-    // ---- 数据状态 ----
-    /** @type {PickerState} 数据状态 */
-    this.state = new PickerState(this.options);
+    // ---- 选中值 ----
+    /** @type {DateTimeValue} */
+    this.value = new DateTimeValue(this.options.mode);
 
     // ---- 国际化 ----
     /** @type {Object} 当前语言包 */
@@ -79,6 +80,10 @@ class dtrPicker {
     // ---- 实例唯一标识 ----
     /** @type {string} */
     this._instanceId = 'dp-' + Math.random().toString(36).substring(2, 10);
+
+    // ---- 值变更回调列表 ----
+    /** @type {Function[]} */
+    this._changeCallbacks = [];
 
     // ---- 创建渲染器 ----
     /** @type {SvgRenderer} 渲染器实例 */
@@ -94,6 +99,7 @@ class dtrPicker {
     this.calendarArea = this._renderer.calendarArea;
     this._hoverDisabled = this._renderer._hoverDisabled;
     this.timeWheel = this._renderer.timeWheel;
+    this._colorShift = this._renderer._colorShift;
 
     // ---- 生命周期回调 ----
     /** @type {Function[]} 面板打开回调列表 */
@@ -149,8 +155,7 @@ class dtrPicker {
   open() {
     if (this.visible) return;
     this.visible = true;
-    this.state.translateY = 0;
-    this.state._wheelTargetY = 0;
+    this._renderer.resetScroll();
     this._positionDropdown();
     this._renderer.container.style.visibility = 'visible';
     this._renderer.container.style.opacity = '1';
@@ -159,10 +164,10 @@ class dtrPicker {
     this._renderer.renderCalendar();
     if (this._renderer.timeWheel) this._renderer.timeWheel.render();
     this._renderer._syncHeaderColors();
-    if (this.state.rangeStart) {
-      this._renderer.goToDate(this.state.rangeStart);
+    if (this.value.start) {
+      this._renderer.goToDate(this.value.start);
     } else {
-      this._renderer.goToDate(this.state.today);
+      this._renderer.goToDate(DateTime.today());
     }
     this._onOpenCallbacks.forEach(function (fn) { fn(); });
 
@@ -237,17 +242,16 @@ class dtrPicker {
    * @private
    */
   _handleDateClick(d) {
-    const result = this.state.handleDateClick(d);
+    const result = this.value.handleDateClick(d);
     if (result.changed) {
-      // 选择完成时同步时间并触发回调，选择中仅渲染
       if (result.action === 'confirmed') {
-        // 将 state 中可能已更新的时间值（如同天 23:59）同步到 TimeWheel，
-        // 防止后续 _fireChange → syncTimeFrom 覆盖掉 state 的更新
-        if (this.state.isTimeRange() && this._renderer.timeWheel) {
-          this._renderer.timeWheel.startHour = this.state.startHour;
-          this._renderer.timeWheel.startMinute = this.state.startMinute;
-          this._renderer.timeWheel.endHour = this.state.endHour;
-          this._renderer.timeWheel.endMinute = this.state.endMinute;
+        // 将 value 中可能已更新的时间值（如同天 23:59）同步到 TimeWheel，
+        // 防止后续 _fireChange → syncTimeFrom 覆盖掉 value 的更新
+        if (this.value.isTimeRange && this._renderer.timeWheel) {
+          this._renderer.timeWheel.startHour = this.value.start.hour;
+          this._renderer.timeWheel.startMinute = this.value.start.minute;
+          this._renderer.timeWheel.endHour = this.value.end.hour;
+          this._renderer.timeWheel.endMinute = this.value.end.minute;
           this._renderer.timeWheel.render();
         }
         this._fireChange({ source: 'user', action: 'confirmed' });
@@ -263,9 +267,11 @@ class dtrPicker {
    */
   _fireChange(meta) {
     if (this._renderer.timeWheel) {
-      this.state.syncTimeFrom(this._renderer.timeWheel);
+      this.value.syncTimeFrom(this._renderer.timeWheel);
     }
-    this.state._fireChange(meta);
+    const val = this.value.toJSON();
+    meta = meta || { source: 'user', action: 'confirmed' };
+    this._changeCallbacks.forEach(function (fn) { fn(val, meta); });
   }
 
   /**
@@ -274,27 +280,30 @@ class dtrPicker {
    * @returns {Object|null}
    */
   getValue(format) {
-    return this.state.getValue(format);
+    if (format === 'date') return this.value.toDate();
+    if (format === 'object') return this.value.toParts();
+    return this.value.toJSON();
   }
 
   setValue(range) {
     if (!range) return;
-    this.state.setValue(range, { source: 'programmatic', action: 'confirmed' });
-    // 将 state 的时分值同步到 TimeWheel，确保 programmatic setValue 后时轮显示正确
-    if (this._renderer.timeWheel && this.state.rangeStart) {
-      this._renderer.timeWheel.startHour = this.state.startHour;
-      this._renderer.timeWheel.startMinute = this.state.startMinute;
-      if (this.state.rangeEnd) {
-        this._renderer.timeWheel.endHour = this.state.endHour;
-        this._renderer.timeWheel.endMinute = this.state.endMinute;
+    this.value.setFrom(range);
+    // 将 value 的时分值同步到 TimeWheel，确保 programmatic setValue 后时轮显示正确
+    if (this._renderer.timeWheel && this.value.start) {
+      this._renderer.timeWheel.startHour = this.value.start.hour;
+      this._renderer.timeWheel.startMinute = this.value.start.minute;
+      if (this.value.end) {
+        this._renderer.timeWheel.endHour = this.value.end.hour;
+        this._renderer.timeWheel.endMinute = this.value.end.minute;
       }
     }
     this._renderer.renderCalendar();
     if (this._renderer.timeWheel) this._renderer.timeWheel.render();
+    this._fireChange({ source: 'programmatic', action: 'confirmed' });
   }
 
   clear(silent = false) {
-    this.state.clear(true);
+    this.value.clear();
     if (this._renderer.timeWheel) this._renderer.timeWheel.clear();
     this._renderer.renderCalendar();
     if (this._renderer.timeWheel) this._renderer.timeWheel.render();
@@ -302,7 +311,7 @@ class dtrPicker {
   }
 
   onChange(fn) {
-    this.state.onChange(fn);
+    if (typeof fn === 'function') this._changeCallbacks.push(fn);
   }
 
   /**
@@ -332,7 +341,7 @@ class dtrPicker {
     window.removeEventListener('resize', this._onWindowResize);
 
     this.trigger.style.borderColor = '';
-    this.state._changeCallbacks = [];
+    this._changeCallbacks = [];
   }
 }
 

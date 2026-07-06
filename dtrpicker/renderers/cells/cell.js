@@ -90,7 +90,7 @@ class Cell {
     const scheme = getActiveScheme(this.picker.options);
     const schemeColors = scheme.colors;
     const schemeLen = schemeColors.length;
-    const cs = this.picker.state._colorShift;
+    const cs = this.picker._colorShift;
     return schemeColors[(offset + cs) % schemeLen];
   }
 
