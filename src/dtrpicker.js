@@ -6,7 +6,7 @@
  * @license    MIT
  */
 
-import { BASE_DEFAULTS } from './config/colors.js';
+import { getActiveScheme } from './config/colors.js';
 import { getLocale } from './config/i18n.js';
 import DateTime from './utils/date.js';
 import DateTimeValue from './utils/datetime-value.js';
@@ -14,7 +14,7 @@ import SvgRenderer from './renderers/svg-renderer.js';
 
 // ==================== 默认配置 ====================
 
-const DEFAULTS = Object.assign({}, BASE_DEFAULTS, {
+const DEFAULTS = {
   firstDay: 0,
   locale: '',
   colorScheme: 'morandi',
@@ -22,7 +22,7 @@ const DEFAULTS = Object.assign({}, BASE_DEFAULTS, {
   wheelStep: 40,
   /** 年月显示方式：'watermark' 水印叠加 | 'column' 单独列显示 */
   yearMonthMode: 'watermark',
-});
+};
 
 // ==================== 主类 ====================
 
@@ -64,6 +64,8 @@ class dtrPicker {
     this.trigger = trigger;
     /** @type {Object} 合并后的完整配置 */
     this.options = Object.assign({}, DEFAULTS, options);
+    // 根据 colorScheme 注入对应色系的颜色值，用户显式传入的颜色优先
+    Object.assign(this.options, getActiveScheme(this.options).defaults, options);
 
     // ---- 选中值 ----
     /** @type {DateTimeValue} */

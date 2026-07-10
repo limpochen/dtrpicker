@@ -31,6 +31,9 @@ export const locales = {
       end: '结束',
       schemeMorandi: '莫兰迪',
       schemeNature: '自然',
+      schemeOcean: '海天蓝',
+      schemeForest: '森林绿',
+      schemeNight: '星夜黑',
       yearFirst: true,
     },
 
@@ -48,6 +51,9 @@ export const locales = {
       end: 'End',
       schemeMorandi: 'Morandi',
       schemeNature: 'Nature',
+      schemeOcean: 'Ocean',
+      schemeForest: 'Forest',
+      schemeNight: 'Starry Night',
     },
 
     /* ==============================
@@ -64,6 +70,9 @@ export const locales = {
       end: '結束',
       schemeMorandi: '莫蘭迪',
       schemeNature: '自然',
+      schemeOcean: '海天藍',
+      schemeForest: '森林綠',
+      schemeNight: '星夜黑',
       yearFirst: true,
     },
 
@@ -81,6 +90,9 @@ export const locales = {
       end: '終了',
       schemeMorandi: 'モランディ',
       schemeNature: 'ナチュラル',
+      schemeOcean: 'オーシャンブルー',
+      schemeForest: 'フォレストグリーン',
+      schemeNight: 'スターリーナイト',
       yearFirst: true,
     },
 
@@ -98,6 +110,9 @@ export const locales = {
       end: '종료',
       schemeMorandi: '모란디',
       schemeNature: '내추럴',
+      schemeOcean: '오션 블루',
+      schemeForest: '포레스트 그린',
+      schemeNight: '스타리 나이트',
       yearFirst: true,
     },
 
@@ -115,6 +130,9 @@ export const locales = {
       end: 'Конец',
       schemeMorandi: 'Моранди',
       schemeNature: 'Натуральный',
+      schemeOcean: 'Океан',
+      schemeForest: 'Лес',
+      schemeNight: 'Звёздная ночь',
     },
 
     /* ==============================
@@ -131,6 +149,9 @@ export const locales = {
       end: 'Fin',
       schemeMorandi: 'Morandi',
       schemeNature: 'Naturel',
+      schemeOcean: 'Océan',
+      schemeForest: 'Forêt',
+      schemeNight: 'Nuit étoilée',
     },
 
     /* ==============================
@@ -147,6 +168,9 @@ export const locales = {
       end: 'Ende',
       schemeMorandi: 'Morandi',
       schemeNature: 'Natur',
+      schemeOcean: 'Ozean',
+      schemeForest: 'Wald',
+      schemeNight: 'Sternennacht',
     },
 
     /* ==============================
@@ -163,6 +187,9 @@ export const locales = {
       end: 'Fin',
       schemeMorandi: 'Morandi',
       schemeNature: 'Natural',
+      schemeOcean: 'Océano',
+      schemeForest: 'Bosque',
+      schemeNight: 'Noche estrellada',
     },
 
     /* ==============================
@@ -179,6 +206,9 @@ export const locales = {
       end: 'Fim',
       schemeMorandi: 'Morandi',
       schemeNature: 'Natural',
+      schemeOcean: 'Oceano',
+      schemeForest: 'Floresta',
+      schemeNight: 'Noite estrelada',
     },
 
     /* ==============================
@@ -195,6 +225,9 @@ export const locales = {
       end: 'Fine',
       schemeMorandi: 'Morandi',
       schemeNature: 'Naturale',
+      schemeOcean: 'Oceano',
+      schemeForest: 'Foresta',
+      schemeNight: 'Notte stellata',
     },
 
     /* ==============================
@@ -211,6 +244,9 @@ export const locales = {
       end: 'نهاية',
       schemeMorandi: 'موراندي',
       schemeNature: 'طبيعي',
+      schemeOcean: 'محيط',
+      schemeForest: 'غابة',
+      schemeNight: 'ليلة مرصعة بالنجوم',
     },
 
     /* ==============================
@@ -227,6 +263,9 @@ export const locales = {
       end: 'สิ้นสุด',
       schemeMorandi: 'โมรันดี',
       schemeNature: 'ธรรมชาติ',
+      schemeOcean: 'ทะเลฟ้า',
+      schemeForest: 'ป่าไม้',
+      schemeNight: 'ราตรีประดับดาว',
     },
 
     /* ==============================
@@ -243,6 +282,9 @@ export const locales = {
       end: 'Einde',
       schemeMorandi: 'Morandi',
       schemeNature: 'Natuur',
+      schemeOcean: 'Oceaan',
+      schemeForest: 'Bos',
+      schemeNight: 'Sterrennacht',
     },
 
     /* ==============================
@@ -259,6 +301,9 @@ export const locales = {
       end: 'Koniec',
       schemeMorandi: 'Morandi',
       schemeNature: 'Naturalny',
+      schemeOcean: 'Ocean',
+      schemeForest: 'Las',
+      schemeNight: 'Gwieździsta noc',
     },
 
     /* ==============================
@@ -275,6 +320,9 @@ export const locales = {
       end: 'Bitiş',
       schemeMorandi: 'Morandi',
       schemeNature: 'Doğal',
+      schemeOcean: 'Okyanus',
+      schemeForest: 'Orman',
+      schemeNight: 'Yıldızlı gece',
     },
 
     /* ==============================
@@ -291,6 +339,9 @@ export const locales = {
       end: 'Kết thúc',
       schemeMorandi: 'Morandi',
       schemeNature: 'Tự nhiên',
+      schemeOcean: 'Đại dương',
+      schemeForest: 'Rừng xanh',
+      schemeNight: 'Đêm đầy sao',
     },
 
     /* ==============================
@@ -307,6 +358,9 @@ export const locales = {
       end: 'Selesai',
       schemeMorandi: 'Morandi',
       schemeNature: 'Alami',
+      schemeOcean: 'Lautan',
+      schemeForest: 'Hutan',
+      schemeNight: 'Malam berbintang',
     },
   };
 

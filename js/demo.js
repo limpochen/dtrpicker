@@ -3,10 +3,10 @@ window.__esModuleLoaded = true;
 let dtrPicker = null;
 let currentPickerSource = '';
 const PICKER_SOURCES = {
-  dev: '../dtrpicker/dtrpicker.js',
+  dev: '../src/dtrpicker.js',
   bundle: '../dist/dtrpicker.js',
 };
-import { locales } from '../dtrpicker/config/i18n.js';
+import { locales } from '../src/config/i18n.js';
 
 // ================================================================
 //  Demo page i18n dictionary
@@ -25,6 +25,9 @@ const demoI18n = {
     yearMonthColumn: '列',
     schemeMorandi: '莫兰迪',
     schemeNature: '自然',
+    schemeOcean: '海天蓝',
+    schemeForest: '森林绿',
+    schemeNight: '星夜黑',
     firstDayLabel: '周起始日',
     sun: '周日',
     mon: '周一',
@@ -53,6 +56,9 @@ const demoI18n = {
     yearMonthColumn: 'Column',
     schemeMorandi: 'Morandi',
     schemeNature: 'Nature',
+    schemeOcean: 'Ocean',
+    schemeForest: 'Forest',
+    schemeNight: 'Starry Night',
     firstDayLabel: 'Week starts',
     sun: 'Sun',
     mon: 'Mon',
@@ -171,7 +177,7 @@ function updateParamsDisplay() {
 
 function generateCodeSnippet(params) {
   const source = document.getElementById('source-select')?.value || 'dev';
-  const importPath = source === 'bundle' ? 'dist/dtrpicker.js' : 'dtrpicker/dtrpicker.js';
+  const importPath = source === 'bundle' ? 'dist/dtrpicker.js' : 'src/dtrpicker.js';
   const opts = [];
   const currentLocale = document.getElementById('lang-select').value;
   opts.push('  mode: "' + params.mode + '"');

@@ -12,6 +12,7 @@
  * @extends Cell
  */
 import Cell from './cell.js';
+import { hexToRgba } from '../../utils/color.js';
 
 class TimeCell extends Cell {
   /**
@@ -148,7 +149,7 @@ class TimeCell extends Cell {
           if (self.picker.isDragActive && self.picker.isDragActive()) return;
           if (info.isCur) return;
           info._hovered = true;
-          r.style.fill = 'rgba(47,84,235,0.07)';
+          r.style.fill = hexToRgba(self.picker.options.selectedColor, 0.07);
         });
         r.addEventListener('mouseleave', function () {
           info._hovered = false;
@@ -168,7 +169,7 @@ class TimeCell extends Cell {
     if (!row || !row._hovered) return;
     if (row.isCur) return;
     if (this.picker.isDragActive && this.picker.isDragActive()) return;
-    row.hitRect.style.fill = 'rgba(47,84,235,0.07)';
+    row.hitRect.style.fill = hexToRgba(this.picker.options.selectedColor, 0.07);
   }
 
   /** @private 仅更新已有 DOM 的文本内容和样式 */

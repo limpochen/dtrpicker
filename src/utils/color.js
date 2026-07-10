@@ -9,6 +9,19 @@
  */
 
 /**
+ * 将十六进制颜色转换为 rgba 字符串。
+ * @param {string} hex - 十六进制颜色（如 '#2f54eb'）
+ * @param {number} alpha - 透明度（0-1）
+ * @returns {string} rgba 字符串
+ */
+export function hexToRgba(hex, alpha) {
+  const r = parseInt(hex.slice(1, 3), 16);
+  const g = parseInt(hex.slice(3, 5), 16);
+  const b = parseInt(hex.slice(5, 7), 16);
+  return 'rgba(' + r + ',' + g + ',' + b + ',' + alpha + ')';
+}
+
+/**
  * 按比例混合两个十六进制颜色。
  * @param {string} c1 - 颜色 1（十六进制字符串）
  * @param {string} c2 - 颜色 2

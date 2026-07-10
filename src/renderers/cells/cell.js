@@ -4,6 +4,7 @@
  * 定位基于行列号 (row, col)，不存绝对像素。
  */
 import { getActiveScheme } from '../../config/colors.js';
+import { hexToRgba } from '../../utils/color.js';
 
 class Cell {
   /**
@@ -64,8 +65,8 @@ class Cell {
   get textWeight() { return '500'; }
   /** @returns {string} 默认文字颜色 */
   get textColor()  { return this.picker.options.textColor; }
-  /** @returns {string} 默认 hover 高亮色 */
-  get hoverColor() { return 'rgba(47,84,235,0.07)'; }
+  /** @returns {string} 默认 hover 高亮色（基于选中色，7% 透明度） */
+  get hoverColor() { return hexToRgba(this.picker.options.selectedColor, 0.07); }
 
   /**
    * 设置/清除此格子的 hover 高亮状态。

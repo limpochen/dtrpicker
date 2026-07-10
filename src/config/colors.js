@@ -129,9 +129,100 @@ export const SCHEMES = {
     },
 
     // ────────────────────────────────────────────────────────────────
-    //  【预留】可在此处添加新色系
-    //  如：ocean（海洋）、sunset（日落）、forest（森林）
+    //  海天蓝色系  —  清亮明快、天空与海洋意象
     // ────────────────────────────────────────────────────────────────
+    ocean: {
+      /** 色系显示名称 */
+      name: 'Ocean',
+
+      /**
+       * 月份背景色轮换数组。
+       * @type {string[]}
+       */
+      colors: [
+        '#e6f0fa',   // [0]  淡天蓝
+        '#e0f2fe',   // [1]  淡海蓝
+        '#f0f9ff',   // [2]  极淡蓝
+        '#e8f4fd',   // [3]  淡青蓝
+      ],
+
+      defaults: {
+        selectedColor: '#1a73e8',
+        gridColor: '#c8d6e5',
+        cellColor: '#ffffff',
+        textColor: '#1a2a3a',
+        textColorDisabled: '#d0d7de',
+        textColorWeekend: '#e8604c',
+        selectedTextColor: '#ffffff',
+        textColorSubLabel: '#5a6a7a',
+        textColorWeekendTitle: '#e8604c',
+        todayBarColor: '#0d7377',
+      },
+    },
+
+    // ────────────────────────────────────────────────────────────────
+    //  森林绿色系  —  自然沉静、草木葱茏意象
+    // ────────────────────────────────────────────────────────────────
+    forest: {
+      /** 色系显示名称 */
+      name: 'Forest',
+
+      /**
+       * 月份背景色轮换数组。
+       * @type {string[]}
+       */
+      colors: [
+        '#e8f5e9',   // [0]  浅草绿
+        '#f1f8e9',   // [1]  浅芽绿
+        '#e0f2f1',   // [2]  浅松绿
+        '#f0f4ec',   // [3]  浅苔绿
+      ],
+
+      defaults: {
+        selectedColor: '#2e7d32',
+        gridColor: '#c8d6c0',
+        cellColor: '#ffffff',
+        textColor: '#1a2e1a',
+        textColorDisabled: '#d0d8d0',
+        textColorWeekend: '#d9534f',
+        selectedTextColor: '#ffffff',
+        textColorSubLabel: '#4a6a4a',
+        textColorWeekendTitle: '#d9534f',
+        todayBarColor: '#1b5e20',
+      },
+    },
+
+    // ────────────────────────────────────────────────────────────────
+    //  星夜黑色系  —  深邃夜空、星光点缀
+    // ────────────────────────────────────────────────────────────────
+    night: {
+      /** 色系显示名称 */
+      name: 'Starry Night',
+
+      /**
+       * 月份背景色轮换数组。
+       * @type {string[]}
+       */
+      colors: [
+        '#1a1a2e',   // [0]  深蓝黑
+        '#16213e',   // [1]  深海蓝
+        '#1c1c3a',   // [2]  深紫黑
+        '#0f3460',   // [3]  深夜蓝
+      ],
+
+      defaults: {
+        selectedColor: '#ffd700',
+        gridColor: '#2a2a3e',
+        cellColor: '#222238',
+        textColor: '#e0e0e8',
+        textColorDisabled: '#3a3a4e',
+        textColorWeekend: '#ff6b6b',
+        selectedTextColor: '#1a1a2e',
+        textColorSubLabel: '#a0a0b8',
+        textColorWeekendTitle: '#ff6b6b',
+        todayBarColor: '#ffd700',
+      },
+    },
   };
 
   // ================================================================
@@ -155,16 +246,6 @@ export const SCHEMES = {
   export function getActiveScheme(options) {
     return SCHEMES[options.colorScheme] || SCHEMES.morandi;
   }
-
-  // ================================================================
-  //  共享默认色板（供 dtrpicker.js DEFAULTS 引用，不包含颜色字面量）
-  // ================================================================
-
-  /**
-   * 共享基础默认色板，与 morandi 色系的 defaults 值一致。
-   * @const {Object<string, string>}
-   */
-  export const BASE_DEFAULTS = SCHEMES.morandi.defaults;
 
   // ================================================================
   //  渲染硬编码色（JS 渲染代码直接引用的字面颜色值）

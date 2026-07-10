@@ -4,7 +4,7 @@ const esbuild = require('esbuild');
 
 const root = __dirname;
 const outdir = path.join(root, 'dist');
-const jsEntry = path.join(root, 'dtrpicker', 'dtrpicker.js');
+const jsEntry = path.join(root, 'src', 'dtrpicker.js');
 const apiSpecSource = path.join(root, 'docs', 'api-spec.md');
 const docsDir = path.join(outdir, 'docs');
 const apiSpecDest = path.join(docsDir, 'api-spec.md');
