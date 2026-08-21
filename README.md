@@ -2,11 +2,8 @@
 
 > 一个流式日期/时间范围选择器组件，基于 SVG 渲染，专注于轻量、流畅与可定制。
 
----
-
-## 概述
-
-dtrPicker 是一个纯前端日期选择器，采用 **SVG 渲染引擎**，支持日期、日期时间、日期范围和日期时间范围四种选择模式。组件以模块化架构设计，核心依赖仅 esbuild 用于构建打包，无其他运行时依赖。
+<!-- 截图：运行 `node server.js` 后打开 http://localhost:16800/，截取选择器弹出界面，保存为 docs/screenshots/picker.png -->
+![选择器弹出界面](docs/screenshots/picker.png)
 
 ---
 
@@ -19,43 +16,6 @@ dtrPicker 是一个纯前端日期选择器，采用 **SVG 渲染引擎**，支�
 - **多色系** — 莫兰迪 / 自然 / 海天蓝 / 森林绿 / 星夜黑，支持自定义颜色覆盖
 - **TypeScript 支持** — 完整类型声明
 - **零运行时依赖** — 仅构建时依赖 esbuild
-
----
-
-## 项目结构
-
-```
-dtrpicker/
-├── src/                      # 核心源码
-│   ├── dtrpicker.js          # 主类与入口
-│   ├── dtrpicker.d.ts        # TypeScript 类型声明
-│   ├── index.js              # 再导出入口
-│   ├── config/               # 配置模块
-│   │   ├── colors.js         # 色彩方案定义
-│   │   ├── dimensions.js     # 尺寸与布局常量
-│   │   └── i18n.js           # 国际化语言包
-│   ├── renderers/            # 渲染层
-│   │   ├── svg-renderer.js   # SVG 渲染器
-│   │   ├── drawing-area.js   # 绘图区域管理
-│   │   ├── cell-manager.js   # 单元格生命周期
-│   │   └── cells/            # 各类单元格实现
-│   ├── services/             # 服务层
-│   │   └── drag-controller.js # 拖拽事件统一调度
-│   └── utils/                # 工具函数
-│       ├── color.js          # 颜色处理
-│       ├── date.js           # 日期计算
-│       └── datetime-value.js # 日期时间值解析
-├── docs/
-│   └── api-spec.md           # API 规范文档
-├── css/
-│   └── demo.css              # 演示页样式
-├── js/
-│   └── demo.js               # 演示页逻辑
-├── index.html                # 演示入口
-├── server.js                 # 本地开发 HTTP 服务
-├── build.js                  # esbuild 打包脚本
-└── package.json
-```
 
 ---
 
@@ -74,7 +34,42 @@ picker.onChange((value, meta) => {
 });
 ```
 
-详细 API 参考请见 [`docs/api-spec.md`](docs/api-spec.md)。
+> 详细 API 参考请见 [`docs/api-spec.md`](docs/api-spec.md)。
+
+---
+
+## API 概览
+
+### 构造
+
+```js
+const picker = new dtrPicker(trigger, options);
+```
+
+| 参数 | 说明 |
+| --- | --- |
+| `trigger` | 触发器元素或其 CSS 选择器，作为面板锚点与点击开关 |
+| `options.mode` | **必填**。`'date'` / `'dateTime'` / `'dateRange'` / `'dateTimeRange'` |
+| `options.locale` | BCP 47 语言标签（`'zh-CN'` / `'en-US'` / `'ja-JP'`），空串自动检测浏览器语言 |
+| `options.firstDay` | 周起始日：`0`=周日，`1`=周一 |
+| `options.colorScheme` | 色系：`'morandi'` / `'nature'` / `'ocean'` / `'forest'` / `'night'` |
+| 颜色选项 | `selectedColor`、`gridColor`、`textColor` 等，可逐项覆盖 |
+
+### 方法
+
+| 方法 | 说明 |
+| --- | --- |
+| `open()` / `close()` / `toggle()` | 打开 / 关闭 / 切换面板 |
+| `setValue(value)` | 程序化设置选中值（`{start, end}`） |
+| `getValue([format])` | 读取值：`'string'`（默认）/ `'date'` / `'object'` |
+| `clear([silent])` | 清除选中值，`silent=true` 时不触发回调 |
+| `onChange(cb)` | 监听值变更，回调 `(value, meta)` |
+| `onOpen(cb)` / `onClose(cb)` | 面板生命周期回调 |
+| `destroy()` | 销毁实例并清理 DOM |
+
+### 多实例
+
+`mode` 在构造后不可更改。同一页面需要不同模式 / 语言时，创建多个实例即可，支持同一 trigger 绑定多个实例。
 
 ---
 
