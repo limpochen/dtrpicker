@@ -41,7 +41,9 @@ class TimeCell extends Cell {
     this._rowGroups = [];
   }
 
+  /** 行高：默认继承基类 Cell 的 rs × CELL_H 高度（时分列单列跨 rs 行） */
   get h() { return super.h; }
+  /** 列宽：固定单列宽 CELL_W（时分列每列一格，不跨列） */
   get w() { return this.g.CELL_W; }
 
   /** @private 计算行布局参数 */
@@ -56,7 +58,11 @@ class TimeCell extends Cell {
     return { rowCount, rowH, baseY, centerIdx };
   }
 
-  /** @private 根据偏移量获取环绕后的值 */
+  /**
+   * @private 根据偏移量获取环绕后的值。
+   * 注：仅单次 ±range 回绕，适用于 offset 较小（可见行数级）的场景；
+   * 若 currentValue 初始越界或 offset 过大可能仍越界（当前调用方保证合法，保留）。
+   */
   _wrapVal(offset) {
     const range = this.max - this.min + 1;
     let val = this.currentValue + offset;

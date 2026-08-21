@@ -122,6 +122,7 @@ body {
   color: #595959;
   font-weight: 500;
   text-align: right;
+  padding: 6px 0;
 }
 .radio-label {
   width: auto !important;

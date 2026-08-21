@@ -6,7 +6,7 @@
  * 未匹配时自动回退到英语（en-US）。
  *
  * @file       国际化语言包
- * @version    1.5.0
+ * @version    2.1.10
  * @license    MIT
  */
 
@@ -231,25 +231,6 @@ export const locales = {
     },
 
     /* ==============================
-       阿拉伯文 (Arabic)
-       ============================== */
-    'ar-SA': {
-      weekdays: ['الأحد', 'الإثنين', 'الثلاثاء', 'الأربعاء', 'الخميس', 'الجمعة', 'السبت'],
-      months: ['يناير', 'فبراير', 'مارس', 'أبريل', 'مايو', 'يونيو', 'يوليو', 'أغسطس', 'سبتمبر', 'أكتوبر', 'نوفمبر', 'ديسمبر'],
-      year: 'سنة',
-      month: 'شهر',
-      hour: 'ساعة',
-      minute: 'دقيقة',
-      start: 'بداية',
-      end: 'نهاية',
-      schemeMorandi: 'موراندي',
-      schemeNature: 'طبيعي',
-      schemeOcean: 'محيط',
-      schemeForest: 'غابة',
-      schemeNight: 'ليلة مرصعة بالنجوم',
-    },
-
-    /* ==============================
        泰文 (Thai)
        ============================== */
     'th-TH': {
@@ -257,7 +238,7 @@ export const locales = {
       months: ['ม.ค.', 'ก.พ.', 'มี.ค.', 'เม.ย.', 'พ.ค.', 'มิ.ย.', 'ก.ค.', 'ส.ค.', 'ก.ย.', 'ต.ค.', 'พ.ย.', 'ธ.ค.'],
       year: 'ปี',
       month: 'เดือน',
-      hour: 'น.',
+      hour: 'ชม.',
       minute: 'น.',
       start: 'เริ่ม',
       end: 'สิ้นสุด',
@@ -389,6 +370,6 @@ export function getLocale(locale) {
     for (const key of Object.keys(locales)) {
       if (key.startsWith(lang)) return locales[key];
     }
-    // 终极回退
+    // 终极回退（用户确认保留的预期兜底）
     return locales[DEFAULT_LOCALE];
   }

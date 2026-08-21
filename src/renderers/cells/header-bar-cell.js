@@ -41,6 +41,7 @@ class HeaderBarCell extends Cell {
     if (!cells || cells.length === 0) return [];
     const fallback = this.picker.options.cellColor;
     const arr = cells.map(function (c, idx) {
+      // 取色值，若未注入则使用 fallback（必要防御，保留；缺失色用格子底色避免渐变 stop 为 null）
       return { x: c.x, color: this._hColors[idx] || fallback };
     }, this);
     arr.sort(function (a, b) { return a.x - b.x; });
@@ -85,14 +86,14 @@ class HeaderBarCell extends Cell {
 
     sortedColors.forEach(function (color, idx) {
       const pct = (idx / (sortedColors.length - 1)) * 100;
-      const stop = document.createElementNS('http://www.w3.org/2000/svg', 'stop');
+      const stop = document.createElementNS(this.g.svgNS, 'stop');
       stop.setAttribute('offset', pct + '%');
       stop.setAttribute('stop-color', color);
       grad.appendChild(stop);
     }, this);
 
     const lastColor = sortedColors[sortedColors.length - 1];
-    const endStop = document.createElementNS('http://www.w3.org/2000/svg', 'stop');
+    const endStop = document.createElementNS(this.g.svgNS, 'stop');
     endStop.setAttribute('offset', '100%');
     endStop.setAttribute('stop-color', lastColor);
     grad.appendChild(endStop);

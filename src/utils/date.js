@@ -5,7 +5,7 @@
  * 提供只读属性、原地修改方法、查询比较、格式化和静态工厂。
  *
  * @file       日期核心类
- * @version    2.0.0
+ * @version    2.1.10
  * @license    MIT
  */
 
@@ -35,6 +35,7 @@ class DateTime {
       } else if (v instanceof Date) {
         this._d = new Date(v);
       } else if (typeof v === 'string') {
+        // 有意兜底：parse 仅认标准格式，回退 new Date(v) 兼容其可解析的其他格式（宽松解析，保留）
         const parsed = DateTime.parse(v);
         this._d = parsed ? new Date(parsed._d) : new Date(v);
       } else {
@@ -252,14 +253,19 @@ class DateTime {
 
   /**
    * 从字符串解析 DateTime。
-   * 优先解析 YYYY-MM-DD 格式（按本地日期），避免 UTC 时区偏移。
+   * 支持 YYYY-MM-DD 与 YYYY-MM-DD HH:mm[:ss]，均按本地时间构造，
+   * 避免 UTC 时区偏移与 Safari 对带空格时间字符串解析失败的问题。
    * @param {string|null} s
    * @returns {DateTime|null}
    */
   static parse(s) {
     if (!s) return null;
-    const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(s);
+    // YYYY-MM-DD（按本地时间）
+    let m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(s);
     if (m) return new DateTime(+m[1], +m[2] - 1, +m[3]);
+    // YYYY-MM-DD HH:mm[:ss]（按本地时间；规避 Safari 解析差异）
+    m = /^(\d{4})-(\d{2})-(\d{2}) (\d{2}):(\d{2})(?::(\d{2}))?$/.exec(s);
+    if (m) return new DateTime(+m[1], +m[2] - 1, +m[3], +m[4], +m[5], m[6] ? +m[6] : 0);
     const d = new Date(s);
     return isNaN(d.getTime()) ? null : new DateTime(d);
   }

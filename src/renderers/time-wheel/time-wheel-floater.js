@@ -5,7 +5,7 @@
  * 定位在 SVG 右上区域，不依赖外部 DOM。
  *
  * @file       时间滚轮放大镜浮层
- * @version    1.0.0
+ * @version    2.1.10
  * @license    MIT
  */
 

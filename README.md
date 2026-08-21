@@ -16,7 +16,7 @@ dtrPicker 是一个纯前端日期选择器，采用 **SVG 渲染引擎**，支�
 - **SVG 渲染** — 像素级精确控制，CSS 隔离，不依赖外部 UI 框架
 - **虚拟滚动** — 日历面板流畅翻页，支持滚轮与拖拽浏览
 - **国际化** — 内置多语言包（简体中文、英语、日语等），BCP 47 语言标签
-- **双色系** — 莫兰迪 / 自然，支持自定义颜色覆盖
+- **多色系** — 莫兰迪 / 自然 / 海天蓝 / 森林绿 / 星夜黑，支持自定义颜色覆盖
 - **TypeScript 支持** — 完整类型声明
 - **零运行时依赖** — 仅构建时依赖 esbuild
 
@@ -26,7 +26,7 @@ dtrPicker 是一个纯前端日期选择器，采用 **SVG 渲染引擎**，支�
 
 ```
 dtrpicker/
-├── dtrpicker/                # 核心源码
+├── src/                      # 核心源码
 │   ├── dtrpicker.js          # 主类与入口
 │   ├── dtrpicker.d.ts        # TypeScript 类型声明
 │   ├── index.js              # 再导出入口
@@ -62,11 +62,10 @@ dtrpicker/
 ## 快速开始
 
 ```js
-import dtrPicker from 'dtrpicker/dtrpicker.js';
+import dtrPicker from 'dist/dtrpicker.js';
 
 const picker = new dtrPicker('#my-input', {
   mode: 'dateRange',
-  zIndex: 1000,
 });
 
 picker.onChange((value, meta) => {

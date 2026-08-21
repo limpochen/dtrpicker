@@ -28,7 +28,7 @@
  * - textColorSubLabel：被年/月表头、侧栏月份标签、年份动画多路径使用。
  *
  * @file       统一色彩配置
- * @version    1.6.0
+ * @version    2.1.10
  * @license    MIT
  */
 
@@ -235,6 +235,7 @@ export const SCHEMES = {
    * @returns {Object} 该色系的完整色板对象
    */
   export function getScheme(scheme) {
+    // 有意兜底：非法/缺失色系回退 morandi（用户确认保留，勿删）
     return SCHEMES[scheme] || SCHEMES.morandi;
   }
 
@@ -244,6 +245,7 @@ export const SCHEMES = {
    * @returns {Object} 色系配置对象
    */
   export function getActiveScheme(options) {
+    // 有意兜底：非法/缺失色系回退 morandi（用户确认保留，勿删）
     return SCHEMES[options.colorScheme] || SCHEMES.morandi;
   }
 

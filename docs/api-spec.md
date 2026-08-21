@@ -1,6 +1,6 @@
 # dtrPicker — API 规范
 
-> 版本: 3.3.0
+> 版本: 2.1.10
 > 本文件定义了 `dtrPicker` 作为可嵌入部件的对外接口。
 > **核心原则**: 组件不关心 trigger 的样式、布局、placeholder 或表单集成——那些是调用方的职责。
 
@@ -11,17 +11,10 @@
 ### ESM（推荐）
 
 ```js
-import dtrPicker from 'dtrpicker/dtrpicker.js';
+import dtrPicker from 'dist/dtrpicker.js';
 ```
 
-### UMD / IIFE（传统页面）
-
-```html
-<script src="dist/dtrpicker.umd.js"></script>
-<script>
-  const picker = new dtrPicker('#my-input', { renderMode: 'svg' });
-</script>
-```
+> 当前仅提供 ESM 构建（`dist/dtrpicker.js`，由 `build.js` 生成），未提供 UMD。
 
 ---
 
@@ -35,17 +28,15 @@ const picker = new dtrPicker(trigger, options);
 | --- | --- | --- | --- | --- |
 | `trigger` | `HTMLElement \| string` | — | ✅ | 触发器元素或其 CSS 选择器。组件用它作为面板定位锚点及点击切换面板。 |
 | `options` | `Object` | `{}` | — | 配置对象 |
-| `options.renderMode` | `'svg'` | `'svg'` | — | 渲染模式（'html' 已移除） |
 | `options.mode` | `string` | — | ✅ | 选择模式：`'date'` / `'dateTime'` / `'dateRange'` / `'dateTimeRange'` |
 | `options.yearMonthMode` | `'watermark' \| 'column'` | `'watermark'` | — | 年月显示方式：`'watermark'` 水印叠加 / `'column'` 单独列 |
-| `options.locale` | `string` | `'en-US'` | — | BCP 47 语言标签：`'zh-CN'` `'en-US'` `'ja-JP'` 等 |
+| `options.locale` | `string` | `''` | — | BCP 47 语言标签：`'zh-CN'` `'en-US'` `'ja-JP'` 等。空串＝自动检测浏览器语言 |
 | `options.firstDay` | `0 \| 1` | `0` | — | 周起始日：`0`=周日, `1`=周一 |
 | `options.colorScheme` | `string` | `'morandi'` | — | 色系：`'morandi'`(莫兰迪) / `'nature'`(自然) |
-| `options.zIndex` | `number` | — | ✅ | 面板 z-index |
 | `options.todayBarHeight` | `number` | `6` | — | 今日标记条高度（px） |
 | `options.wheelStep` | `number` | `40` | — | 滚轮翻页步长系数 |
 
-> ⚠️ `renderMode`、`mode`、`zIndex`、`yearMonthMode`、`locale`、`firstDay`、`colorScheme` **构造后不可更改**。
+> ⚠️ `mode`、`yearMonthMode`、`locale`、`firstDay`、`colorScheme` **构造后不可更改**。
 
 颜色选项：
 
@@ -59,7 +50,7 @@ const picker = new dtrPicker(trigger, options);
 | `textColorDisabled` | `'#d9d9d9'` | 禁用日期文字色 |
 | `textColorSubLabel` | `'#595959'` | 次要标签色 |
 | `textColorWeekend` | `'#f04040'` | 周末日期文字色 |
-| `textColorWeekendTitle` | `'#f08080'` | 周末日期文字色 |
+| `textColorWeekendTitle` | `'#f08080'` | 周末表头文字色 |
 | `todayBarColor` | `'#8c00ff'` | 今日标记条颜色 |
 
 ---
@@ -98,7 +89,7 @@ picker.setValue({ start: "2026-06-01 08:30", end: "2026-06-15 17:00" });
 ```
 
 - `value` 为 ValueObject（见 §3）
-- 自动校验格式，非法日期静默忽略
+- 自动校验格式，非法日期静默置空
 - 触发 `onChange` 回调（`meta.source = 'programmatic'`）
 
 > ⚠️ **组件不跨边界读取 trigger 显示文本**。`setValue()` 接受的是 ValueObject（`{start, end}`），不是 trigger 输入框的原始字符串。
@@ -144,7 +135,7 @@ picker.clear(true);   // 静默清除，不触发回调
 ```js
 picker.onChange(function(value, meta) {
   // value: ValueObject | null
-  // meta: { source: 'user' | 'programmatic', action: 'selecting' | 'confirmed' | 'cleared' }
+  // meta: { source: 'user' | 'programmatic', action: 'confirmed' | 'cleared' }
 });
 ```
 
@@ -152,7 +143,6 @@ picker.onChange(function(value, meta) {
 | --- | --- | --- |
 | `source` | `'user'` | 由用户点击/交互触发 |
 | `source` | `'programmatic'` | 由`setValue()` / `clear()` 触发 |
-| `action` | `'selecting'` | 选择中（单日期已选、范围选了起点） |
 | `action` | `'confirmed'` | 选择完成 |
 | `action` | `'cleared'` | 被清除 |
 
@@ -183,8 +173,8 @@ picker.onClose(function() { /* 面板已关闭 */ });
 每个实例绑定各自的 trigger 元素，独立工作：
 
 ```js
-const pickerA = new dtrPicker('#input-a', { renderMode: 'svg', mode: 'date' });
-const pickerB = new dtrPicker('#input-b', { renderMode: 'svg', mode: 'dateRange' });
+const pickerA = new dtrPicker('#input-a', { mode: 'date' });
+const pickerB = new dtrPicker('#input-b', { mode: 'dateRange' });
 ```
 
 ### 单 trigger 多实例
@@ -196,7 +186,7 @@ const trigger = document.querySelector('#my-input');
 const instances = [];
 
 ['dateTime', 'dateTimeRange'].forEach(function(mode) {
-  const p = new dtrPicker(trigger, { renderMode: 'svg', mode: mode });
+  const p = new dtrPicker(trigger, { mode: mode });
   instances.push(p);
 });
 
@@ -215,11 +205,10 @@ function switchInstance(index) {
 ## 6. 快速开始
 
 ```js
-import dtrPicker from 'path/to/dtrpicker/dtrpicker.js';
+import dtrPicker from 'path/to/dist/dtrpicker.js';
 
 // 1. 创建
 const picker = new dtrPicker('#my-input', {
-  renderMode: 'svg',
   mode: 'dateRange',
   locale: 'zh-CN',
   firstDay: 1,

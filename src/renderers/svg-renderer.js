@@ -158,7 +158,7 @@ class SvgRenderer {
       this.svg.setAttribute('viewBox', '0 0 ' + this.SVG_W + ' ' + this.SVG_H);
       this.svg.setAttribute('width', this.SVG_W);
       this.svgBg.setAttribute('width', this.SVG_W);
-            if (this.picker && this.picker._instanceId) {
+      if (this.picker && this.picker._instanceId) {
         const hdrClip = this.svg.querySelector('#' + this.picker._instanceId + '-hdr-clip > rect');
         if (hdrClip) {
           hdrClip.setAttribute('width', this.SVG_W - this.GAP * 2);
@@ -266,7 +266,7 @@ class SvgRenderer {
     this.svgBg.setAttribute('fill', this.options.gridColor);
     this.svg.appendChild(this.svgBg);
 
-        // 网格常量引用
+    // 网格常量引用
     const totalCols = this._calcTotalCols();
     const gridRef = {
       CELL_W: this.CELL_W, CELL_H: this.CELL_H, GAP: this.GAP,
@@ -304,7 +304,7 @@ class SvgRenderer {
     this.svg.insertBefore(viewportSvg, this.calendarArea.container);
     viewportSvg.appendChild(this.calendarArea.container);
 
-        // defs
+    // defs
     let defs = this.svg.querySelector('defs');
     if (!defs) {
       defs = document.createElementNS(this.svgNS, 'defs');
@@ -351,7 +351,7 @@ class SvgRenderer {
     this.panel.appendChild(this.svg);
     this.container.appendChild(this.panel);
 
-        // 版本号（由 DIM.SHOW_VERSION 控制是否显示）
+    // 版本号（由 DIM.SHOW_VERSION 控制是否显示）
     if (DIM.SHOW_VERSION) {
       const verEl = document.createElement('div');
       verEl.textContent = DIM.VERSION;
@@ -392,7 +392,7 @@ class SvgRenderer {
     };
     const i18n = this._i18n;
 
-        const headerCells = [];
+    const headerCells = [];
     const hTotalCols = this._calcTotalCols();
 
     if (this._hasSidebar) {
@@ -417,7 +417,7 @@ class SvgRenderer {
       }));
     }
 
-        const fd = this.options.firstDay || 0;
+    const fd = this.options.firstDay || 0;
     const weeks = fd === 0
       ? i18n.weekdays
       : i18n.weekdays.slice(fd).concat(i18n.weekdays.slice(0, fd));
@@ -463,7 +463,7 @@ class SvgRenderer {
     this.cellManager.clear();
     this.calendarArea.setScroll(this._translateY);
 
-        const grid = {
+    const grid = {
       CELL_W: this.CELL_W, CELL_H: this.CELL_H, GAP: this.GAP,
       STEP_X: this.STEP_X, STEP_Y: this.STEP_Y, svgNS: this.svgNS,
     };
@@ -522,7 +522,7 @@ class SvgRenderer {
       }
     }
 
-        // 逐行颜色
+    // 逐行颜色
     const rowYearColors = {};
     for (let i = 0; i < TOTAL_ROWS; i++) {
       const rowNum = startRow + i;
@@ -558,81 +558,81 @@ class SvgRenderer {
 
     // YearCell（仅 column 模式显示）
     if (this._hasSidebar) {
-    const coveredYearRows = {};
-    for (let si = 0; si < pureYears.length; si++) {
-      const seg = pureYears[si];
-      const yc = new YearCell({
-        r: seg.startRow, c: 0, rs: seg.endRow - seg.startRow, cs: 1, grid: grid,
-        container: this.calendarArea.container, picker: this.picker,
-        year: seg.year,
-      });
-      yc.render();
-      this.cellManager.add(yc);
-      for (let yr = seg.startRow; yr < seg.endRow; yr++) coveredYearRows[yr] = true;
-    }
-    for (let i = 0; i < TOTAL_ROWS; i++) {
-      const rowNum = startRow + i;
-      if (coveredYearRows[rowNum]) continue;
-      const ycBlend = new YearCell({
-        r: rowNum, c: 0, rs: 1, cs: 1, grid: grid,
-        container: this.calendarArea.container, picker: this.picker,
-        year: 0,
-        bgFill: rowYearColors[rowNum] || null,
-      });
-      ycBlend.render();
-      this.cellManager.add(ycBlend);
-    }
+      const coveredYearRows = {};
+      for (let si = 0; si < pureYears.length; si++) {
+        const seg = pureYears[si];
+        const yc = new YearCell({
+          r: seg.startRow, c: 0, rs: seg.endRow - seg.startRow, cs: 1, grid: grid,
+          container: this.calendarArea.container, picker: this.picker,
+          year: seg.year,
+        });
+        yc.render();
+        this.cellManager.add(yc);
+        for (let yr = seg.startRow; yr < seg.endRow; yr++) coveredYearRows[yr] = true;
+      }
+      for (let i = 0; i < TOTAL_ROWS; i++) {
+        const rowNum = startRow + i;
+        if (coveredYearRows[rowNum]) continue;
+        const ycBlend = new YearCell({
+          r: rowNum, c: 0, rs: 1, cs: 1, grid: grid,
+          container: this.calendarArea.container, picker: this.picker,
+          year: 0,
+          bgFill: rowYearColors[rowNum] || null,
+        });
+        ycBlend.render();
+        this.cellManager.add(ycBlend);
+      }
     } // end if _hasSidebar
 
     // MonthCell（仅 column 模式显示）
     if (this._hasSidebar) {
-    const coveredMonthRows = {};
-    for (let si = 0; si < pureSegments.length; si++) {
-      const seg = pureSegments[si];
-      const monthLabel = this._i18n.months[seg.month];
-      const mc = new MonthCell({
-        r: seg.startRow, c: 1, rs: seg.endRow - seg.startRow, cs: 1, grid: grid,
-        container: this.calendarArea.container, picker: this.picker,
-        month: seg.month,
-        isPureSegment: true,
-        label: monthLabel,
-      });
-      mc.render();
-      this.cellManager.add(mc);
-      for (let r = seg.startRow; r < seg.endRow; r++) coveredMonthRows[r] = true;
-    }
-    for (let i = 0; i < TOTAL_ROWS; i++) {
-      const rowNum = startRow + i;
-      if (coveredMonthRows[rowNum]) continue;
-      const rowStart = this._getDateOfWeekRow(rowNum);
-      const monthCounts = {};
-      for (let col = 0; col < this.DATE_COLS; col++) {
-        const d = rowStart.clone();
-        d.setDate(rowStart.date + col);
-        const m = d.month;
-        monthCounts[m] = (monthCounts[m] || 0) + 1;
+      const coveredMonthRows = {};
+      for (let si = 0; si < pureSegments.length; si++) {
+        const seg = pureSegments[si];
+        const monthLabel = this._i18n.months[seg.month];
+        const mc = new MonthCell({
+          r: seg.startRow, c: 1, rs: seg.endRow - seg.startRow, cs: 1, grid: grid,
+          container: this.calendarArea.container, picker: this.picker,
+          month: seg.month,
+          isPureSegment: true,
+          label: monthLabel,
+        });
+        mc.render();
+        this.cellManager.add(mc);
+        for (let r = seg.startRow; r < seg.endRow; r++) coveredMonthRows[r] = true;
       }
-      const mKeys = Object.keys(monthCounts).map(Number);
-      let blended = null;
-      if (mKeys.length > 1) {
-        const m1 = Math.min.apply(null, mKeys);
-        const m2 = Math.max.apply(null, mKeys);
-        blended = {
-          c1: schemeColors[(m1 + cs) % schemeLen],
-          c2: schemeColors[(m2 + cs) % schemeLen],
-          ratio: monthCounts[m2] / this.DATE_COLS,
-        };
+      for (let i = 0; i < TOTAL_ROWS; i++) {
+        const rowNum = startRow + i;
+        if (coveredMonthRows[rowNum]) continue;
+        const rowStart = this._getDateOfWeekRow(rowNum);
+        const monthCounts = {};
+        for (let col = 0; col < this.DATE_COLS; col++) {
+          const d = rowStart.clone();
+          d.setDate(rowStart.date + col);
+          const m = d.month;
+          monthCounts[m] = (monthCounts[m] || 0) + 1;
+        }
+        const mKeys = Object.keys(monthCounts).map(Number);
+        let blended = null;
+        if (mKeys.length > 1) {
+          const m1 = Math.min.apply(null, mKeys);
+          const m2 = Math.max.apply(null, mKeys);
+          blended = {
+            c1: schemeColors[(m1 + cs) % schemeLen],
+            c2: schemeColors[(m2 + cs) % schemeLen],
+            ratio: monthCounts[m2] / this.DATE_COLS,
+          };
+        }
+        const mc = new MonthCell({
+          r: rowNum, c: 1, rs: 1, cs: 1, grid: grid,
+          container: this.calendarArea.container, picker: this.picker,
+          month: mKeys[0],
+          blended: true,
+          blendColors: blended,
+        });
+        mc.render();
+        this.cellManager.add(mc);
       }
-      const mc = new MonthCell({
-        r: rowNum, c: 1, rs: 1, cs: 1, grid: grid,
-        container: this.calendarArea.container, picker: this.picker,
-        month: mKeys[0],
-        blended: true,
-        blendColors: blended,
-      });
-      mc.render();
-      this.cellManager.add(mc);
-    }
     } // end if _hasSidebar
 
     // 年份文字（仅 column 模式显示）
@@ -654,7 +654,7 @@ class SvgRenderer {
         const isToday = dayDate.equals(this._today);
         const dateStrVal = dayDate.toDateString();
 
-                const dc = new DayCell({
+        const dc = new DayCell({
           r: rowNum, c: svgCol, rs: 1, cs: 1, grid: grid,
           container: this.calendarArea.container, picker: this.picker,
           date: dayDate,
@@ -668,7 +668,7 @@ class SvgRenderer {
       }
     }
 
-    // 水印模式：每月矩形容器（1px 红色边框，供观察用）
+    // 水印模式：年月水印文字
     if (!this._hasSidebar) {
       const monthRanges = {}; // key: "year-month" => { startRow, endRow }
       for (let i = 0; i < TOTAL_ROWS; i++) {
@@ -700,22 +700,7 @@ class SvgRenderer {
         const rectX = dateLeft;
         const rectY = this.GAP + seg.startRow * this.STEP_Y;
         const rectH = (seg.endRow - seg.startRow + 1) * this.CELL_H
-                    + (seg.endRow - seg.startRow) * this.GAP;
-
-        const rect = document.createElementNS(this.svgNS, 'rect');
-        rect.setAttribute('x', rectX);
-        rect.setAttribute('y', rectY);
-        rect.setAttribute('width', dateWidth);
-        rect.setAttribute('height', rectH);
-        // 使用 inset 让 1px 描边完全位于矩形内缘以内，不伸入间隙
-        rect.setAttribute('x', rectX + 0.5);
-        rect.setAttribute('y', rectY + 0.5);
-        rect.setAttribute('width', dateWidth - 1);
-        rect.setAttribute('height', rectH - 1);
-        // 矩形容器（已无边框，仅用于占位参考，后续可移除）
-        rect.setAttribute('fill', 'none');
-        rect.setAttribute('stroke', 'none');
-        this.calendarArea.container.appendChild(rect);
+          + (seg.endRow - seg.startRow) * this.GAP;
 
         // 年月水印文字（由 i18n 数据的 yearFirst 字段驱动格式）
         const label = this._i18n.yearFirst
@@ -759,7 +744,7 @@ class SvgRenderer {
     this._syncHeaderColors();
   }
 
-    /** @private */
+  /** @private */
   _renderYearLabel(pureYears, startRow, totalRows, cx) {
     const yearCells = this.cellManager.filter(function (c) { return c instanceof YearCell; });
     if (yearCells.length === 0) return;
@@ -1151,7 +1136,7 @@ class SvgRenderer {
   //  表头颜色同步
   // ════════════════════════════════════════════════════════════════
 
-    _syncHeaderColors() {
+  _syncHeaderColors() {
     if (!this._headerCells) return;
 
     const container = this.headerArea.container;
@@ -1175,14 +1160,14 @@ class SvgRenderer {
     }
   }
 
-    /** @private */
+  /** @private */
   _probeCellAt(x, y) {
     const all = this.cellManager._all;
     const sy = this._translateY;
     for (let ci = 0; ci < all.length; ci++) {
       const cell = all[ci];
       if (x >= cell.x && x < cell.x + cell.w &&
-          y >= cell.y + sy && y < cell.y + sy + cell.h) {
+        y >= cell.y + sy && y < cell.y + sy + cell.h) {
         return cell;
       }
     }
@@ -1192,7 +1177,7 @@ class SvgRenderer {
       for (let ti = 0; ti < titleBarCells.length; ti++) {
         const tbc = titleBarCells[ti];
         if (tbc && tbc.bgColor && x >= tbc.x && x < tbc.x + tbc.w &&
-            y >= tbc.y && y < tbc.y + tbc.h) {
+          y >= tbc.y && y < tbc.y + tbc.h) {
           return tbc;
         }
       }
@@ -1202,7 +1187,7 @@ class SvgRenderer {
         for (let tk = 0; tk < tcKeys.length; tk++) {
           const tcCell = tcMap[tcKeys[tk]];
           if (tcCell.bgColor && x >= tcCell.x && x < tcCell.x + tcCell.w &&
-              y >= tcCell.y && y < tcCell.y + tcCell.h) {
+            y >= tcCell.y && y < tcCell.y + tcCell.h) {
             return tcCell;
           }
         }

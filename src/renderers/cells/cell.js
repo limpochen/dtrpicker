@@ -42,7 +42,8 @@ class Cell {
     this._borderColor = '#000000';
     /** @type {number} 边框宽度（px），设为 0 禁用调试边框 */
     this._borderWidth = 0;
-    /** @type {boolean} 是否跳过自动 GAP（用于绝对定位的格子） */
+    /** @type {boolean} 是否跳过自动 GAP（用于绝对定位的格子）
+     *  注：当前无读取方，保留备用（用户确认保留，勿删） */
     this._skipGridGap = false;
   }
 

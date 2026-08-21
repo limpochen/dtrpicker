@@ -1,7 +1,7 @@
 /**
  * dtrPicker — 日期范围选择器 TypeScript 类型声明
  *
- * @version 3.0.0
+ * @version 2.1.10
  * @license MIT
  */
 
@@ -43,7 +43,7 @@ export interface ChangeMeta {
   /** 变更来源 */
   source: 'user' | 'programmatic';
   /** 变更动作 */
-  action: 'selecting' | 'confirmed' | 'cleared';
+  action: 'confirmed' | 'cleared';
 }
 
 /** onChange 回调 */
@@ -55,13 +55,9 @@ export type LifecycleCallback = () => void;
    配置选项
    ================================================================ */
 
-export type RenderMode = 'svg';
-
 export type PickerMode = 'date' | 'dateTime' | 'dateRange' | 'dateTimeRange';
 
 export interface PickerOptions {
-  /** 渲染模式（默认 'svg'，'html' 已移除） */
-  renderMode?: RenderMode;
   /** 选择模式（必选） */
   mode: PickerMode;
   /** BCP 47 语言标签 */
@@ -70,8 +66,6 @@ export interface PickerOptions {
   firstDay?: 0 | 1;
   /** 色系 */
   colorScheme?: string;
-  /** 面板 z-index */
-  zIndex: number;
   /** 今日标记条高度(px) */
   todayBarHeight?: number;
   /** 滚轮步进(px) */

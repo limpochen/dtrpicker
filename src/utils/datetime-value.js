@@ -6,7 +6,7 @@
  * 程序化赋值/清除。不依赖 DOM，不持有回调。
  *
  * @file       选中值对象
- * @version    1.0.0
+ * @version    2.1.10
  * @license    MIT
  */
 
@@ -63,7 +63,8 @@ class DateTimeValue {
   /**
    * 处理日期点击 — 纯状态机逻辑。
    *
-   * 只分两种情况：
+   * 分三种情况：
+   *   单日期模式（date/dateTime）→ 点击即替换，end 恒为 null
    *   同天范围（1天）→ 点不同日则扩展，点同天不变
    *   其他（空/不同天）→ 起止=点击日（1 天范围）
    *
@@ -71,6 +72,13 @@ class DateTimeValue {
    * @returns {{ changed: boolean, action: string|null }}
    */
   handleDateClick(d) {
+    // 单日期模式（date/dateTime）：点击即替换，无范围概念，end 恒为 null
+    if (this.isSingle) {
+      this.start = d.clone();
+      this.end = null;
+      return { changed: true, action: 'confirmed' };
+    }
+
     // ── 同天范围 → 扩展 ──
     if (this.start && this.start.equals(this.end)) {
       if (d.timestamp < this.start.timestamp) {
@@ -152,6 +160,7 @@ class DateTimeValue {
    */
   setFrom(range) {
     if (!range) return;
+    // 有意兜底：非法日期输入安全失败为 null，不抛错（用户确认保留）
     this.start = DateTime.parse(range.start) || null;
     this.end = range.start && range.end ? (DateTime.parse(range.end) || null) : null;
   }

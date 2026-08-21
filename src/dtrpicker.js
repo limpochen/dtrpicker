@@ -2,7 +2,7 @@
  * dtrpicker.js — 日期范围选择器核心
  *
  * @file       日期范围选择器核心脚本
- * @version    3.5.0
+ * @version    2.1.10
  * @license    MIT
  */
 
@@ -344,6 +344,8 @@ class dtrPicker {
 
     this.trigger.style.borderColor = '';
     this._changeCallbacks = [];
+    this._onOpenCallbacks = [];
+    this._onCloseCallbacks = [];
   }
 }
 

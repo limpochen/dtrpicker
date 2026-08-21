@@ -46,6 +46,7 @@ class DrawingArea {
    * @returns {Cell|null}
    */
   addChild(cfg) {
+    // 保留备用：当前库内无调用（用户确认保留，勿删）
     const relR = cfg.r; const relC = cfg.c;
     const rs = cfg.rs || 1; const cs = cfg.cs || 1;
     if (relR < 0 || relR + rs > this.rs) return null;

@@ -11,7 +11,7 @@
  * - 所有 session 注销后自动解除 window 绑定
  *
  * @file       拖拽事件共享层
- * @version    1.0.0
+ * @version    2.1.10
  * @license    MIT
  */
 

@@ -18,7 +18,7 @@ const demoI18n = {
     dateRangeLabel: '日期范围：',
     demoHint: '💡 点击输入框弹出日历 · 拖拽浏览月份 · 点击起止日期 · JSON 实时返回',
     paramConfig: '参数配置',
-    colorSchemeLabel: '色系',
+    colorSchemeLabel: '色系风格',
     renderModeSvg: 'SVG',
     yearMonthModeLabel: '年月显示',
     yearMonthWatermark: '水印',
@@ -39,7 +39,7 @@ const demoI18n = {
     currentParams: '当前参数 (JSON)',
     codeSample: '调用代码',
     returnValue: '返回值 (JSON)',
-    localeLabel: '语言',
+    localeLabel: '国际语言',
     clearTitle: '清除选择',
     placeholder: '请选择日期范围',
   },
@@ -158,13 +158,19 @@ function syntaxHighlightJSON(json) {
 }
 
 function getCurrentParams() {
-  return {
-    yearMonthMode: document.querySelector('input[name="param-yearMonthMode"]:checked').value,
-    locale: document.getElementById('lang-select').value,
-    firstDay: parseInt(document.querySelector('input[name="param-firstDay"]:checked').value),
+  const locale = document.getElementById('lang-select').value;
+  const yearMonthMode = document.querySelector('input[name="param-yearMonthMode"]:checked').value;
+  const firstDayRaw = document.querySelector('input[name="param-firstDay"]:checked').value;
+  const colorScheme = document.getElementById('param-colorScheme').value;
+  const params = {
     mode: currentMode,
-    colorScheme: document.getElementById('param-colorScheme').value,
   };
+  // 各选项为「默认」（空值）时不提供对应 JSON 项，由选择器使用内部默认值
+  if (locale) params.locale = locale;
+  if (yearMonthMode) params.yearMonthMode = yearMonthMode;
+  if (firstDayRaw !== '') params.firstDay = parseInt(firstDayRaw, 10);
+  if (colorScheme) params.colorScheme = colorScheme;
+  return params;
 }
 
 function updateParamsDisplay() {
@@ -181,10 +187,12 @@ function generateCodeSnippet(params) {
   const opts = [];
   const currentLocale = document.getElementById('lang-select').value;
   opts.push('  mode: "' + params.mode + '"');
-  if (params.yearMonthMode !== 'watermark') opts.push('  yearMonthMode: "' + params.yearMonthMode + '"');
-  if (currentLocale !== 'en-US') opts.push('  locale: "' + currentLocale + '"');
-  if (params.firstDay !== 0) opts.push('  firstDay: ' + params.firstDay);
-  if (params.colorScheme !== 'morandi') opts.push('  colorScheme: "' + params.colorScheme + '"');
+  // 各选项为「默认」时不生成对应代码行；显式选择的具体值一律生成
+  if (params.yearMonthMode) opts.push('  yearMonthMode: "' + params.yearMonthMode + '"');
+  // 「自动」（空值）与默认 en-US 均不提供 locale
+  if (currentLocale && currentLocale !== 'en-US') opts.push('  locale: "' + currentLocale + '"');
+  if (params.firstDay !== undefined) opts.push('  firstDay: ' + params.firstDay);
+  if (params.colorScheme) opts.push('  colorScheme: "' + params.colorScheme + '"');
 
   let code = '// Import & Create\nimport dtrPicker from \'' + importPath + '\';\n\n'
     + 'const picker = new dtrPicker("#my-input", {\n' + opts.join(',\n') + '\n});\n\n'
@@ -241,18 +249,20 @@ async function initAllPickers() {
   const PickerClass = await ensurePickerSource(source);
   const yearMonthMode = document.querySelector('input[name="param-yearMonthMode"]:checked').value;
   const locale = document.getElementById('lang-select').value;
-  const firstDay = parseInt(document.querySelector('input[name="param-firstDay"]:checked').value);
+  const firstDayRaw = document.querySelector('input[name="param-firstDay"]:checked').value;
   const colorScheme = document.getElementById('param-colorScheme').value;
   const triggerEl = document.getElementById('picker-trigger');
 
   currentMode = document.getElementById('param-mode').value;
-  const p = new PickerClass(triggerEl, {
-    yearMonthMode: yearMonthMode,
+  const pickerOpts = {
     mode: currentMode,
-    locale: locale,
-    firstDay: firstDay,
-    colorScheme: colorScheme,
-  });
+  };
+  // 各选项为「默认」（空值）时不传参，由选择器使用内部默认值
+  if (yearMonthMode) pickerOpts.yearMonthMode = yearMonthMode;
+  if (locale) pickerOpts.locale = locale;
+  if (firstDayRaw !== '') pickerOpts.firstDay = parseInt(firstDayRaw, 10);
+  if (colorScheme) pickerOpts.colorScheme = colorScheme;
+  const p = new PickerClass(triggerEl, pickerOpts);
   p.onChange(onChangeHandler);
   // 移除实例自带的 trigger 点击，由 demo 统一管理
   triggerEl.removeEventListener('click', p._onTriggerClick);
@@ -343,7 +353,7 @@ const detectedLocale = (function () {
   return 'en-US';
 })();
 
-document.getElementById('lang-select').value = detectedLocale;
+// 语言默认「自动」：页面文案用浏览器检测语言渲染，选择器 locale 由浏览器自动检测
 applyDemoI18n(detectedLocale);
 initAllPickers();
 updateParamsDisplay();

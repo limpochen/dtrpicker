@@ -4,7 +4,7 @@
  * 纯颜色运算工具集，无 DOM 依赖。
  *
  * @file       色彩工具函数
- * @version    1.9.0
+ * @version    2.1.10
  * @license    MIT
  */
 
@@ -15,6 +15,7 @@
  * @returns {string} rgba 字符串
  */
 export function hexToRgba(hex, alpha) {
+  // 注：无非法输入防护，调用方须传合法 #rrggbb（如色板颜色），否则 parseInt 得 NaN
   const r = parseInt(hex.slice(1, 3), 16);
   const g = parseInt(hex.slice(3, 5), 16);
   const b = parseInt(hex.slice(5, 7), 16);
@@ -29,6 +30,7 @@ export function hexToRgba(hex, alpha) {
  * @returns {string} 混合后的颜色，格式 #rrggbb
  */
 export function blendColors(c1, c2, ratio) {
+  // 注：无非法输入防护，调用方须传合法 #rrggbb，否则 parseInt 得 NaN
   const r1 = parseInt(c1.slice(1, 3), 16);
   const g1 = parseInt(c1.slice(3, 5), 16);
   const b1 = parseInt(c1.slice(5, 7), 16);
