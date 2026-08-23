@@ -1,14 +1,14 @@
 /**
- * TimeCell — 时分列格子。
+ * TimeCell — hour/minute column cell.
  *
- * 每个时/分列由一个 TimeCell 管理，内部每行是一个独立 <g> 子容器：
- *   热区 <rect>  → 鼠标事件（hover、mousedown 点击反馈）
- *   高亮 <rect>  → 当前选中行蓝底（仅中间行，pointer-events:none）
- *   数字 <text>  → 数值显示（最上层，pointer-events:none）
+ * Each hour/minute column is managed by one TimeCell; each internal row is an independent <g> sub-container:
+ *   hit area <rect>  → mouse events (hover, mousedown click feedback)
+ *   highlight <rect> → blue background of the currently selected row (middle row only, pointer-events:none)
+ *   number <text>    → value display (topmost layer, pointer-events:none)
  *
- * 设计：首次 render() 创建固定数量的 DOM 并缓存引用；
- *      后续 setValue() 仅更新已有 DOM 的文本和样式属性，
- *      不创建/销毁 DOM 节点，减少布局抖动和 GC 压力。
+ * Design: the first render() creates a fixed number of DOM nodes and caches references;
+ *      subsequent setValue() calls only update the text and style attributes of existing DOM,
+ *      never creating/destroying nodes, reducing layout thrash and GC pressure.
  * @extends Cell
  */
 import Cell from './cell.js';
@@ -18,10 +18,10 @@ class TimeCell extends Cell {
   /**
    * @param {Object} cfg
    * @param {string} cfg.subType - 'hour'|'minute'|'startHour'|'startMinute'|'endHour'|'endMinute'
-   * @param {number} cfg.currentValue - 当前选中值
-   * @param {number} cfg.min - 最小值
-   * @param {number} cfg.max - 最大值
-   * @param {number} cfg.rowCount - 可见行数
+   * @param {number} cfg.currentValue - current selected value
+   * @param {number} cfg.min - minimum value
+   * @param {number} cfg.max - maximum value
+   * @param {number} cfg.rowCount - number of visible rows
    */
   constructor(cfg) {
     super(cfg);
@@ -32,21 +32,21 @@ class TimeCell extends Cell {
     this.max = cfg.max;
     this.rowCount = cfg.rowCount;
     this._hoverEnabled = false;
-    /** @type {SVGRectElement|null} 高亮行 rect */
+    /** @type {SVGRectElement|null} Highlight row rect. */
     this._highlightRect = null;
     /**
-     * 每行子容器信息，长度恒等于 rowCount。
+     * Per-row sub-container info; length always equals rowCount.
      * @type {Array<{g: SVGGElement, hitRect: SVGRectElement, text: SVGTextElement}>}
      */
     this._rowGroups = [];
   }
 
-  /** 行高：默认继承基类 Cell 的 rs × CELL_H 高度（时分列单列跨 rs 行） */
+  /** Row height: inherits the base Cell height of rs × CELL_H by default (a single time column spans rs rows). */
   get h() { return super.h; }
-  /** 列宽：固定单列宽 CELL_W（时分列每列一格，不跨列） */
+  /** Column width: fixed single-column width CELL_W (each time column is one cell, no spanning). */
   get w() { return this.g.CELL_W; }
 
-  /** @private 计算行布局参数 */
+  /** @private Compute the row layout parameters. */
   _layout() {
     const cellH = this.h;
     const rowCount = this.rowCount;
@@ -59,9 +59,10 @@ class TimeCell extends Cell {
   }
 
   /**
-   * @private 根据偏移量获取环绕后的值。
-   * 注：仅单次 ±range 回绕，适用于 offset 较小（可见行数级）的场景；
-   * 若 currentValue 初始越界或 offset 过大可能仍越界（当前调用方保证合法，保留）。
+   * @private Get the wrapped value at the given offset.
+   * Note: only wraps once by ±range, suitable for small offsets (on the order of visible rows);
+   * if currentValue is initially out of range or the offset is too large it may still be out of range
+   * (current callers guarantee validity, kept).
    */
   _wrapVal(offset) {
     const range = this.max - this.min + 1;
@@ -72,7 +73,7 @@ class TimeCell extends Cell {
   }
 
   /**
-   * 更新当前值——仅改已有 DOM 的文本和样式，不创建/销毁元素。
+   * Update the current value — only changes the text and styles of existing DOM, without creating/destroying elements.
    * @param {number} newVal
    */
   setValue(newVal) {
@@ -81,8 +82,8 @@ class TimeCell extends Cell {
   }
 
   /**
-   * 首次渲染：创建全部 DOM 元素并缓存引用。
-   * 之后值变化走 setValue → _updateDisplay，不再调用此方法。
+   * Initial render: create all DOM elements and cache references.
+   * Later value changes go through setValue → _updateDisplay; this method is not called again.
    */
   render() {
     super.render();
@@ -98,14 +99,14 @@ class TimeCell extends Cell {
       const rowTop = baseY + i * rowH;
       const isCurrent = val === this.currentValue;
 
-      // 行组容器 <g>
+      // Row group container <g>
       const rowG = document.createElementNS(ns, 'g');
       rowG.setAttribute('data-time-type', this.subType);
       rowG.setAttribute('data-time-val', String(val));
       this.container.appendChild(rowG);
       this.elements.push(rowG);
 
-      // 热区 rect（无边框、无背景，捕获鼠标事件）
+      // Hit area rect (no border, no background; captures mouse events)
       const hitRect = document.createElementNS(ns, 'rect');
       hitRect.setAttribute('x', cx);
       hitRect.setAttribute('y', rowTop);
@@ -114,7 +115,7 @@ class TimeCell extends Cell {
       hitRect.style.fill = 'transparent';
       rowG.appendChild(hitRect);
 
-      // 高亮 rect——仅当前行（中间行），独立于热区，不受 hover/clear 影响
+      // Highlight rect — current row (middle row) only, independent of the hit area, unaffected by hover/clear
       let hlRect = null;
       if (isCurrent) {
         hlRect = document.createElementNS(ns, 'rect');
@@ -130,7 +131,7 @@ class TimeCell extends Cell {
         this._highlightRect = hlRect;
       }
 
-      // 数字文本（最上层）
+      // Number text (topmost layer)
       const text = document.createElementNS(ns, 'text');
       text.setAttribute('x', cx + this.w / 2);
       text.setAttribute('y', rowTop + rowH / 2);
@@ -146,9 +147,9 @@ class TimeCell extends Cell {
       text.textContent = String(val).padStart(2, '0');
       rowG.appendChild(text);
 
-      // 热区存文字引用，供 mousedown 反馈时同时变白
+      // Store a text reference on the hit area so it can turn white during the mousedown feedback
       hitRect._timeText = text;
-      // 热区事件：hover
+      // Hit area events: hover
       const rowInfo = { g: rowG, hitRect: hitRect, text: text, hlRect: hlRect, _hovered: false, isCur: isCurrent };
       (function (r, info) {
         r.addEventListener('mouseenter', function () {
@@ -170,7 +171,7 @@ class TimeCell extends Cell {
     this._drawDebugBorder();
   }
 
-  /** @private 恢复某行的 hover 高亮（如果鼠标仍在该行上） */
+  /** @private Restore a row's hover highlight (if the mouse is still over that row). */
   _applyRowHover(row) {
     if (!row || !row._hovered) return;
     if (row.isCur) return;
@@ -178,7 +179,7 @@ class TimeCell extends Cell {
     row.hitRect.style.fill = hexToRgba(this.picker.options.selectedColor, 0.07);
   }
 
-  /** @private 仅更新已有 DOM 的文本内容和样式 */
+  /** @private Only update the text content and styles of existing DOM. */
   _updateDisplay() {
     const cx = this.x;
     const { rowCount, rowH, baseY, centerIdx } = this._layout();
@@ -191,39 +192,39 @@ class TimeCell extends Cell {
       const row = this._rowGroups[i];
       if (!row) continue;
 
-      // 当前行更新高亮 rect，非当前行清除 mousedown 反馈
+      // Update the highlight rect for the current row; clear the mousedown feedback for non-current rows
       if (isCurrent) {
         if (row.hlRect) row.hlRect.setAttribute('fill', opt.selectedColor);
       } else {
         row.hitRect.style.fill = 'transparent';
       }
 
-      // 文本——仅改内容、颜色、字重
+      // Text — only update content, color, and font weight
       row.text.textContent = String(val).padStart(2, '0');
       row.text.setAttribute('fill', isCurrent ? opt.selectedTextColor : opt.textColor);
       row.text.setAttribute('font-weight', isCurrent ? '700' : '500');
       row.text.setAttribute('data-time-val', String(val));
 
-      // 行组和热区的 data 属性
+      // data attributes of the row group and hit area
       row.g.setAttribute('data-time-val', String(val));
       row.hitRect.setAttribute('data-time-val', String(val));
 
-      // 恢复 hover 状态（mouseenter 不会因 fill 改变而重发）
+      // Restore the hover state (mouseenter is not re-fired when fill changes)
       this._applyRowHover(row);
     }
 
-    // 同步 _highlightRect 引用（值变化后中间行变了，但 hlRect 还在原位）
+    // Sync the _highlightRect reference (after the value changes the middle row moves, but hlRect stays in place)
     const curRow = this._rowGroups[centerIdx];
     this._highlightRect = curRow ? curRow.hlRect : null;
   }
 
-  /** 清除所有行 hover 高亮（当前行高亮由独立的 hlRect 负责，不受影响） */
+  /** Clear all row hover highlights (the current row's highlight is handled by its own hlRect and is unaffected). */
   clearHoverFills() {
     for (let i = 0; i < this._rowGroups.length; i++) {
       const row = this._rowGroups[i];
       row.hitRect.style.fill = 'transparent';
     }
-    // mouseenter 不会因 fill 改变而重发，手动恢复 hover 状态
+    // mouseenter is not re-fired when fill changes, so manually restore the hover state
     for (let i = 0; i < this._rowGroups.length; i++) {
       this._applyRowHover(this._rowGroups[i]);
     }

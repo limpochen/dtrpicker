@@ -1,7 +1,7 @@
 /**
- * dtrpicker.js — 日期范围选择器核心
+ * dtrpicker.js — Date range picker core
  *
- * @file       日期范围选择器核心脚本
+ * @file       Core script of the date range picker
  * @version    2.1.11
  * @license    MIT
  */
@@ -12,7 +12,7 @@ import DateTime from './utils/date.js';
 import DateTimeValue from './utils/datetime-value.js';
 import SvgRenderer from './renderers/svg-renderer.js';
 
-// ==================== 默认配置 ====================
+// ==================== Default Configuration ====================
 
 const DEFAULTS = {
   firstDay: 0,
@@ -20,31 +20,31 @@ const DEFAULTS = {
   colorScheme: 'morandi',
   todayBarHeight: 6,
   wheelStep: 40,
-  /** 年月显示方式：'watermark' 水印叠加 | 'column' 单独列显示 */
+  /** Year/month display mode: 'watermark' overlay watermark | 'column' separate column display */
   yearMonthMode: 'watermark',
 };
 
-// ==================== 主类 ====================
+// ==================== Main Class ====================
 
 /**
- * dtrPicker — 流式日期范围/时间选择器。
+ * dtrPicker — Fluent date range / time picker.
  *
- * 仅支持 SVG 渲染（2026 年起 HTML+CSS 模式已移除）。
- * 每个实例的 mode 在构造时设定，不可在运行时更改。
- * 如需使用不同 mode，请创建多个实例。
+ * Only SVG rendering is supported (the HTML+CSS mode was removed as of 2026).
+ * The mode of each instance is set at construction time and cannot be changed at runtime.
+ * Create multiple instances if you need different modes.
  *
  * @class
- * @param {HTMLElement|string} trigger - 触发器 DOM 元素或 CSS 选择器
- * @param {Object} options - 配置选项
- * @param {string} options.mode - 必选！选择模式（'date'|'dateTime'|'dateRange'|'dateTimeRange'）
- * @param {number} [options.firstDay=0] - 周起始日（0=周日, 1=周一）
- * @throws {Error} 缺少 mode 或 trigger 无效时抛出
+ * @param {HTMLElement|string} trigger - Trigger DOM element or CSS selector
+ * @param {Object} options - Configuration options
+ * @param {string} options.mode - Required! Selection mode ('date'|'dateTime'|'dateRange'|'dateTimeRange')
+ * @param {number} [options.firstDay=0] - First day of the week (0=Sunday, 1=Monday)
+ * @throws {Error} Thrown when mode is missing or trigger is invalid
  */
 class dtrPicker {
 
   /**
-   * @param {HTMLElement|string} trigger - 触发器元素或选择器
-   * @param {Object} [options={}] - 配置选项
+   * @param {HTMLElement|string} trigger - Trigger element or selector
+   * @param {Object} [options={}] - Configuration options
    */
   constructor(trigger, options = {}) {
     if (typeof trigger === 'string') {
@@ -54,46 +54,46 @@ class dtrPicker {
       throw new Error('dtrPicker: trigger must be a valid DOM element or selector');
     }
 
-    // ---- mode 必选校验 ----
+    // ---- mode is required ----
     const validModes = ['date', 'dateTime', 'dateRange', 'dateTimeRange'];
     if (!options.mode || validModes.indexOf(options.mode) === -1) {
       throw new Error('dtrPicker: "mode" is required (' + validModes.join('|') + ')');
     }
 
-    /** @type {HTMLElement} 触发器 DOM 元素 */
+    /** @type {HTMLElement} Trigger DOM element */
     this.trigger = trigger;
-    /** @type {Object} 合并后的完整配置 */
+    /** @type {Object} Merged full configuration */
     this.options = Object.assign({}, DEFAULTS, options);
-    // 根据 colorScheme 注入对应色系的颜色值，用户显式传入的颜色优先
+    // Inject the color values of the matching scheme based on colorScheme; user-provided colors take precedence
     Object.assign(this.options, getActiveScheme(this.options).defaults, options);
 
-    // ---- 选中值 ----
+    // ---- Selected value ----
     /** @type {DateTimeValue} */
     this.value = new DateTimeValue(this.options.mode);
 
-    // ---- 国际化 ----
-    /** @type {Object} 当前语言包 */
+    // ---- i18n ----
+    /** @type {Object} Current locale pack */
     this._i18n = getLocale(this.options.locale);
 
-    // ---- 内部 UI 状态 ----
-    /** @type {boolean} 面板是否可见 */
+    // ---- Internal UI state ----
+    /** @type {boolean} Whether the panel is visible */
     this.visible = false;
 
-    // ---- 实例唯一标识 ----
+    // ---- Instance unique id ----
     /** @type {string} */
     this._instanceId = 'dp-' + Math.random().toString(36).substring(2, 10);
 
-    // ---- 值变更回调列表 ----
+    // ---- Change callback list ----
     /** @type {Function[]} */
     this._changeCallbacks = [];
 
-    // ---- 创建渲染器 ----
-    /** @type {SvgRenderer} 渲染器实例 */
+    // ---- Create renderer ----
+    /** @type {SvgRenderer} Renderer instance */
     this._renderer = new SvgRenderer(this);
     this._renderer.createPanel();
     this._renderer.bindEvents();
 
-    // ---- 暴露渲染器属性供 Cell 子类通过 this.picker 访问 ----
+    // ---- Expose renderer properties for Cell subclasses to access via this.picker ----
     this.svg = this._renderer.svg;
     this.SVG_W = this._renderer.SVG_W;
     this.yearGroup = this._renderer.yearGroup;
@@ -103,28 +103,28 @@ class dtrPicker {
     this.timeWheel = this._renderer.timeWheel;
     this._colorShift = this._renderer._colorShift;
 
-    // ---- 生命周期回调 ----
-    /** @type {Function[]} 面板打开回调列表 */
+    // ---- Lifecycle callbacks ----
+    /** @type {Function[]} Panel open callback list */
     this._onOpenCallbacks = [];
-    /** @type {Function[]} 面板关闭回调列表 */
+    /** @type {Function[]} Panel close callback list */
     this._onCloseCallbacks = [];
 
     this._bindEvents();
   }
 
   /**
-   * 绑定独立于渲染器的全局事件。
+   * Bind global events that are independent of the renderer.
    * @private
    */
   _bindEvents() {
-    // trigger 点击
+    // Trigger click
     this._onTriggerClick = (e) => {
       e.stopPropagation();
       this.toggle();
     };
     this.trigger.addEventListener('click', this._onTriggerClick);
 
-    // 点击/触摸外部关闭
+    // Close on click/touch outside
     this._docClickHandler = (e) => {
       if (!this.visible || this._renderer._dragging) return;
       const target = e.target;
@@ -135,13 +135,13 @@ class dtrPicker {
     document.addEventListener('click', this._docClickHandler, true);
     document.addEventListener('touchstart', this._docClickHandler, true);
 
-    // Esc 关闭
+    // Esc closes
     this._onDocumentKeyDown = (e) => {
       if (e.key === 'Escape' && this.visible) this.close();
     };
     document.addEventListener('keydown', this._onDocumentKeyDown);
 
-    // 窗口 resize：SVG 渲染器先重算缩放，再重定位
+    // Window resize: recompute the scale in the SVG renderer first, then reposition
     this._onWindowResize = () => {
       if (!this.visible) return;
       this._renderer._applyScale();
@@ -151,7 +151,7 @@ class dtrPicker {
   }
 
   // ════════════════════════════════════════════════════════════════
-  //  面板控制
+  //  Panel Control
   // ════════════════════════════════════════════════════════════════
 
   open() {
@@ -173,7 +173,7 @@ class dtrPicker {
     }
     this._onOpenCallbacks.forEach(function (fn) { fn(); });
 
-    // 页面滚动时关闭选择器（排除面板内部滚动）
+    // Close the picker on page scroll (excluding scrolls inside the panel)
     this._onPageScroll = (e) => {
       if (this._renderer.container.contains(e.target)) return;
       this.close();
@@ -191,7 +191,7 @@ class dtrPicker {
     this.trigger.style.borderColor = '';
     this._onCloseCallbacks.forEach(function (fn) { fn(); });
 
-    // 移除页面滚动监听
+    // Remove page scroll listeners
     if (this._onPageScroll) {
       document.removeEventListener('wheel', this._onPageScroll);
       document.removeEventListener('touchmove', this._onPageScroll);
@@ -204,7 +204,7 @@ class dtrPicker {
   }
 
   /**
-   * 计算并设置下拉面板的绝对定位。
+   * Compute and set the absolute position of the dropdown panel.
    * @private
    */
   _positionDropdown() {
@@ -220,7 +220,7 @@ class dtrPicker {
       top = rect.top - panelH - 4;
     }
 
-    // SVG 渲染器：CSS transform 缩放
+    // SVG renderer: scale via CSS transform
     this._renderer._applyScale();
     const scaledW = this._renderer.SVG_W * this._renderer._scaleFactor;
 
@@ -235,11 +235,11 @@ class dtrPicker {
   }
 
   // ════════════════════════════════════════════════════════════════
-  //  公共 API
+  //  Public API
   // ════════════════════════════════════════════════════════════════
 
   /**
-   * 处理日期点击。
+   * Handle date clicks.
    * @param {Date} d
    * @private
    */
@@ -247,8 +247,8 @@ class dtrPicker {
     const result = this.value.handleDateClick(d);
     if (result.changed) {
       if (result.action === 'confirmed') {
-        // 将 value 中可能已更新的时间值（如同天 23:59）同步到 TimeWheel，
-        // 防止后续 _fireChange → syncTimeFrom 覆盖掉 value 的更新
+        // Sync the possibly-updated time values in value (e.g. 23:59 on the same day)
+        // to the TimeWheel so that the later _fireChange → syncTimeFrom won't override the value update
         if (this.value.isTimeRange && this._renderer.timeWheel) {
           this._renderer.timeWheel.startHour = this.value.start.hour;
           this._renderer.timeWheel.startMinute = this.value.start.minute;
@@ -263,8 +263,8 @@ class dtrPicker {
   }
 
   /**
-   * 触发 change 回调。
-   * @param {Object} [meta] - 变更元信息
+   * Fire the change callbacks.
+   * @param {Object} [meta] - Change metadata
    * @private
    */
   _fireChange(meta) {
@@ -277,8 +277,8 @@ class dtrPicker {
   }
 
   /**
-   * 获取选中值。
-   * @param {'string'|'date'|'object'} [format='string'] - 返回格式
+   * Get the selected value.
+   * @param {'string'|'date'|'object'} [format='string'] - Return format
    * @returns {Object|null}
    */
   getValue(format) {
@@ -290,7 +290,7 @@ class dtrPicker {
   setValue(range) {
     if (!range) return;
     this.value.setFrom(range);
-    // 将 value 的时分值同步到 TimeWheel，确保 programmatic setValue 后时轮显示正确
+    // Sync the hour/minute values of value to the TimeWheel so the wheel renders correctly after a programmatic setValue
     if (this._renderer.timeWheel && this.value.start) {
       this._renderer.timeWheel.startHour = this.value.start.hour;
       this._renderer.timeWheel.startMinute = this.value.start.minute;
@@ -317,7 +317,7 @@ class dtrPicker {
   }
 
   /**
-   * 注册面板打开回调。
+   * Register a panel open callback.
    * @param {Function} fn - () => void
    */
   onOpen(fn) {
@@ -325,7 +325,7 @@ class dtrPicker {
   }
 
   /**
-   * 注册面板关闭回调。
+   * Register a panel close callback.
    * @param {Function} fn - () => void
    */
   onClose(fn) {
@@ -349,7 +349,7 @@ class dtrPicker {
   }
 }
 
-// ==================== 导出 ====================
+// ==================== Exports ====================
 
 dtrPicker.DEFAULTS = DEFAULTS;
 

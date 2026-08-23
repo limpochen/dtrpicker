@@ -1,7 +1,7 @@
 /**
- * Cell — 格子基类。
- * 所有格子类型的共同抽象。
- * 定位基于行列号 (row, col)，不存绝对像素。
+ * Cell — base cell class.
+ * Common abstraction shared by all cell types.
+ * Positioning is based on row/column indices (row, col); no absolute pixels are stored.
  */
 import { getActiveScheme } from '../../config/colors.js';
 import { hexToRgba } from '../../utils/color.js';
@@ -9,14 +9,14 @@ import { hexToRgba } from '../../utils/color.js';
 class Cell {
   /**
    * @param {Object} cfg
-   * @param {string}  cfg.type       — 格子类型标识
-   * @param {number}  cfg.r          — 起始行号（0-based）
-   * @param {number}  cfg.c          — 起始列号（0-based）
-   * @param {number}  [cfg.rs=1]    — 行跨度
-   * @param {number}  [cfg.cs=1]    — 列跨度
-   * @param {Object}  cfg.grid       — 网格常量引用 { CELL_W, CELL_H, GAP, STEP_X, STEP_Y, svgNS }
-   * @param {SVGGElement} cfg.container — 父容器 <g>
-   * @param {dtrPicker} cfg.picker   — 主实例引用
+   * @param {string}  cfg.type       — cell type identifier
+   * @param {number}  cfg.r          — starting row index (0-based)
+   * @param {number}  cfg.c          — starting column index (0-based)
+   * @param {number}  [cfg.rs=1]    — row span
+   * @param {number}  [cfg.cs=1]    — column span
+   * @param {Object}  cfg.grid       — grid constants reference { CELL_W, CELL_H, GAP, STEP_X, STEP_Y, svgNS }
+   * @param {SVGGElement} cfg.container — parent container <g>
+   * @param {dtrPicker} cfg.picker   — main instance reference
    */
   constructor(cfg) {
     this.type = cfg.type;
@@ -27,52 +27,52 @@ class Cell {
     this.g = cfg.grid;
     this.container = cfg.container;
     this.picker = cfg.picker;
-    /** @type {string|null} 背景色，由基类 render() 自动绘制 */
+    /** @type {string|null} Background color, automatically drawn by the base render(). */
     this.bgColor = cfg.bgColor || null;
-    /** @type {SVGElement[]} 此格子创建的所有 SVG 元素 */
+    /** @type {SVGElement[]} All SVG elements created by this cell. */
     this.elements = [];
-    /** @type {boolean} 默认允许 hover，子类可设为 false 禁止 */
+    /** @type {boolean} Hover enabled by default; subclasses may set to false to disable. */
     this._hoverEnabled = true;
-    /** @type {boolean} 当前是否处于 hover 高亮状态 */
+    /** @type {boolean} Whether the cell is currently in a hover-highlight state. */
     this._isHovered = false;
-    /** @type {SVGRectElement|null} 热区 DOM 元素引用 */
+    /** @type {SVGRectElement|null} Reference to the hit area DOM element. */
     this._hitRect = null;
-    // ──── 调试边框（基类属性，所有子类强制继承）────
-    /** @type {string} 边框颜色，空字符串=不显示 */
+    // ──── Debug border (base-class property, forced on all subclasses) ────
+    /** @type {string} Border color; empty string means no border. */
     this._borderColor = '#000000';
-    /** @type {number} 边框宽度（px），设为 0 禁用调试边框 */
+    /** @type {number} Border width (px); set to 0 to disable the debug border. */
     this._borderWidth = 0;
-    /** @type {boolean} 是否跳过自动 GAP（用于绝对定位的格子）
-     *  注：当前无读取方，保留备用（用户确认保留，勿删） */
+    /** @type {boolean} Whether to skip the automatic GAP (for absolutely positioned cells)
+     *  Note: no current readers; kept for future use (user confirmed to keep, do not delete). */
     this._skipGridGap = false;
   }
 
-  // ──── 坐标计算（由 r/c/rs/cs 换算，不存绝对值）────
+  // ──── Coordinate calculation (derived from r/c/rs/cs; no absolute values stored) ────
 
-  /** @returns {number} 左边缘 x */
+  /** @returns {number} Left edge x. */
   get x() { return this.g.GAP + this.c * this.g.STEP_X; }
-  /** @returns {number} 上边缘 y = GAP + r × STEP_Y */
+  /** @returns {number} Top edge y = GAP + r × STEP_Y. */
   get y() { return this.g.GAP + this.r * this.g.STEP_Y; }
-  /** @returns {number} 宽度 = cs × CELL_W + (cs-1) × GAP */
+  /** @returns {number} Width = cs × CELL_W + (cs-1) × GAP. */
   get w() { return this.cs * this.g.CELL_W + (this.cs - 1) * this.g.GAP; }
-  /** @returns {number} 高度 = rs × CELL_H + (rs-1) × GAP */
+  /** @returns {number} Height = rs × CELL_H + (rs-1) × GAP. */
   get h() { return this.rs * this.g.CELL_H + (this.rs - 1) * this.g.GAP; }
 
-  // ──── 默认样式 getter（子类可覆盖）────
+  // ──── Default style getters (overridable by subclasses) ────
 
-  /** @returns {string} 默认字号 */
+  /** @returns {string} Default font size. */
   get textSize()   { return '13'; }
-  /** @returns {string} 默认字重 */
+  /** @returns {string} Default font weight. */
   get textWeight() { return '500'; }
-  /** @returns {string} 默认文字颜色 */
+  /** @returns {string} Default text color. */
   get textColor()  { return this.picker.options.textColor; }
-  /** @returns {string} 默认 hover 高亮色（基于选中色，7% 透明度） */
+  /** @returns {string} Default hover highlight color (based on the selected color at 7% opacity). */
   get hoverColor() { return hexToRgba(this.picker.options.selectedColor, 0.07); }
 
   /**
-   * 设置/清除此格子的 hover 高亮状态。
-   * 当 picker._hoverDisabled 为 true 时，不允许点亮高亮。
-   * @param {boolean} on - true=点亮高亮, false=清除
+   * Set or clear this cell's hover-highlight state.
+   * Highlighting is not allowed while picker._hoverDisabled is true.
+   * @param {boolean} on - true=highlight, false=clear
    */
   setHover(on) {
     if (!this._hoverEnabled) return;
@@ -84,9 +84,9 @@ class Cell {
   }
 
   /**
-   * 根据偏移量获取当前色系下的背景色。
-   * @param {number} offset - 色系数组的偏移索引（如 month、year+2 等）
-   * @returns {string} 颜色值
+   * Get the background color for the current color scheme at the given offset.
+   * @param {number} offset - offset index into the scheme colors array (e.g. month, year+2)
+   * @returns {string} color value
    */
   _cellColor(offset) {
     const scheme = getActiveScheme(this.picker.options);
@@ -96,23 +96,23 @@ class Cell {
     return schemeColors[(offset + cs) % schemeLen];
   }
 
-  // ──── 生命周期 ────
+  // ──── Lifecycle ────
 
-  /** 创建此格子所需的所有 SVG 元素。子类重写此方法。 */
+  /** Create all SVG elements needed by this cell. Subclasses override this method. */
   render() {
-    // 基类自动绘制背景色
+    // Base class automatically draws the background color
     if (this.bgColor) {
       this._createRect(this.x, this.y, this.w, this.h, { fill: this.bgColor });
     }
   }
 
-  /** 从父容器中移除所有 SVG 元素 */
+  /** Remove all SVG elements from the parent container. */
   destroy() {
     this.elements.forEach(function (el) { el.remove(); });
     this.elements = [];
   }
 
-  // ──── 通用辅助方法（子类 render() 中调用）────
+  // ──── Common helpers (called from subclass render()) ────
 
   _createRect(x, y, w, h, attrs) {
     if (!attrs) attrs = {};

@@ -1,7 +1,7 @@
 /**
- * YearCell — 年列格子。
- * col=0，按纯年段跨行合并为竖长矩形。
- * 年份动画（传送带效果）封装在 startAnim/stopAnim 中。
+ * YearCell — year column cell.
+ * col=0, merged across rows into a tall rectangle per pure year segment.
+ * The year animation (conveyor-belt effect) is encapsulated in startAnim/stopAnim.
  * @extends Cell
  */
 import Cell from './cell.js';
@@ -10,17 +10,17 @@ import { saturateColor } from '../../utils/color.js';
 class YearCell extends Cell {
   /**
    * @param {Object} cfg
-   * @param {number} cfg.year - 年份值
+   * @param {number} cfg.year - year value
    */
   constructor(cfg) {
     super(cfg);
     this.type = 'year';
     this.year = cfg.year;
     this._hoverEnabled = true;
-    /** @type {string|null} 跨年混色行的背景色（由 _renderCalendar 传入），不透明度已预制 */
+    /** @type {string|null} Background color for a blended cross-year row (injected by _renderCalendar); opacity is pre-baked. */
     this.bgFill = cfg.bgFill || null;
 
-    // 年份动画状态
+    // Year animation state
     this._animId = null;
     this._animOldYear = null;
     this._animNewYear = null;
@@ -39,13 +39,13 @@ class YearCell extends Cell {
   }
 
   /**
-   * 启动"传送带"年份切换动画。
+   * Start the "conveyor-belt" year switching animation.
    * @param {number} oldYear
    * @param {number} newYear
-   * @param {number} dir - 1=向上(年份增大), -1=向下
-   * @param {number} cx - 年份列中心 X
-   * @param {number} centerY - 垂直居中 Y
-   * @param {number} areaY - 侧栏内容区顶部 Y
+   * @param {number} dir - 1=up (year increases), -1=down
+   * @param {number} cx - center X of the year column
+   * @param {number} centerY - vertically centered Y
+   * @param {number} areaY - top Y of the sidebar content area
    */
   startAnim(oldYear, newYear, dir, cx, centerY, areaY) {
     this.stopAnim();
@@ -104,7 +104,7 @@ class YearCell extends Cell {
     this._animId = requestAnimationFrame(frame);
   }
 
-  /** 停止年份动画 */
+  /** Stop the year animation. */
   stopAnim() {
     if (this._animId) {
       cancelAnimationFrame(this._animId);

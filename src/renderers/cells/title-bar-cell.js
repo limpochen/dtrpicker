@@ -1,6 +1,6 @@
 /**
- * TitleBarCell — "开始" / "结束" 标题栏。
- * 时间范围模式下显示，横跨两列。
+ * TitleBarCell — "Start" / "End" title bar.
+ * Shown in time-range mode, spanning two columns.
  * @extends Cell
  */
 import Cell from './cell.js';
@@ -8,8 +8,8 @@ import Cell from './cell.js';
 class TitleBarCell extends Cell {
   /**
    * @param {Object} cfg
-   * @param {string} cfg.label - "开始" / "结束"
-   * @param {string} cfg.bgColor - 背景色
+   * @param {string} cfg.label - "Start" / "End"
+   * @param {string} cfg.bgColor - background color
    */
   constructor(cfg) {
     super(cfg);
@@ -21,7 +21,7 @@ class TitleBarCell extends Cell {
     this.spanCols = 2;
   }
 
-  /** 横跨两列宽度 */
+  /** Width spanning two columns. */
   get w() { return this.g.CELL_W * this.spanCols + this.g.GAP; }
 
   get textSize()   { return '13'; }

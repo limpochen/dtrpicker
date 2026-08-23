@@ -1,16 +1,16 @@
 /**
- * DragController.js — 拖拽事件共享层
+ * DragController.js — shared drag event layer
  *
- * 统一管理 window 级别的鼠标/触摸拖拽事件，
- * 消除 dtrPicker 和 TimeWheel 之间的重复监听。
+ * Uniformly manages window-level mouse/touch drag events,
+ * eliminating duplicate listeners between dtrPicker and TimeWheel.
  *
- * 设计原则：
- * - 仅在首次注册 session 时绑定一次 window 事件
- * - 通过 activate(id) 决定当前活跃 session
- * - 只有活跃 session 能收到 onDragMove / onDragEnd
- * - 所有 session 注销后自动解除 window 绑定
+ * Design principles:
+ * - Binds window events only once, on the first session registration
+ * - activate(id) determines the currently active session
+ * - Only the active session receives onDragMove / onDragEnd
+ * - Window listeners are automatically removed once all sessions are unregistered
  *
- * @file       拖拽事件共享层
+ * @file       Shared drag event layer
  * @version    2.1.11
  * @license    MIT
  */
@@ -19,12 +19,12 @@ class DragController {
   constructor() {
     /** @type {Map<string, { onDragMove: Function, onDragEnd: Function }>} */
     this._sessions = new Map();
-    /** @type {string|null} 当前活跃 session id */
+    /** @type {string|null} Currently active session id. */
     this._activeSession = null;
-    /** @type {boolean} 是否已绑定 window 事件 */
+    /** @type {boolean} Whether window events are bound. */
     this._bound = false;
 
-    // 绑定函数引用（用于解除绑定）
+    // Bound function references (used for unbinding)
     this._onMouseMove = null;
     this._onMouseUp = null;
     this._onTouchMove = null;
@@ -33,8 +33,8 @@ class DragController {
   }
 
   /**
-   * 注册一个拖拽 session。
-   * @param {string} id - session 唯一标识
+   * Register a drag session.
+   * @param {string} id - unique session identifier
    * @param {Object} handlers
    * @param {Function} handlers.onDragMove - (clientY) => void
    * @param {Function} handlers.onDragEnd - () => void
@@ -51,8 +51,8 @@ class DragController {
   }
 
   /**
-   * 注销一个拖拽 session。
-   * 全部注销后自动解绑 window 事件。
+   * Unregister a drag session.
+   * Window events are automatically unbound once all sessions are removed.
    * @param {string} id
    */
   unregister(id) {
@@ -62,7 +62,7 @@ class DragController {
   }
 
   /**
-   * 激活某个 session，使其接收后续 move/end 事件。
+   * Activate a session so it receives subsequent move/end events.
    * @param {string} id
    */
   activate(id) {
@@ -92,7 +92,7 @@ class DragController {
 
     this._onTouchMove = function (e) {
       if (!self._activeSession) return;
-      e.preventDefault(); // 拖拽中阻止页面滚动
+      e.preventDefault(); // Prevent page scrolling while dragging
       const s = self._sessions.get(self._activeSession);
       if (s) s.onDragMove(e.touches[0].clientY);
     };
@@ -134,7 +134,7 @@ class DragController {
     this._bound = false;
   }
 
-  /** 销毁：清空所有 session 并解绑 window 事件 */
+  /** Destroy: clear all sessions and unbind window events. */
   destroy() {
     this._sessions.clear();
     this._activeSession = null;

@@ -1,6 +1,6 @@
 /**
- * HeaderBarCell — 通长标题背景渐变条。
- * 横跨整行，由 _syncHeaderColors 注入各列取色值后绘制线性渐变。
+ * HeaderBarCell — full-width header background gradient bar.
+ * Spans the entire row; draws a linear gradient from the per-column sampled colors injected by _syncHeaderColors.
  * @extends Cell
  */
 import Cell from './cell.js';
@@ -10,29 +10,29 @@ class HeaderBarCell extends Cell {
     super(cfg);
     this.type = 'header-bar';
     this._hoverEnabled = false;
-    /** @type {string[]} 各列取色值，由 setHeaderColors 注入 */
+    /** @type {string[]} Sampled color per column, injected by setHeaderColors. */
     this._hColors = [];
   }
 
-  /** 通栏全宽 = 总宽 - 左右 GAP */
+  /** Full bar width = total width - left/right GAP. */
   get w() { return this.picker.SVG_W - this.g.GAP * 2; }
-  /** 格子内容高度 = CELL_H，底部留出 GAP */
+  /** Cell content height = CELL_H, leaving GAP at the bottom. */
   get h() { return this.g.CELL_H; }
-  /** y：从网格上边缘开始 */
+  /** y: starts from the top edge of the grid. */
   get y() { return this.g.GAP; }
-  /** x：从网格左边缘开始 */
+  /** x: starts from the left edge of the grid. */
   get x() { return this.g.GAP; }
 
   /**
-   * 注入各列取色值。
-   * @param {string[]} colors - 各列色值数组
+   * Inject the per-column sampled colors.
+   * @param {string[]} colors - array of per-column color values
    */
   setHeaderColors(colors) {
     this._hColors = colors;
   }
 
   /**
-   * 内部方法：按列物理位置排序的 [color] 数组。
+   * Internal method: array of [color] sorted by physical column position.
    * @returns {string[]}
    * @private
    */
@@ -41,7 +41,8 @@ class HeaderBarCell extends Cell {
     if (!cells || cells.length === 0) return [];
     const fallback = this.picker.options.cellColor;
     const arr = cells.map(function (c, idx) {
-      // 取色值，若未注入则使用 fallback（必要防御，保留；缺失色用格子底色避免渐变 stop 为 null）
+      // Use the sampled color, falling back if not injected (necessary defensive measure, kept;
+      // missing colors use the cell background so gradient stops are never null)
       return { x: c.x, color: this._hColors[idx] || fallback };
     }, this);
     arr.sort(function (a, b) { return a.x - b.x; });

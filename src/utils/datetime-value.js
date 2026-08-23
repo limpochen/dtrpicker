@@ -1,11 +1,11 @@
 /**
- * DateTimeValue — dtrPicker 选中值对象
+ * DateTimeValue — the selected-value object of dtrPicker
  *
- * 封装一个完整的选择结果：起止日期时间 + 选择模式。
- * 负责状态机（handleDateClick）、格式化输出（toJSON/toDate/toParts）、
- * 程序化赋值/清除。不依赖 DOM，不持有回调。
+ * Encapsulates a complete selection result: start/end date-time + selection mode.
+ * Handles the state machine (handleDateClick), formatted output (toJSON/toDate/toParts),
+ * and programmatic set/clear. No DOM dependency, holds no callbacks.
  *
- * @file       选中值对象
+ * @file       Selected-value object
  * @version    2.1.11
  * @license    MIT
  */
@@ -13,7 +13,7 @@
 import DateTime from './date.js';
 
 /**
- * 模式枚举（匹配 options.mode）。
+ * Mode enum (matches options.mode).
  * @enum {string}
  */
 const MODE = {
@@ -25,61 +25,61 @@ const MODE = {
 
 class DateTimeValue {
   /**
-   * @param {string} mode - 选择模式（'date'|'dateTime'|'dateRange'|'dateTimeRange'）
+   * @param {string} mode - Selection mode ('date'|'dateTime'|'dateRange'|'dateTimeRange')
    */
   constructor(mode) {
-    /** @type {string} 选择模式 */
+    /** @type {string} Selection mode */
     this.mode = mode;
-    /** @type {DateTime|null} 起始日期+时间 */
+    /** @type {DateTime|null} Start date + time */
     this.start = null;
-    /** @type {DateTime|null} 结束日期+时间 */
+    /** @type {DateTime|null} End date + time */
     this.end = null;
   }
 
-  // ── 模式判断 ────────────────────────────────────────────────────
+  // ── Mode checks ─────────────────────────────────────────────────
 
-  /** @returns {boolean} 是否启用时间选择 */
+  /** @returns {boolean} Whether time selection is enabled */
   get isTimeEnabled() {
     return this.mode === MODE.SINGLE_DATETIME || this.mode === MODE.RANGE_DATETIME;
   }
 
-  /** @returns {boolean} 是否时间范围模式 */
+  /** @returns {boolean} Whether this is a date-time range mode */
   get isTimeRange() {
     return this.mode === MODE.RANGE_DATETIME;
   }
 
-  /** @returns {boolean} 是否单日期模式 */
+  /** @returns {boolean} Whether this is a single-date mode */
   get isSingle() {
     return this.mode === MODE.SINGLE_DATE || this.mode === MODE.SINGLE_DATETIME;
   }
 
-  /** @returns {boolean} 是否范围模式 */
+  /** @returns {boolean} Whether this is a range mode */
   get isRange() {
     return this.mode === MODE.RANGE_DATE || this.mode === MODE.RANGE_DATETIME;
   }
 
-  // ── 日期选择状态机 ──────────────────────────────────────────────
+  // ── Date selection state machine ───────────────────────────────
 
   /**
-   * 处理日期点击 — 纯状态机逻辑。
+   * Handle a date click — pure state machine logic.
    *
-   * 分三种情况：
-   *   单日期模式（date/dateTime）→ 点击即替换，end 恒为 null
-   *   同天范围（1天）→ 点不同日则扩展，点同天不变
-   *   其他（空/不同天）→ 起止=点击日（1 天范围）
+   * Three cases:
+   *   Single-date mode (date/dateTime) → click replaces the selection, end stays null
+   *   Same-day range (1 day) → clicking a different day extends the range; clicking the same day does nothing
+   *   Otherwise (empty/different day) → start = end = clicked day (1-day range)
    *
-   * @param {DateTime} d - 被点击的日期（DateTime 实例）
+   * @param {DateTime} d - The clicked date (a DateTime instance)
    * @returns {{ changed: boolean, action: string|null }}
    */
   handleDateClick(d) {
-    // 单日期模式（date/dateTime）：点击即替换，无范围概念，end 恒为 null
+    // Single-date mode (date/dateTime): click replaces the selection; there is no range concept, end stays null
     if (this.isSingle) {
       this.start = d.clone();
       this.end = null;
       return { changed: true, action: 'confirmed' };
     }
 
-    // ── 同天范围 → 扩展 ──
+    // ── Same-day range → extend ──
     if (this.start && this.start.equals(this.end)) {
       if (d.timestamp < this.start.timestamp) {
         this.start = d.clone();
@@ -89,10 +89,10 @@ class DateTimeValue {
       return { changed: true, action: 'confirmed' };
     }
 
-    // ── 空 / 不同天 → 起止=点击日（1 天范围）──
+    // ── Empty / different day → start = end = clicked day (1-day range) ──
     this.start = d.clone();
     this.end = d.clone();
-    // dateTimeRange 模式下同天选择，起止时间设为 00:00 - 23:59
+    // In dateTimeRange mode with a same-day selection, set start/end times to 00:00 - 23:59
     if (this.isTimeRange) {
       this.start.setHour(0).setMinute(0);
       this.end.setHour(23).setMinute(59);
@@ -100,10 +100,10 @@ class DateTimeValue {
     return { changed: true, action: 'confirmed' };
   }
 
-  // ── 输出 ────────────────────────────────────────────────────────
+  // ── Output ──────────────────────────────────────────────────────
 
   /**
-   * 输出为字符串格式 JSON。
+   * Output as a string-format JSON object.
    * { start: "YYYY-MM-DD HH:mm"[, end: "..."] }
    * @returns {Object|null}
    */
@@ -120,7 +120,7 @@ class DateTimeValue {
   }
 
   /**
-   * 输出为原生 Date 对象。
+   * Output as native Date objects.
    * { start: Date[, end: Date] }
    * @returns {Object|null}
    */
@@ -133,7 +133,7 @@ class DateTimeValue {
   }
 
   /**
-   * 输出为展开的数字对象。
+   * Output as an expanded numeric object.
    * { start: {year,month,day,hour,minute}[, end: {...}] }
    * @returns {Object|null}
    */
@@ -152,21 +152,21 @@ class DateTimeValue {
     return val;
   }
 
-  // ── 程序化操作 ──────────────────────────────────────────────────
+  // ── Programmatic operations ────────────────────────────────────
 
   /**
-   * 从字符串范围设置值。
+   * Set the value from a string range.
    * @param {{start:string, end?:string}} range
    */
   setFrom(range) {
     if (!range) return;
-    // 有意兜底：非法日期输入安全失败为 null，不抛错（用户确认保留）
+    // Intentional fallback: invalid date input safely fails to null instead of throwing (kept per user confirmation)
     this.start = DateTime.parse(range.start) || null;
     this.end = range.start && range.end ? (DateTime.parse(range.end) || null) : null;
   }
 
   /**
-   * 清除全部选中状态。
+   * Clear all selected state.
    */
   clear() {
     this.start = null;
@@ -174,7 +174,7 @@ class DateTimeValue {
   }
 
   /**
-   * 从 TimeWheel 对象同步时间值到 DateTime 实例。
+   * Sync time values from a TimeWheel object into the DateTime instances.
    * @param {{ startHour:number, startMinute:number, endHour:number, endMinute:number }} tv
    */
   syncTimeFrom(tv) {

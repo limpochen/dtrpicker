@@ -1,21 +1,21 @@
 /**
- * color.js — dtrPicker 色彩工具函数
+ * color.js — color utility functions for dtrPicker
  *
- * 纯颜色运算工具集，无 DOM 依赖。
+ * A pure color computation utility set with no DOM dependencies.
  *
- * @file       色彩工具函数
+ * @file       Color utility functions
  * @version    2.1.11
  * @license    MIT
  */
 
 /**
- * 将十六进制颜色转换为 rgba 字符串。
- * @param {string} hex - 十六进制颜色（如 '#2f54eb'）
- * @param {number} alpha - 透明度（0-1）
- * @returns {string} rgba 字符串
+ * Convert a hex color to an rgba string.
+ * @param {string} hex - Hex color (e.g. '#2f54eb')
+ * @param {number} alpha - Alpha (opacity) value (0-1)
+ * @returns {string} rgba string
  */
 export function hexToRgba(hex, alpha) {
-  // 注：无非法输入防护，调用方须传合法 #rrggbb（如色板颜色），否则 parseInt 得 NaN
+  // Note: no invalid input guard; the caller must pass a valid #rrggbb (e.g. palette colors), otherwise parseInt yields NaN
   const r = parseInt(hex.slice(1, 3), 16);
   const g = parseInt(hex.slice(3, 5), 16);
   const b = parseInt(hex.slice(5, 7), 16);
@@ -23,14 +23,14 @@ export function hexToRgba(hex, alpha) {
 }
 
 /**
- * 按比例混合两个十六进制颜色。
- * @param {string} c1 - 颜色 1（十六进制字符串）
- * @param {string} c2 - 颜色 2
- * @param {number} ratio - c2 的权重（0=纯 c1, 1=纯 c2）
- * @returns {string} 混合后的颜色，格式 #rrggbb
+ * Blend two hex colors by a given ratio.
+ * @param {string} c1 - Color 1 (hex string)
+ * @param {string} c2 - Color 2
+ * @param {number} ratio - Weight of c2 (0=pure c1, 1=pure c2)
+ * @returns {string} The blended color, in #rrggbb format
  */
 export function blendColors(c1, c2, ratio) {
-  // 注：无非法输入防护，调用方须传合法 #rrggbb，否则 parseInt 得 NaN
+  // Note: no invalid input guard; the caller must pass a valid #rrggbb, otherwise parseInt yields NaN
   const r1 = parseInt(c1.slice(1, 3), 16);
   const g1 = parseInt(c1.slice(3, 5), 16);
   const b1 = parseInt(c1.slice(5, 7), 16);
@@ -44,15 +44,16 @@ export function blendColors(c1, c2, ratio) {
 }
 
 /**
- * 在 HSL 空间中降低颜色的明度（Lightness），保持色相和饱和度不变。
- * 使侧栏月份列比日期格略暗，视觉上形成层次区分。
+ * Reduce a color's lightness in the HSL color space while keeping hue and saturation unchanged.
+ * Makes the sidebar month column slightly darker than the date cells to create visual hierarchy.
  *
- * 使用闭包缓存 memoize 结果：色板颜色数 × factor 种类 ≤ 5×3 = 15 种组合，
- * 首次渲染后全部命中缓存，后续 O(1) 查表返回，避免每帧反复 HSL 变换。
+ * Memoizes results in a closure cache: palette color count × factor types ≤ 5×3 = 15 combinations.
+ * After the first render all lookups hit the cache and return in O(1), avoiding repeated
+ * HSL conversions on every frame.
  *
- * @param {string} hex - 颜色值（十六进制字符串）
- * @param {number} factor - 明度降低比例（0=不变, 0.08=降8%）
- * @returns {string} 调暗后的颜色
+ * @param {string} hex - Color value (hex string)
+ * @param {number} factor - Lightness reduction ratio (0=unchanged, 0.08=reduce by 8%)
+ * @returns {string} The darkened color
  */
 export const saturateColor = (function () {
   const cache = {};

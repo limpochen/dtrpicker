@@ -1,24 +1,24 @@
 /**
- * i18n.js — 国际化语言包字典
+ * i18n.js — Internationalization locale dictionary
  *
- * 提供多语言文本翻译，通过 dtrPickerI18n.getLocale(locale) 获取。
- * locale 格式为 BCP 47 标签（如 'zh-CN', 'en-US'）。
- * 未匹配时自动回退到英语（en-US）。
+ * Provides multilingual text translations, retrieved via dtrPickerI18n.getLocale(locale).
+ * The locale format is a BCP 47 tag (e.g. 'zh-CN', 'en-US').
+ * Automatically falls back to English (en-US) when no match is found.
  *
- * @file       国际化语言包
+ * @file       Internationalization locale pack
  * @version    2.1.11
  * @license    MIT
  */
 
 /**
- * 所有语言包。
- * 每周日数组索引：0=周日, 1=周一 … 6=周六
+ * All locale packs.
+ * Weekday array index: 0=Sunday, 1=Monday … 6=Saturday
  * @const {Object<string, Object>}
  */
 export const locales = {
 
     /* ==============================
-       简体中文 (Chinese Simplified)
+       Simplified Chinese
        ============================== */
     'zh-CN': {
       weekdays: ['日', '一', '二', '三', '四', '五', '六'],
@@ -38,7 +38,7 @@ export const locales = {
     },
 
     /* ==============================
-       英语 (English)
+       English
        ============================== */
     'en-US': {
       weekdays: ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'],
@@ -57,7 +57,7 @@ export const locales = {
     },
 
     /* ==============================
-       繁体中文 (Chinese Traditional)
+       Traditional Chinese
        ============================== */
     'zh-TW': {
       weekdays: ['日', '一', '二', '三', '四', '五', '六'],
@@ -77,7 +77,7 @@ export const locales = {
     },
 
     /* ==============================
-       日文 (Japanese)
+       Japanese
        ============================== */
     'ja-JP': {
       weekdays: ['日', '月', '火', '水', '木', '金', '土'],
@@ -97,7 +97,7 @@ export const locales = {
     },
 
     /* ==============================
-       韩文 (Korean)
+       Korean
        ============================== */
     'ko-KR': {
       weekdays: ['일', '월', '화', '수', '목', '금', '토'],
@@ -117,7 +117,7 @@ export const locales = {
     },
 
     /* ==============================
-       俄文 (Russian)
+       Russian
        ============================== */
     'ru-RU': {
       weekdays: ['Вс', 'Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб'],
@@ -136,7 +136,7 @@ export const locales = {
     },
 
     /* ==============================
-       法文 (French)
+       French
        ============================== */
     'fr-FR': {
       weekdays: ['Dim', 'Lun', 'Mar', 'Mer', 'Jeu', 'Ven', 'Sam'],
@@ -155,7 +155,7 @@ export const locales = {
     },
 
     /* ==============================
-       德文 (German)
+       German
        ============================== */
     'de-DE': {
       weekdays: ['So', 'Mo', 'Di', 'Mi', 'Do', 'Fr', 'Sa'],
@@ -174,7 +174,7 @@ export const locales = {
     },
 
     /* ==============================
-       西班牙文 (Spanish)
+       Spanish
        ============================== */
     'es-ES': {
       weekdays: ['Dom', 'Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb'],
@@ -193,7 +193,7 @@ export const locales = {
     },
 
     /* ==============================
-       葡萄牙文 (Portuguese)
+       Portuguese
        ============================== */
     'pt-BR': {
       weekdays: ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'],
@@ -212,7 +212,7 @@ export const locales = {
     },
 
     /* ==============================
-       意大利文 (Italian)
+       Italian
        ============================== */
     'it-IT': {
       weekdays: ['Dom', 'Lun', 'Mar', 'Mer', 'Gio', 'Ven', 'Sab'],
@@ -231,7 +231,7 @@ export const locales = {
     },
 
     /* ==============================
-       泰文 (Thai)
+       Thai
        ============================== */
     'th-TH': {
       weekdays: ['อา', 'จ', 'อ', 'พ', 'พฤ', 'ศ', 'ส'],
@@ -250,7 +250,7 @@ export const locales = {
     },
 
     /* ==============================
-       荷兰文 (Dutch)
+       Dutch
        ============================== */
     'nl-NL': {
       weekdays: ['Zo', 'Ma', 'Di', 'Wo', 'Do', 'Vr', 'Za'],
@@ -269,7 +269,7 @@ export const locales = {
     },
 
     /* ==============================
-       波兰文 (Polish)
+       Polish
        ============================== */
     'pl-PL': {
       weekdays: ['Nd', 'Pn', 'Wt', 'Śr', 'Cz', 'Pt', 'Sb'],
@@ -288,7 +288,7 @@ export const locales = {
     },
 
     /* ==============================
-       土耳其文 (Turkish)
+       Turkish
        ============================== */
     'tr-TR': {
       weekdays: ['Paz', 'Pzt', 'Sal', 'Çar', 'Per', 'Cum', 'Cmt'],
@@ -307,7 +307,7 @@ export const locales = {
     },
 
     /* ==============================
-       越南文 (Vietnamese)
+       Vietnamese
        ============================== */
     'vi-VN': {
       weekdays: ['CN', 'T2', 'T3', 'T4', 'T5', 'T6', 'T7'],
@@ -326,7 +326,7 @@ export const locales = {
     },
 
     /* ==============================
-       印尼文 (Indonesian)
+       Indonesian
        ============================== */
     'id-ID': {
       weekdays: ['Min', 'Sen', 'Sel', 'Rab', 'Kam', 'Jum', 'Sab'],
@@ -345,31 +345,31 @@ export const locales = {
     },
   };
 
-/** 全局默认语言——检测不到语言时的唯一兜底 */
+/** Global default locale — the only fallback when no language can be detected */
 export const DEFAULT_LOCALE = 'en-US';
 
 /**
- * 获取指定语言的语言包字典。
+ * Returns the locale dictionary for the specified language.
  *
- * 查找顺序：
- * 1. 完全匹配（如 'zh-CN'）
- * 2. 语言前缀匹配（如 'zh' → 'zh-CN'）
- * 3. 回退到全局默认语言 DEFAULT_LOCALE
+ * Lookup order:
+ * 1. Exact match (e.g. 'zh-CN')
+ * 2. Language prefix match (e.g. 'zh' → 'zh-CN')
+ * 3. Fall back to the global default locale DEFAULT_LOCALE
  *
- * @param {string} [locale] - BCP 47 语言标签。为空时自动检测浏览器语言。
- * @returns {Object} 语言包对象
+ * @param {string} [locale] - BCP 47 language tag. When empty, the browser language is auto-detected.
+ * @returns {Object} The locale dictionary object
  */
 export function getLocale(locale) {
     if (!locale) {
       locale = (navigator.language || navigator.browserLanguage || DEFAULT_LOCALE);
     }
-    // 完全匹配
+    // Exact match
     if (locales[locale]) return locales[locale];
-    // 语言前缀匹配（如 'zh' → 'zh-CN'）
+    // Language prefix match (e.g. 'zh' → 'zh-CN')
     const lang = locale.split('-')[0];
     for (const key of Object.keys(locales)) {
       if (key.startsWith(lang)) return locales[key];
     }
-    // 终极回退（用户确认保留的预期兜底）
+    // Final fallback (expected fallback kept by user request)
     return locales[DEFAULT_LOCALE];
   }

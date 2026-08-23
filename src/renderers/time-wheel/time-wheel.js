@@ -1,7 +1,8 @@
 /**
- * TimeWheel — 时间滚轮选择器
+ * TimeWheel — time wheel picker
  *
- * 在给定的 SVG <g> 容器内渲染时分滚轮列，支持鼠标滚轮滚动和拖拽调节。
+ * Renders hour/minute wheel columns inside the given SVG <g> container,
+ * supporting mouse wheel scrolling and drag adjustment.
  */
 import TimeCell from '../cells/time-cell.js';
 import TitleBarCell from '../cells/title-bar-cell.js';
@@ -44,16 +45,16 @@ class TimeWheel {
     this._dragState = null;
     this._dragActive = false;
     this._colLayouts = {};
-    /** @type {Object<string,string>} 各列背景色映射（供放大器直读） */
+    /** @type {Object<string,string>} Background color per column (read directly by the magnifier). */
     this._colBgColors = {};
-    /** @type {Object<string,TimeCell>} 各列 TimeCell 实例映射 */
+    /** @type {Object<string,TimeCell>} TimeCell instance per column. */
     this._timeCells = {};
-    /** @type {boolean} 本次拖拽是否发生过位移（用于区分点击/拖拽） */
+    /** @type {boolean} Whether the current drag has moved (used to distinguish click vs drag). */
     this._dragMoved = false;
 
-    /** @type {DragController} 拖拽事件共享层（由父级传入） */
+    /** @type {DragController} Shared drag event layer (provided by the parent). */
     this._dragController = cfg.dragController;
-    /** @type {string} 此 TimeWheel 的 session ID */
+    /** @type {string} Session ID of this TimeWheel. */
     this._dragSessionId = cfg.dragSessionId;
     this._isDragActive = cfg.isDragActive;
 
@@ -296,8 +297,8 @@ class TimeWheel {
       if (!type) return;
       e.preventDefault();
       onDragStart(e.clientY, type);
-      // onDragStart → onDragStateChange(true) → clearHoverFills 清掉了所有热区，
-      // 需要重新在被点击的热区上设置点击反馈色和文字白色
+      // onDragStart → onDragStateChange(true) → clearHoverFills clears all hit areas,
+      // so re-apply the click feedback color and white text on the clicked hit area
       if (e.target.style) {
         e.target.style.fill = self.selectedColor;
         if (e.target._timeText) {
@@ -352,7 +353,7 @@ class TimeWheel {
       });
     }
 
-    // 点击数值直接设置
+    // Click a value to set it directly
     this._onTimeGroupClick = function (e) {
       if (self._dragMoved) return;
       const type = getType(e);
@@ -371,7 +372,7 @@ class TimeWheel {
     this.timeGroup.addEventListener('click', this._onTimeGroupClick);
   }
 
-  /** @private 直接设置某列的值为指定数值 */
+  /** @private Directly set a column's value to the given number. */
   _setTimeValue(type, val) {
     if (type === 'startHour' || type === 'hour') this.startHour = val;
     else if (type === 'startMinute' || type === 'minute') this.startMinute = val;

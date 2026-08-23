@@ -1,6 +1,6 @@
 /**
- * HeaderCell — 表头文字格。
- * 每列一个对象，无 hover。
+ * HeaderCell — header text cell.
+ * One object per column; no hover.
  * @extends Cell
  */
 import Cell from './cell.js';

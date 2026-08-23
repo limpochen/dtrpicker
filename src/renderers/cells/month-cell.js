@@ -1,6 +1,6 @@
 /**
- * MonthCell — 月列格子。
- * col=1，支持纯月段竖长矩形和跨月混合行（blended）。
+ * MonthCell — month column cell.
+ * col=1, supports tall rectangles for pure month segments and blended rows spanning months.
  * @extends Cell
  */
 import Cell from './cell.js';
@@ -9,11 +9,11 @@ import { saturateColor, blendColors } from '../../utils/color.js';
 class MonthCell extends Cell {
   /**
    * @param {Object} cfg
-   * @param {number} cfg.month - 月份值 (0-11)
-   * @param {boolean} [cfg.isPureSegment=false] - 是否纯月段
-   * @param {boolean} [cfg.blended=false] - 是否跨月混合行
-   * @param {Object} [cfg.blendColors] - 混合色 { c1, c2, ratio }
-   * @param {string} [cfg.label] - 月份标签，如 "1月"
+   * @param {number} cfg.month - month value (0-11)
+   * @param {boolean} [cfg.isPureSegment=false] - whether it is a pure month segment
+   * @param {boolean} [cfg.blended=false] - whether it is a blended row spanning months
+   * @param {Object} [cfg.blendColors] - blend colors { c1, c2, ratio }
+   * @param {string} [cfg.label] - month label, e.g. "Jan"
    */
   constructor(cfg) {
     super(cfg);

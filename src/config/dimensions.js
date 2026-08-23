@@ -1,65 +1,66 @@
 /**
- * SVG 渲染器共用尺寸常量。
+ * Shared dimension constants for the SVG renderer.
  *
- * 网格布局常量和今日按钮尺寸常量集中在此处定义，
- * 避免渲染逻辑各处维护不同的硬编码值。
+ * Grid layout constants and today-button dimension constants are
+ * defined here in one place, avoiding scattered hardcoded values
+ * maintained across the rendering logic.
  *
  * @const {Object}
  */
 export const DIM = {
 
   // ══════════════════════════════════════════════════════════════
-  //  网格布局常量
+  //  Grid Layout Constants
   // ══════════════════════════════════════════════════════════════
 
-  /** 单元格宽度（px）
-   * 注：移动端超出页面时由 SvgRenderer._applyScale() 整体 CSS transform 缩放，
-   * 无需单独区分移动端 CELL_W。 */
+  /** Cell width (px)
+   * Note: when it overflows on mobile, the whole SVG is scaled via CSS transform
+   * by SvgRenderer._applyScale(), so a separate mobile CELL_W is not needed. */
   CELL_W: 40,
-  /** 单元格高度（px） */
+  /** Cell height (px) */
   CELL_H: 36,
-  /** 网格间隙（px） */
+  /** Grid gap (px) */
   GAP: 1,
-  /** 侧边栏列数（年 + 月） */
+  /** Number of sidebar columns (year + month) */
   SIDEBAR_COLS: 2,
-  /** 日期列起始索引（在侧边栏之后） */
+  /** Start index of date columns (after the sidebar) */
   DATE_COL_START: 2,
-  /** 日期列数（一周 7 天） */
+  /** Number of date columns (7 days a week) */
   DATE_COLS: 7,
-  /** 时间列起始索引 */
+  /** Start index of time columns */
   TIME_COL_START: 9,
-  /** 时间列数（时 + 分） */
+  /** Number of time columns (hour + minute) */
   TIME_COLS: 2,
-  /** 表头行号 */
+  /** Header row number */
   HEADER_ROW: 0,
-  /** 日历区域可见行数（视口内） */
+  /** Number of visible rows in the calendar area (within the viewport) */
   VISIBLE_DATE_ROWS: 8,
-  /** 上下缓冲行数（虚拟滚动用） */
+  /** Number of buffer rows above and below (for virtual scrolling) */
   BUFFER_ROWS: 12,
 
-  /** 版本号 */
+  /** Version number */
   VERSION: 'v2.1.11',
-  /** 是否在容器左下角显示版本号 */
+  /** Whether to display the version number in the bottom-left corner of the container */
   SHOW_VERSION: true,
 
   // ══════════════════════════════════════════════════════════════
-  //  回到今日按钮常量
+  //  Back-to-Today Button Constants
   // ══════════════════════════════════════════════════════════════
 
   TODAY_BTN: {
-    /** 按钮外径（px） */
+    /** Button outer diameter (px) */
     SIZE: 24,
-    /** 按钮距离左下角的边距（px） */
+    /** Button margin from the bottom-left corner (px) */
     MARGIN: 16,
-    /** 外圈圆环半径（px） */
+    /** Outer ring radius (px) */
     RING_R: 7,
-    /** 中心圆点半径（px） */
+    /** Center dot radius (px) */
     DOT_R: 3,
-    /** 外圈圆环描边宽度（px） */
+    /** Outer ring stroke width (px) */
     STROKE_W: 1.5,
-    /** 阴影水平偏移（px，正值向右） */
+    /** Shadow horizontal offset (px, positive shifts right) */
     SHADOW_X: 2,
-    /** 阴影垂直偏移（px，正值向下） */
+    /** Shadow vertical offset (px, positive shifts down) */
     SHADOW_Y: 2,
   },
 };

@@ -1,9 +1,10 @@
 /**
- * SvgRenderer — SVG 渲染器
+ * SvgRenderer — SVG renderer
  *
- * 封装 dtrPicker 的全部 SVG 渲染逻辑，包括 DOM 创建、日历渲染、
- * 拖拽/滚轮事件管理。主类通过此渲染器接口操作 SVG 内容，
- * 不直接接触 SVG 实现细节。
+ * Encapsulates all of dtrPicker's SVG rendering logic, including DOM creation,
+ * calendar rendering, and drag/wheel event management. The main class operates
+ * on the SVG content through this renderer interface without touching
+ * SVG implementation details.
  */
 
 import { getActiveScheme, HARDCODED } from '../config/colors.js';
@@ -26,7 +27,7 @@ import TimeWheel from './time-wheel/time-wheel.js';
 
 class SvgRenderer {
   /**
-   * @param {dtrPicker} picker - 主实例引用
+   * @param {dtrPicker} picker - main instance reference
    */
   constructor(picker) {
     this.picker = picker;
@@ -34,7 +35,7 @@ class SvgRenderer {
     this.value = picker.value;
     this._i18n = picker._i18n;
 
-    // SVG DOM 元素
+    // SVG DOM elements
     /** @type {HTMLDivElement|null} */
     this.container = null;
     /** @type {HTMLDivElement|null} */
@@ -50,13 +51,13 @@ class SvgRenderer {
     /** @type {string} */
     this.svgNS = 'http://www.w3.org/2000/svg';
 
-    // 网格常量（CELL_W 取自 DIM.CELL_W，STEP_X/STEP_Y 在 createPanel 中计算）
+    // Grid constants (CELL_W comes from DIM.CELL_W; STEP_X/STEP_Y are computed in createPanel)
     this.CELL_W = 0;
     this.CELL_H = DIM.CELL_H;
     this.GAP = DIM.GAP;
     this.STEP_X = 0;
     this.STEP_Y = 0;
-    /** 是否显示侧边栏（年/月列） */
+    /** Whether the sidebar (year/month column) is shown. */
     this._hasSidebar = this.options.yearMonthMode === 'column';
     this.SIDEBAR_COLS = this._hasSidebar ? DIM.SIDEBAR_COLS : 0;
     this.DATE_COL_START = this._hasSidebar ? DIM.DATE_COL_START : 0;
@@ -69,7 +70,7 @@ class SvgRenderer {
     this.VISIBLE_DATE_ROWS = DIM.VISIBLE_DATE_ROWS;
     this.BUFFER_ROWS = DIM.BUFFER_ROWS;
 
-    // 绘制区域
+    // Drawing areas
     /** @type {DrawingArea|null} */
     this.calendarArea = null;
     /** @type {DrawingArea|null} */
@@ -77,7 +78,7 @@ class SvgRenderer {
     /** @type {DrawingArea|null} */
     this.headerArea = null;
 
-    // 拖拽
+    // Dragging
     /** @type {DragController} */
     this.dragController = new DragController();
     /** @type {boolean} */
@@ -93,51 +94,51 @@ class SvgRenderer {
     /** @type {boolean} */
     this._hoverDisabled = false;
 
-    // 滚轮动画
+    // Wheel animation
     /** @type {number|null} */
     this._wheelAnimId = null;
     /** @type {number|null} */
     this._lastRenderRow = null;
 
-    // 格子管理
+    // Cell management
     /** @type {CellManager} */
     this.cellManager = new CellManager();
 
-    // 表头
+    // Header
     /** @type {HeaderCell[]} */
     this._headerCells = [];
     /** @type {HeaderBarCell|null} */
     this.headerBarCell = null;
 
-    // 时间滚轮
+    // Time wheel
     /** @type {TimeWheel|null} */
     this.timeWheel = null;
 
-    // ── 从 PickerState 迁入的滚动/渲染状态 ──
-    /** @type {number} 当前垂直滚动偏移（px） */
+    // ── Scroll/render state migrated from PickerState ──
+    /** @type {number} Current vertical scroll offset (px). */
     this._translateY = 0;
-    /** @type {number} 滚轮目标偏移（平滑动画用） */
+    /** @type {number} Wheel target offset (used for smooth animation). */
     this._wheelTargetY = 0;
-    /** @type {number} 色系随机偏移 */
+    /** @type {number} Random color scheme shift. */
     this._colorShift = Math.floor(Math.random() * 100);
-    /** @type {number|null} 当前可见年份 */
+    /** @type {number|null} Currently visible year. */
     this._visibleYear = null;
-    /** @type {DateTime|null} 鼠标悬停日期 */
+    /** @type {DateTime|null} Hovered date. */
     this._hoverDate = null;
-    /** @type {DateTime} 今日（构造时快照） */
+    /** @type {DateTime} Today (snapshot taken at construction). */
     this._today = DateTime.today();
-    /** @type {DateTime} startOfWeekZero 基准 */
+    /** @type {DateTime} startOfWeekZero anchor. */
     this._startOfWeekZero = this._today.startOfWeek(this.options.firstDay === 0);
 
-    // 暴露给 picker，供 Cell 子类访问
+    // Expose to picker so Cell subclasses can access it
     this.picker._colorShift = this._colorShift;
 
-    /** 移动端 CSS scale 因子（1 = 无缩放） */
+    /** Mobile CSS scale factor (1 = no scaling). */
     this._scaleFactor = 1;
   }
 
   // ════════════════════════════════════════════════════════════════
-  //  面板创建
+  //  Panel Creation
   // ════════════════════════════════════════════════════════════════
 
   /** @private */
@@ -168,15 +169,16 @@ class SvgRenderer {
   }
 
   /**
-   * 移动端自适应缩放。
+   * Mobile adaptive scaling.
    *
-   * 当移动端 SVG 总宽超出可用宽度时，对 SVG 应用 CSS transform: scale()，
-   * SVG 内部坐标系统不变，所有绘制元素无感知。
-   * 这是 GPU 合成层操作，不触发 SVG 重计算。
+   * When the mobile SVG total width exceeds the available width, applies
+   * CSS transform: scale() to the SVG. The SVG internal coordinate system is
+   * unchanged and all drawn elements are unaware of it.
+   * This is a GPU compositing-layer operation and does not trigger SVG reflow.
    *
-   * 注意：仅设 transform 不修改 CSS width/height，因为
-   * getBoundingClientRect() 返回 post-transform 值，
-   * 坐标映射（_isInDateArea 等）自动正确。
+   * Note: only the transform is set; CSS width/height are not modified because
+   * getBoundingClientRect() returns post-transform values, so coordinate mapping
+   * (_isInDateArea etc.) stays correct automatically.
    * @private
    */
   _applyScale() {
@@ -186,7 +188,7 @@ class SvgRenderer {
       return;
     }
 
-    // 面板左右安全边距
+    // Horizontal safety margin around the panel
     const MARGIN = 16;
     const availableWidth = window.innerWidth - MARGIN * 2;
 
@@ -201,7 +203,7 @@ class SvgRenderer {
     this.svg.style.transformOrigin = '0 0';
     this.svg.style.transform = 'scale(' + scale + ')';
 
-    // 面板宽度同步设为 scaledW（panel overflow:hidden 裁剪 SVG 溢出）
+    // Set the panel width to scaledW in sync (panel overflow:hidden clips the overflowing SVG)
     this.panel.style.width = (this.SVG_W * scale) + 'px';
   }
 
@@ -212,12 +214,12 @@ class SvgRenderer {
     if (!this.svg) return;
     this.svg.style.transformOrigin = '';
     this.svg.style.transform = '';
-    // 还原面板宽度
+    // Restore panel width
     this.panel.style.width = '';
   }
 
   /**
-   * 创建下拉面板的完整 DOM 结构并挂载到 body。
+   * Create the full DOM structure of the dropdown panel and mount it to the body.
    */
   createPanel() {
     this.CELL_W = this._detectCellW();
@@ -226,7 +228,7 @@ class SvgRenderer {
     this.SVG_H = this.CELL_H * 9 + this.GAP * 10;
     this._updateSVGSize();
 
-    // 外层容器
+    // Outer container
     this.container = document.createElement('div');
     this.container.className = 'dtrpicker-container';
     this.container.style.position = 'fixed';
@@ -235,7 +237,7 @@ class SvgRenderer {
     this.container.style.transform = 'translateY(-8px)';
     this.container.style.transition = 'opacity 0.2s, visibility 0.2s, transform 0.2s';
 
-    // 面板
+    // Panel
     this.panel = document.createElement('div');
     this.panel.className = 'dtrpicker-panel';
     this.panel.style.background = this.options.cellColor;
@@ -257,7 +259,7 @@ class SvgRenderer {
     this.svg.style.touchAction = 'none';
     this.svg.style.userSelect = 'none';
 
-    // 灰色背景铺底
+    // Gray background base
     this.svgBg = document.createElementNS(this.svgNS, 'rect');
     this.svgBg.setAttribute('x', '0');
     this.svgBg.setAttribute('y', '0');
@@ -266,14 +268,14 @@ class SvgRenderer {
     this.svgBg.setAttribute('fill', this.options.gridColor);
     this.svg.appendChild(this.svgBg);
 
-    // 网格常量引用
+    // Grid constants reference
     const totalCols = this._calcTotalCols();
     const gridRef = {
       CELL_W: this.CELL_W, CELL_H: this.CELL_H, GAP: this.GAP,
       STEP_X: this.STEP_X, STEP_Y: this.STEP_Y, svgNS: this.svgNS,
     };
 
-    // 三个绘制区域（顺序：calendar → time → header）
+    // Three drawing areas (order: calendar → time → header)
     this.calendarArea = new DrawingArea({
       r: 1, c: 0, rs: 8, cs: this.SIDEBAR_COLS + this.DATE_COLS, scrollable: true,
       parentSvg: this.svg, containerId: this.picker._instanceId + '-calendar',
@@ -290,7 +292,7 @@ class SvgRenderer {
       grid: gridRef, picker: this.picker,
     });
 
-    // 日历区域视口裁剪：嵌套 <svg>
+    // Calendar area viewport clipping: nested <svg>
     const vpX = this.GAP;
     const vpY = this.GAP + 1 * this.STEP_Y;
     const vpW = (this.SIDEBAR_COLS + this.DATE_COLS) * this.STEP_X - this.GAP;
@@ -311,7 +313,7 @@ class SvgRenderer {
       this.svg.insertBefore(defs, this.svg.firstChild);
     }
 
-    // 标题栏裁剪
+    // Header bar clipping
     const hdrClipId = this.picker._instanceId + '-hdr-clip';
     const hdrClip = document.createElementNS(this.svgNS, 'clipPath');
     hdrClip.setAttribute('id', hdrClipId);
@@ -324,7 +326,7 @@ class SvgRenderer {
     defs.appendChild(hdrClip);
     this.headerArea.container.setAttribute('clip-path', 'url(#' + hdrClipId + ')');
 
-    // 时间区裁剪
+    // Time area clipping
     const timeClipId = this.picker._instanceId + '-time-clip';
     const timeClip = document.createElementNS(this.svgNS, 'clipPath');
     timeClip.setAttribute('id', timeClipId);
@@ -337,21 +339,21 @@ class SvgRenderer {
     defs.appendChild(timeClip);
     this.timeArea.container.setAttribute('clip-path', 'url(#' + timeClipId + ')');
 
-    // 年份动画层
+    // Year animation layer
     this.yearGroup = document.createElementNS(this.svgNS, 'g');
     this.yearGroup.setAttribute('id', this.picker._instanceId + '-year');
     this.svg.appendChild(this.yearGroup);
 
-    // 今日定位按钮层
+    // Today button layer
     this.todayBtnGroup = document.createElementNS(this.svgNS, 'g');
     this.todayBtnGroup.setAttribute('id', this.picker._instanceId + '-today-btn');
     this.svg.appendChild(this.todayBtnGroup);
 
-    // 组装
+    // Assemble
     this.panel.appendChild(this.svg);
     this.container.appendChild(this.panel);
 
-    // 版本号（由 DIM.SHOW_VERSION 控制是否显示）
+    // Version label (visibility controlled by DIM.SHOW_VERSION)
     if (DIM.SHOW_VERSION) {
       const verEl = document.createElement('div');
       verEl.textContent = DIM.VERSION;
@@ -361,7 +363,7 @@ class SvgRenderer {
 
     document.body.appendChild(this.container);
 
-    // 同步渲染器属性到主实例（Cell 子类通过 this.picker.xxx 访问）
+    // Sync renderer properties to the main instance (Cell subclasses access them via this.picker.xxx)
     this.picker.svg = this.svg;
     this.picker.SVG_W = this.SVG_W;
     this.picker.yearGroup = this.yearGroup;
@@ -370,17 +372,17 @@ class SvgRenderer {
     this.picker._hoverDisabled = this._hoverDisabled;
     this.picker.timeWheel = this.timeWheel;
 
-    // 初始渲染
+    // Initial render
     this.renderWeekHeader();
     this.renderCalendar();
     this._initTimeWheel();
 
-    // 移动端自适应缩放（CSS transform，不影响 SVG 内部坐标）
+    // Mobile adaptive scaling (CSS transform, does not affect SVG internal coordinates)
     this._applyScale();
   }
 
   // ════════════════════════════════════════════════════════════════
-  //  表头渲染
+  //  Header Rendering
   // ════════════════════════════════════════════════════════════════
 
   renderWeekHeader() {
@@ -425,7 +427,7 @@ class SvgRenderer {
       const col = this.DATE_COL_START + i;
       const isWeekend = (this.options.firstDay === 0 && (i === 0 || i === 6))
         || (this.options.firstDay === 1 && (i === 5 || i === 6));
-      // 周末标题使用专门颜色（优先级高于周末日期色）
+      // Weekend titles use a dedicated color (takes precedence over the weekend date color)
       headerCells.push(new HeaderCell({
         r: 0, c: col, rs: 1, cs: 1, grid: grid, picker: this.picker, label: w,
         colorOverride: isWeekend ? this.options.textColorWeekendTitle : null,
@@ -440,13 +442,13 @@ class SvgRenderer {
 
     headerCells.forEach(function (c) { c.render(); });
     this._headerCells = headerCells;
-    // 同步到主实例（HeaderBarCell._sortedColors 通过 this.picker._headerCells 访问）
+    // Sync to the main instance (HeaderBarCell._sortedColors reads this.picker._headerCells)
     this.picker._headerCells = this._headerCells;
     this.picker.headerBarCell = this.headerBarCell;
   }
 
   // ════════════════════════════════════════════════════════════════
-  //  日历渲染
+  //  Calendar Rendering
   // ════════════════════════════════════════════════════════════════
 
   renderCalendar() {
@@ -480,7 +482,7 @@ class SvgRenderer {
       return t > this.value.start.timestamp && t < this.value.end.timestamp;
     };
 
-    // 纯月段
+    // Pure month segments
     const pureSegments = [];
     for (let i = 0; i < TOTAL_ROWS; i++) {
       const rowNum = startRow + i;
@@ -501,7 +503,7 @@ class SvgRenderer {
       }
     }
 
-    // 纯年段
+    // Pure year segments
     const pureYears = [];
     for (let i = 0; i < TOTAL_ROWS; i++) {
       const rowNum = startRow + i;
@@ -522,7 +524,7 @@ class SvgRenderer {
       }
     }
 
-    // 逐行颜色
+    // Per-row colors
     const rowYearColors = {};
     for (let i = 0; i < TOTAL_ROWS; i++) {
       const rowNum = startRow + i;
@@ -556,7 +558,7 @@ class SvgRenderer {
       rowYearColors[rowNum] = saturateColor(yColor, 0.08);
     }
 
-    // YearCell（仅 column 模式显示）
+    // YearCell (only shown in column mode)
     if (this._hasSidebar) {
       const coveredYearRows = {};
       for (let si = 0; si < pureYears.length; si++) {
@@ -584,7 +586,7 @@ class SvgRenderer {
       }
     } // end if _hasSidebar
 
-    // MonthCell（仅 column 模式显示）
+    // MonthCell (only shown in column mode)
     if (this._hasSidebar) {
       const coveredMonthRows = {};
       for (let si = 0; si < pureSegments.length; si++) {
@@ -635,7 +637,7 @@ class SvgRenderer {
       }
     } // end if _hasSidebar
 
-    // 年份文字（仅 column 模式显示）
+    // Year label (only shown in column mode)
     if (this._hasSidebar) {
       this._renderYearLabel(pureYears, startRow, TOTAL_ROWS, this.GAP + this.CELL_W / 2);
     }
@@ -668,7 +670,7 @@ class SvgRenderer {
       }
     }
 
-    // 水印模式：年月水印文字
+    // Watermark mode: year/month watermark text
     if (!this._hasSidebar) {
       const monthRanges = {}; // key: "year-month" => { startRow, endRow }
       for (let i = 0; i < TOTAL_ROWS; i++) {
@@ -702,7 +704,7 @@ class SvgRenderer {
         const rectH = (seg.endRow - seg.startRow + 1) * this.CELL_H
           + (seg.endRow - seg.startRow) * this.GAP;
 
-        // 年月水印文字（由 i18n 数据的 yearFirst 字段驱动格式）
+        // Year/month watermark text (format driven by the yearFirst field in i18n data)
         const label = this._i18n.yearFirst
           ? String(seg.year) + this._i18n.year + ' ' + this._i18n.months[seg.month]
           : this._i18n.months[seg.month] + ' ' + String(seg.year);
@@ -725,7 +727,7 @@ class SvgRenderer {
         this.calendarArea.container.appendChild(text);
       }
 
-      // 将 DayCell 的日期文字提升到水印层之上
+      // Raise DayCell date text above the watermark layer
       const dayCells = this.cellManager.filter(function (c) { return c.type === 'day'; });
       for (let di = 0; di < dayCells.length; di++) {
         const els = dayCells[di].elements;
@@ -737,10 +739,10 @@ class SvgRenderer {
       }
     }
 
-    // 今日按钮
+    // Today button
     this._drawTodayBtn();
 
-    // 表头颜色同步
+    // Header color sync
     this._syncHeaderColors();
   }
 
@@ -797,88 +799,89 @@ class SvgRenderer {
   }
 
   /**
-   * 绘制「回到今日」定位按钮。
+   * Draw the "back to today" positioning button.
    *
-   * 按钮位于 SVG 左下角，由一个圆形底座 + 外圈圆环 + 中心圆点组成，
-   * 视觉上模拟「靶心」图标，点击后调用 _goToToday() 滚回今日日期所在行。
+   * The button is located at the bottom-left of the SVG and consists of a circular
+   * base + an outer ring + a center dot, visually mimicking a "bullseye" icon.
+   * Clicking it calls _goToToday() to scroll back to today's date row.
    *
-   * - base  : 白色半透明圆形底座，作为按钮背景
-   * - ring  : 空心圆环，使用 todayBarColor 描边
-   * - dot   : 实心中心圆点，使用 todayBarColor 填充
-   * - hit   : 透明点击层，覆盖整个按钮区域，绑定点击事件
+   * - base  : white semi-transparent circular base, acting as the button background
+   * - ring  : hollow ring, stroked with todayBarColor
+   * - dot   : solid center dot, filled with todayBarColor
+   * - hit   : transparent click layer covering the whole button, bound to the click event
    *
-   * 每次渲染前先清空 todayBtnGroup 内所有子元素，实现重绘。
+   * All child elements of todayBtnGroup are cleared before each render for a redraw.
    * @private
    */
   _drawTodayBtn() {
-    // ── 清空旧内容，准备重绘 ──────────────────────────────────────
+    // ── Clear old content and prepare for redraw ──────────────────────
     while (this.todayBtnGroup.firstChild) this.todayBtnGroup.removeChild(this.todayBtnGroup.firstChild);
 
-    // ── 尺寸常量 ──────────────────────────────────────────────────
+    // ── Size constants ────────────────────────────────────────────────
     const {
       SIZE, MARGIN, RING_R, DOT_R, STROKE_W, SHADOW_X, SHADOW_Y,
     } = DIM.TODAY_BTN;
 
-    // ── 计算按钮在 SVG 坐标系中的位置（左下角定位） ──────────────
+    // ── Compute the button position in the SVG coordinate system (bottom-left) ──
     const bx = MARGIN;
     const by = this.SVG_H - MARGIN - SIZE;
-    const cxIcon = bx + SIZE / 2;   // 按钮圆心 X
-    const cyIcon = by + SIZE / 2;   // 按钮圆心 Y
+    const cxIcon = bx + SIZE / 2;   // Button center X
+    const cyIcon = by + SIZE / 2;   // Button center Y
 
-    // ── 1. 阴影：与底座同大的半透明圆，向右向下偏移 ──────────────
+    // ── 1. Shadow: semi-transparent circle the same size as the base, offset right and down ──
     const shadow = document.createElementNS(this.svgNS, 'circle');
     shadow.setAttribute('cx', cxIcon + SHADOW_X);
     shadow.setAttribute('cy', cyIcon + SHADOW_Y);
     shadow.setAttribute('r', SIZE / 2);
-    shadow.setAttribute('fill', 'rgba(0,0,0,0.30)');         // 半透明黑色模拟阴影
+    shadow.setAttribute('fill', 'rgba(0,0,0,0.30)');         // Semi-transparent black to simulate shadow
     this.todayBtnGroup.appendChild(shadow);
 
-    // ── 2. 底座：白色半透明圆形背景 ──────────────────────────────
+    // ── 2. Base: white semi-transparent circular background ────────────
     const base = document.createElementNS(this.svgNS, 'circle');
     base.setAttribute('cx', cxIcon);
     base.setAttribute('cy', cyIcon);
     base.setAttribute('r', SIZE / 2);
-    base.setAttribute('fill', HARDCODED.todayBtnFill);     // 白色填充
-    base.setAttribute('fill-opacity', '0.88');              // 轻微透明，透出网格
-    base.setAttribute('stroke', HARDCODED.todayBtnStroke);   // 描边使用淡灰色
+    base.setAttribute('fill', HARDCODED.todayBtnFill);     // White fill
+    base.setAttribute('fill-opacity', '0.88');              // Slightly transparent so the grid shows through
+    base.setAttribute('stroke', HARDCODED.todayBtnStroke);   // Stroke uses a light gray
     base.setAttribute('stroke-width', '1');
     this.todayBtnGroup.appendChild(base);
 
-    // ── 2. 外圈圆环：空心圆圈 ────────────────────────────────────
+    // ── 2. Outer ring: hollow circle ───────────────────────────────────
     const ring = document.createElementNS(this.svgNS, 'circle');
     ring.setAttribute('cx', cxIcon);
     ring.setAttribute('cy', cyIcon);
     ring.setAttribute('r', RING_R);
-    ring.setAttribute('fill', 'none');                       // 空心
-    ring.setAttribute('stroke', this.options.todayBarColor); // 主题色描边
+    ring.setAttribute('fill', 'none');                       // Hollow
+    ring.setAttribute('stroke', this.options.todayBarColor); // Theme color stroke
     ring.setAttribute('stroke-width', STROKE_W);
     this.todayBtnGroup.appendChild(ring);
 
-    // ── 3. 中心圆点：实心圆点 ────────────────────────────────────
+    // ── 3. Center dot: solid dot ──────────────────────────────────────
     const dot = document.createElementNS(this.svgNS, 'circle');
     dot.setAttribute('cx', cxIcon);
     dot.setAttribute('cy', cyIcon);
     dot.setAttribute('r', DOT_R);
-    dot.setAttribute('fill', this.options.todayBarColor);   // 主题色填充
+    dot.setAttribute('fill', this.options.todayBarColor);   // Theme color fill
     this.todayBtnGroup.appendChild(dot);
 
-    // ── 4. 透明点击层：覆盖整个按钮区域，接收点击事件 ──────────
-    // 使用透明圆形而非直接在底座上绑定事件，避免点击视觉元素时触发穿透
+    // ── 4. Transparent hit layer: covers the whole button and receives clicks ──
+    // Use a transparent circle instead of binding events on the base directly, to avoid pass-through when clicking the visual elements
     const hit = document.createElementNS(this.svgNS, 'circle');
     hit.setAttribute('cx', cxIcon);
     hit.setAttribute('cy', cyIcon);
     hit.setAttribute('r', SIZE / 2);
-    hit.setAttribute('fill', 'transparent');                 // 完全透明
+    hit.setAttribute('fill', 'transparent');                 // Fully transparent
     const self = this;
     hit.addEventListener('click', function (e) {
-      e.stopPropagation();   // 阻止事件冒泡，避免触发日历点击逻辑
-      self._goToToday();     // 导航到今天的日期行
+      e.stopPropagation();   // Stop propagation to avoid triggering calendar click logic
+      self._goToToday();     // Navigate to today's date row
     });
     this.todayBtnGroup.appendChild(hit);
   }
 
   // ════════════════════════════════════════════════════════════════
-  //  时间滚轮
+  //  Time Wheel
   // ════════════════════════════════════════════════════════════════
 
   /** @private */
@@ -914,7 +917,8 @@ class SvgRenderer {
         if (isDragging) {
           this._dragging = true;
         } else {
-          // 延迟清除拖拽标志，让紧随的 click 事件仍能看到 _dragging=true，避免关闭选择器
+          // Defer clearing the drag flag so the immediately-following click event still sees
+          // _dragging=true and does not close the picker
           setTimeout(() => { this._dragging = false; }, 0);
         }
       },
@@ -924,11 +928,11 @@ class SvgRenderer {
   }
 
   // ════════════════════════════════════════════════════════════════
-  //  事件绑定（SVG 专属）
+  //  Event Binding (SVG-specific)
   // ════════════════════════════════════════════════════════════════
 
   bindEvents() {
-    // 日历拖拽 session
+    // Calendar drag session
     this.dragController.register('calendar', {
       onDragMove: (clientY) => {
         if (!this._dragging) return;
@@ -953,7 +957,7 @@ class SvgRenderer {
     };
     this.svg.addEventListener('touchstart', this._onTouchStart, { passive: true });
 
-    // 滚轮
+    // Wheel
     this._onContainerWheel = (e) => {
       if (!this.picker.visible) return;
       e.preventDefault();
@@ -966,7 +970,7 @@ class SvgRenderer {
     };
     this.container.addEventListener('wheel', this._onContainerWheel, { passive: false });
 
-    // 日期点击（拖拽后不触发选择）
+    // Date click (no selection after a drag)
     this._onScrollGroupClick = (e) => {
       if (this._dragMoved) return;
       const dateAttr = e.target.getAttribute('data-date');
@@ -984,7 +988,7 @@ class SvgRenderer {
     };
     this.calendarArea.container.addEventListener('mouseleave', this._onScrollGroupMouseLeave);
 
-    // 面板触控阻止页面滚动
+    // Panel touch: prevent page scrolling
     this._onContainerTouchMove = (e) => {
       if (!this.picker.visible) return;
       e.preventDefault();
@@ -993,7 +997,7 @@ class SvgRenderer {
   }
 
   // ════════════════════════════════════════════════════════════════
-  //  拖拽管理
+  //  Drag Management
   // ════════════════════════════════════════════════════════════════
 
   _onDragStart(clientY) {
@@ -1028,7 +1032,8 @@ class SvgRenderer {
   }
 
   _onDragEnd() {
-    // 延迟清除拖拽标志，让紧随的 click 事件仍能看到 _dragging=true，避免关闭选择器
+    // Defer clearing the drag flag so the immediately-following click event still sees
+    // _dragging=true and does not close the picker
     setTimeout(() => { this._dragging = false; }, 0);
     this._setHoverDisabled(false);
     this._lastDragClientY = undefined;
@@ -1060,7 +1065,7 @@ class SvgRenderer {
   }
 
   // ════════════════════════════════════════════════════════════════
-  //  滚轮动画
+  //  Wheel Animation
   // ════════════════════════════════════════════════════════════════
 
   _startWheelAnimation() {
@@ -1095,17 +1100,17 @@ class SvgRenderer {
   }
 
   // ════════════════════════════════════════════════════════════════
-  //  滚动控制
+  //  Scroll Control
   // ════════════════════════════════════════════════════════════════
 
-  /** 重置滚动偏移到起始位置。 */
+  /** Reset the scroll offset to the starting position. */
   resetScroll() {
     this._translateY = 0;
     this._wheelTargetY = 0;
   }
 
   // ════════════════════════════════════════════════════════════════
-  //  导航
+  //  Navigation
   // ════════════════════════════════════════════════════════════════
 
   goToDate(date) {
@@ -1133,7 +1138,7 @@ class SvgRenderer {
   }
 
   // ════════════════════════════════════════════════════════════════
-  //  表头颜色同步
+  //  Header Color Sync
   // ════════════════════════════════════════════════════════════════
 
   _syncHeaderColors() {
@@ -1197,7 +1202,7 @@ class SvgRenderer {
   }
 
   // ════════════════════════════════════════════════════════════════
-  //  Hover 管理
+  //  Hover Management
   // ════════════════════════════════════════════════════════════════
 
   _setHoverDisabled(disabled) {
@@ -1218,7 +1223,7 @@ class SvgRenderer {
   }
 
   // ════════════════════════════════════════════════════════════════
-  //  销毁
+  //  Destroy
   // ════════════════════════════════════════════════════════════════
 
   destroy() {
@@ -1234,13 +1239,13 @@ class SvgRenderer {
     if (this.timeArea) { this.timeArea.destroy(); this.timeArea = null; }
     if (this.headerArea) { this.headerArea.destroy(); this.headerArea = null; }
 
-    // 解绑 SVG 事件
+    // Unbind SVG events
     if (this._onSvgMouseDown) this.svg.removeEventListener('mousedown', this._onSvgMouseDown);
     if (this._onTouchStart) this.svg.removeEventListener('touchstart', this._onTouchStart);
     if (this._onContainerWheel) this.container.removeEventListener('wheel', this._onContainerWheel);
     if (this._onContainerTouchMove) this.container.removeEventListener('touchmove', this._onContainerTouchMove);
 
-    // 移除 DOM
+    // Remove DOM
     if (this.container) this.container.remove();
   }
 }

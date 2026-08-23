@@ -1,10 +1,11 @@
 /**
- * TimeWheelFloater — 时间滚轮放大镜浮层（SVG 原生渲染）
+ * TimeWheelFloater — time wheel magnifier floater (native SVG rendering)
  *
- * 在 SVG 内部绘制一个放大镜面板，以放大字号展示时间列邻近可选值。
- * 定位在 SVG 右上区域，不依赖外部 DOM。
+ * Draws a magnifier panel inside the SVG that shows nearby selectable values
+ * of a time column at an enlarged font size. Positioned in the upper-right area
+ * of the SVG; does not depend on external DOM.
  *
- * @file       时间滚轮放大镜浮层
+ * @file       Time wheel magnifier floater
  * @version    2.1.11
  * @license    MIT
  */
@@ -12,8 +13,8 @@
 class TimeWheelFloater {
   /**
    * @param {Object} cfg
-   * @param {string} cfg.svgNS - SVG 命名空间
-   * @param {SVGSVGElement} cfg.svg - 父 SVG 元素
+   * @param {string} cfg.svgNS - SVG namespace
+   * @param {SVGSVGElement} cfg.svg - parent SVG element
    * @param {string} cfg.selectedColor
    * @param {string} cfg.todayBarColor
    * @param {string} cfg.textColor
@@ -48,8 +49,8 @@ class TimeWheelFloater {
   }
 
   /**
-   * 显示浮层。
-   * @param {string} type - 列标识
+   * Show the floater.
+   * @param {string} type - column identifier
    */
   show(type) {
     if (this._group) this.hide();
@@ -101,7 +102,7 @@ class TimeWheelFloater {
     this.svg.appendChild(g);
   }
 
-  /** 更新浮层数值。 */
+  /** Update the floater values. */
   update() {
     if (!this._group || !this._type) return;
     const tc = this.getTimeCell ? this.getTimeCell(this._type) : null;
@@ -203,7 +204,7 @@ class TimeWheelFloater {
     return t;
   }
 
-  /** 隐藏浮层。 */
+  /** Hide the floater. */
   hide() {
     if (this._group) {
       this._group.remove();
@@ -214,7 +215,7 @@ class TimeWheelFloater {
     this._hlRect = null;
   }
 
-  /** 销毁浮层。 */
+  /** Destroy the floater. */
   destroy() {
     this.hide();
     this.getTimeCell = null;

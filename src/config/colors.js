@@ -1,117 +1,121 @@
 /**
- * colors.js — dtrPicker 统一色彩配置
+ * colors.js — Unified color configuration for dtrPicker.
  *
  * ================================================================
- *  职责
+ *  Responsibilities
  * ================================================================
  *
- * 集中管理选择器内所有颜色值。每个色系（scheme）拥有独立的
- * 完整色板，方便后续分开调整。
+ * Centralizes all color values used within the picker. Each scheme
+ * has its own complete palette, making them easy to adjust
+ * independently later.
  *
  * ================================================================
- *  色板结构
+ *  Palette Structure
  * ================================================================
  *
- * 每个色系包含两部分：
+ * Each scheme consists of two parts:
  *
- *   1. monthColors  — 月份背景色轮换数组
- *   2. defaults     — 对应 DEFAULTS 的色板选项（各角色颜色）
+ *   1. monthColors  — Monthly background color rotation array
+ *   2. defaults     — Palette options corresponding to DEFAULTS (role colors)
  *
- *  取色公式：monthColors[month % monthColors.length]
+ *  Color selection formula: monthColors[month % monthColors.length]
  *
  * ================================================================
- *  说明
+ *  Notes
  * ================================================================
  *
- * - gridColor：SVG 灰色背景，1px 间隙露出即成网格线，并非独立线条色。
- * - cellColor：格子/侧栏背景色，表头全宽白色底也用此色。
- * - textColorSubLabel：被年/月表头、侧栏月份标签、年份动画多路径使用。
+ * - gridColor: SVG gray background; the 1px gaps reveal the grid lines, not an independent line color.
+ * - cellColor: Cell/sidebar background color; the full-width white header background also uses this color.
+ * - textColorSubLabel: Used by the year/month headers, sidebar month labels, and the year animation.
  *
- * @file       统一色彩配置
+ * @file       Unified color configuration
  * @version    2.1.11
  * @license    MIT
  */
 
 // ================================================================
-//  色板定义
+//  Palette Definition
 // ================================================================
 
 /**
- * 所有色系配置。
- * 每个色系独立包含完整色板，互不共享，便于分套调整。
+ * Configuration for all color schemes.
+ * Each scheme has its own complete palette, independent of the others,
+ * making it easy to adjust them separately.
  * @const {Object<string, Object>}
  */
 export const SCHEMES = {
 
     // ────────────────────────────────────────────────────────────────
-    //  莫兰迪色系  —  低饱和度、柔和、高级灰质感
+    //  Morandi scheme  —  Low saturation, soft, premium gray tone
     // ────────────────────────────────────────────────────────────────
     morandi: {
-      /** 色系显示名称 */
+      /** Display name of the scheme */
       name: 'Morandi',
 
       /**
-       * 月份背景色轮换数组。
-       * 取色：colors[month % colors.length]，相邻月份自动区分。
+       * Monthly background color rotation array.
+       * Selection: colors[month % colors.length]; adjacent months are distinguished automatically.
        * @type {string[]}
        */
       colors: [
-        '#f9f0ff',   // [0]  1月/5月/9月   淡紫
-        '#e6f7ff',   // [1]  2月/6月/10月  淡蓝
-        '#f6ffed',   // [2]  3月/7月/11月  淡绿
-        '#fff7e6',   // [3]  4月/8月/12月  淡橙
+        '#f9f0ff',   // [0]  Jan/May/Sep   Light purple
+        '#e6f7ff',   // [1]  Feb/Jun/Oct   Light blue
+        '#f6ffed',   // [2]  Mar/Jul/Nov   Light green
+        '#fff7e6',   // [3]  Apr/Aug/Dec   Light orange
       ],
 
       /**
-       * 默认色板（对应 DEFAULTS 的色板选项）。
-       * 选择器核心功能使用的全部颜色，可通过构造函数 options 覆写。
+       * Default palette (corresponds to the palette options in DEFAULTS).
+       * All colors used by the picker's core features; overridable via constructor options.
        * @type {Object<string, string>}
        */
       defaults: {
-        /** 选中/高亮色——选中格、今日标记、时间滚轮高亮、靶心图标等 */
+        /** Selected/highlight color — selected cells, today marker, time wheel highlight, target icon, etc. */
         selectedColor: '#2f54eb',
-        /** SVG 背景色——1px 间隙露出即成网格线（非独立线条色） */
+        /** SVG background color — the 1px gap reveals grid lines (not an independent line color) */
         gridColor: '#d0d0d0',
-        /** 格子/侧栏背景色 */
+        /** Cell/sidebar background color */
         cellColor: '#ffffff',
-        /** 日期主文字色 */
+        /** Primary date text color */
         textColor: '#262626',
-        /** 禁用日期文字色 */
+        /** Disabled date text color */
         textColorDisabled: '#d9d9d9',
-        /** 周末日期文字色（当前预留，未启用） */
+        /** Weekend date text color (reserved for now, not enabled) */
         textColorWeekend: '#f04040',
-        /** 选中/高亮文字色（叠在 selectedColor 上） */
+        /** Selected/highlight text color (overlaid on selectedColor) */
         selectedTextColor: '#ffffff',
-        /** 次要标签色（星期标题、侧栏月份、侧栏年份） */
+        /** Secondary label color (weekday titles, sidebar months, sidebar years) */
         textColorSubLabel: '#595959',
-        /** 周末表头文字色 */
+        /** Weekend header text color */
         textColorWeekendTitle: '#f08080',
-        /** 今日标记条颜色 */
+        /** Today marker bar color */
         todayBarColor: '#8c00ff',
       },
     },
 
     // ────────────────────────────────────────────────────────────────
-    //  自然色系  —  高饱和度、鲜活、贴近自然草木
+    //  Nature scheme  —  High saturation, vibrant, close to natural flora
     // ────────────────────────────────────────────────────────────────
     nature: {
-      /** 色系显示名称 */
+      /** Display name of the scheme */
       name: 'Nature',
 
       /**
-       * 月份背景色轮换数组。5 色轮换，比 morandi 多一种变化。
+       * Monthly background color rotation array. Rotates through 5 colors,
+       * one more variation than morandi.
        * @type {string[]}
        */
       colors: [
-        '#e8f5e9',   // [0]  1月/6月/11月   浅绿（草木）
-        '#fff3e0',   // [1]  2月/7月/12月   浅橙（秋叶）
-        '#e3f2fd',   // [2]  3月/8月        浅蓝（天空）
-        '#fce4ec',   // [3]  4月/9月        浅粉（花）
-        '#f3e5f5',   // [4]  5月/10月       浅紫（薰衣草）
+        '#e8f5e9',   // [0]  Jan/Jun/Nov   Light green (foliage)
+        '#fff3e0',   // [1]  Feb/Jul/Dec   Light orange (autumn leaves)
+        '#e3f2fd',   // [2]  Mar/Aug       Light blue (sky)
+        '#fce4ec',   // [3]  Apr/Sep       Light pink (flowers)
+        '#f3e5f5',   // [4]  May/Oct       Light purple (lavender)
       ],
 
       /**
-       * 默认色板。结构同 morandi，值当前与 morandi 一致，可独立调整。
+       * Default palette. Same structure as morandi; values currently match
+       * morandi and can be adjusted independently.
        * @type {Object<string, string>}
        */
       defaults: {
@@ -129,21 +133,21 @@ export const SCHEMES = {
     },
 
     // ────────────────────────────────────────────────────────────────
-    //  海天蓝色系  —  清亮明快、天空与海洋意象
+    //  Ocean scheme  —  Bright and refreshing, sky and sea imagery
     // ────────────────────────────────────────────────────────────────
     ocean: {
-      /** 色系显示名称 */
+      /** Display name of the scheme */
       name: 'Ocean',
 
       /**
-       * 月份背景色轮换数组。
+       * Monthly background color rotation array.
        * @type {string[]}
        */
       colors: [
-        '#e6f0fa',   // [0]  淡天蓝
-        '#e0f2fe',   // [1]  淡海蓝
-        '#f0f9ff',   // [2]  极淡蓝
-        '#e8f4fd',   // [3]  淡青蓝
+        '#e6f0fa',   // [0]  Light sky blue
+        '#e0f2fe',   // [1]  Light sea blue
+        '#f0f9ff',   // [2]  Very light blue
+        '#e8f4fd',   // [3]  Light cyan blue
       ],
 
       defaults: {
@@ -161,21 +165,21 @@ export const SCHEMES = {
     },
 
     // ────────────────────────────────────────────────────────────────
-    //  森林绿色系  —  自然沉静、草木葱茏意象
+    //  Forest scheme  —  Natural and serene, lush foliage imagery
     // ────────────────────────────────────────────────────────────────
     forest: {
-      /** 色系显示名称 */
+      /** Display name of the scheme */
       name: 'Forest',
 
       /**
-       * 月份背景色轮换数组。
+       * Monthly background color rotation array.
        * @type {string[]}
        */
       colors: [
-        '#e8f5e9',   // [0]  浅草绿
-        '#f1f8e9',   // [1]  浅芽绿
-        '#e0f2f1',   // [2]  浅松绿
-        '#f0f4ec',   // [3]  浅苔绿
+        '#e8f5e9',   // [0]  Light grass green
+        '#f1f8e9',   // [1]  Light sprout green
+        '#e0f2f1',   // [2]  Light pine green
+        '#f0f4ec',   // [3]  Light moss green
       ],
 
       defaults: {
@@ -193,21 +197,21 @@ export const SCHEMES = {
     },
 
     // ────────────────────────────────────────────────────────────────
-    //  星夜黑色系  —  深邃夜空、星光点缀
+    //  Starry Night scheme  —  Deep night sky dotted with starlight
     // ────────────────────────────────────────────────────────────────
     night: {
-      /** 色系显示名称 */
+      /** Display name of the scheme */
       name: 'Starry Night',
 
       /**
-       * 月份背景色轮换数组。
+       * Monthly background color rotation array.
        * @type {string[]}
        */
       colors: [
-        '#1a1a2e',   // [0]  深蓝黑
-        '#16213e',   // [1]  深海蓝
-        '#1c1c3a',   // [2]  深紫黑
-        '#0f3460',   // [3]  深夜蓝
+        '#1a1a2e',   // [0]  Deep blue-black
+        '#16213e',   // [1]  Deep sea blue
+        '#1c1c3a',   // [2]  Deep purple-black
+        '#0f3460',   // [3]  Deep night blue
       ],
 
       defaults: {
@@ -226,40 +230,40 @@ export const SCHEMES = {
   };
 
   // ================================================================
-  //  工具函数
+  //  Utility Functions
   // ================================================================
 
   /**
-   * 获取指定色系的完整配置对象。
-   * @param {string} scheme - 色系名（'morandi' | 'nature'）
-   * @returns {Object} 该色系的完整色板对象
+   * Returns the complete configuration object for the specified scheme.
+   * @param {string} scheme - Scheme name ('morandi' | 'nature')
+   * @returns {Object} The complete palette object of the scheme
    */
   export function getScheme(scheme) {
-    // 有意兜底：非法/缺失色系回退 morandi（用户确认保留，勿删）
+    // Intentional fallback: invalid/missing schemes fall back to morandi (kept by user request, do not delete)
     return SCHEMES[scheme] || SCHEMES.morandi;
   }
 
   /**
-   * 获取当前激活的色系配置。
-   * @param {Object} options - 配置选项，含 colorScheme 字段
-   * @returns {Object} 色系配置对象
+   * Returns the currently active scheme configuration.
+   * @param {Object} options - Configuration options, containing the colorScheme field
+   * @returns {Object} The scheme configuration object
    */
   export function getActiveScheme(options) {
-    // 有意兜底：非法/缺失色系回退 morandi（用户确认保留，勿删）
+    // Intentional fallback: invalid/missing schemes fall back to morandi (kept by user request, do not delete)
     return SCHEMES[options.colorScheme] || SCHEMES.morandi;
   }
 
   // ================================================================
-  //  渲染硬编码色（JS 渲染代码直接引用的字面颜色值）
+  //  Hardcoded Render Colors (literal color values referenced directly by JS rendering code)
   // ================================================================
 
   /**
-   * JS 渲染代码中必需的字面颜色值集合。
+   * Collection of literal color values required by the JS rendering code.
    * @const {Object<string, string>}
    */
   export const HARDCODED = {
-    /** 今日定位按钮底托填充色 */
+    /** Fill color of the "back to today" button base */
     todayBtnFill: '#ffffff',
-    /** 今日定位按钮底托描边色 */
+    /** Stroke color of the "back to today" button base */
     todayBtnStroke: '#e8e8e8',
   };

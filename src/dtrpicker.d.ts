@@ -1,27 +1,27 @@
 /**
- * dtrPicker — 日期范围选择器 TypeScript 类型声明
+ * dtrPicker — TypeScript type declarations for the date range picker
  *
  * @version 2.1.11
  * @license MIT
  */
 
 /* ================================================================
-   值类型
+   Value Types
    ================================================================ */
 
-/** 格式化的字符串值（默认） */
+/** Formatted string value (default) */
 export interface ValueObject {
   start: string;
   end?: string;
 }
 
-/** Date 对象值 */
+/** Date object value */
 export interface DateValue {
   start: Date;
   end?: Date;
 }
 
-/** 展开的数字对象值 */
+/** Expanded numeric object value */
 export interface DateParts {
   year: number;
   month: number;
@@ -35,126 +35,126 @@ export interface ObjectValue {
   end?: DateParts;
 }
 
-/** 返回值格式 */
+/** Return value format */
 export type ValueFormat = 'string' | 'date' | 'object';
 
-/** 变更元信息 */
+/** Change metadata */
 export interface ChangeMeta {
-  /** 变更来源 */
+  /** Change source */
   source: 'user' | 'programmatic';
-  /** 变更动作 */
+  /** Change action */
   action: 'confirmed' | 'cleared';
 }
 
-/** onChange 回调 */
+/** onChange callback */
 export type ChangeCallback = (value: ValueObject | null, meta: ChangeMeta) => void;
 
 export type LifecycleCallback = () => void;
 
 /* ================================================================
-   配置选项
+   Configuration Options
    ================================================================ */
 
 export type PickerMode = 'date' | 'dateTime' | 'dateRange' | 'dateTimeRange';
 
 export interface PickerOptions {
-  /** 选择模式（必选） */
+  /** Selection mode (required) */
   mode: PickerMode;
-  /** BCP 47 语言标签 */
+  /** BCP 47 language tag */
   locale?: string;
-  /** 周起始日：0=周日, 1=周一 */
+  /** First day of the week: 0=Sunday, 1=Monday */
   firstDay?: 0 | 1;
-  /** 色系 */
+  /** Color scheme */
   colorScheme?: string;
-  /** 今日标记条高度(px) */
+  /** Today bar height (px) */
   todayBarHeight?: number;
-  /** 滚轮步进(px) */
+  /** Wheel step (px) */
   wheelStep?: number;
-  /** 选中/高亮色 */
+  /** Selected/highlight color */
   selectedColor?: string;
-  /** 网格线色 */
+  /** Grid line color */
   gridColor?: string;
-  /** 格子背景色 */
+  /** Cell background color */
   cellColor?: string;
-  /** 主文字色 */
+  /** Primary text color */
   textColor?: string;
-  /** 禁用文字色 */
+  /** Disabled text color */
   textColorDisabled?: string;
-  /** 周末文字色 */
+  /** Weekend text color */
   textColorWeekend?: string;
-  /** 选中文字色 */
+  /** Selected text color */
   selectedTextColor?: string;
-  /** 次要标签色 */
+  /** Secondary label color */
   textColorSubLabel?: string;
-  /** 周末表头色 */
+  /** Weekend header color */
   textColorWeekendTitle?: string;
-  /** 今日标记条色 */
+  /** Today bar color */
   todayBarColor?: string;
 }
 
 /* ================================================================
-   dtrPicker 实例
+   dtrPicker Instance
    ================================================================ */
 
 export interface dtrPickerInstance {
-  /** 触发器 DOM 元素 */
+  /** Trigger DOM element */
   readonly trigger: HTMLElement;
-  /** 合并后的完整配置 */
+  /** Merged full configuration */
   readonly options: PickerOptions;
-  /** 面板是否可见 */
+  /** Whether the panel is visible */
   readonly visible: boolean;
 
-  /** 打开面板 */
+  /** Open the panel */
   open(): void;
-  /** 关闭面板 */
+  /** Close the panel */
   close(): void;
-  /** 切换面板 */
+  /** Toggle the panel */
   toggle(): void;
 
   /**
-   * 设置选中值。
-   * @param range - 值对象（start/end 为 YYYY-MM-DD 或 YYYY-MM-DD HH:mm 格式）
+   * Set the selected value.
+   * @param range - Value object (start/end in YYYY-MM-DD or YYYY-MM-DD HH:mm format)
    */
   setValue(range: ValueObject): void;
 
   /**
-   * 获取选中值。
-   * @param format - 返回格式
-   * @returns 格式化后的值，无选中返回 null
+   * Get the selected value.
+   * @param format - Return format
+   * @returns The formatted value, or null if nothing is selected
    */
   getValue(format?: ValueFormat): ValueObject | DateValue | ObjectValue | null;
 
   /**
-   * 清除选中值。
-   * @param silent - true 则静默清除，不触发回调
+   * Clear the selected value.
+   * @param silent - If true, clear silently without firing callbacks
    */
   clear(silent?: boolean): void;
 
-  /** 注册值变更回调 */
+  /** Register a value change callback */
   onChange(callback: ChangeCallback): void;
 
-  /** 注册面板打开回调 */
+  /** Register a panel open callback */
   onOpen(callback: LifecycleCallback): void;
 
-  /** 注册面板关闭回调 */
+  /** Register a panel close callback */
   onClose(callback: LifecycleCallback): void;
 
-  /** 销毁实例，清理所有资源 */
+  /** Destroy the instance and release all resources */
   destroy(): void;
 }
 
 /* ================================================================
-   构造器
+   Constructor
    ================================================================ */
 
 export interface dtrPickerConstructor {
   /**
-   * @param trigger - 触发器元素或其 CSS 选择器
-   * @param options - 配置选项
+   * @param trigger - Trigger element or its CSS selector
+   * @param options - Configuration options
    */
   new (trigger: HTMLElement | string, options: PickerOptions): dtrPickerInstance;
 
-  /** 默认配置 */
+  /** Default configuration */
   readonly DEFAULTS: PickerOptions;
 }
 

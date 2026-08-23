@@ -1,24 +1,25 @@
 /**
- * DateTime — dtrPicker 日期核心类
+ * DateTime — the core date class of dtrPicker
  *
- * 封装日期运算，替代纯函数模块。所有 Date 操作集中管理，
- * 提供只读属性、原地修改方法、查询比较、格式化和静态工厂。
+ * Encapsulates date arithmetic, replacing the pure-function module. All Date operations are
+ * managed centrally, providing read-only properties, in-place mutation methods, query
+ * comparison, formatting, and static factories.
  *
- * @file       日期核心类
+ * @file       Date core class
  * @version    2.1.11
  * @license    MIT
  */
 
 class DateTime {
   /**
-   * 构造 DateTime 实例。
+   * Construct a DateTime instance.
    *
-   * 入参兼容多种形式：
-   *   - 无参：当前时刻
-   *   - Date：包装该 Date 对象
-   *   - DateTime：克隆
-   *   - 字符串：由 parse 解析（YYYY-MM-DD 优先）
-   *   - 多个数字：(year, month, date[, hour[, minute[, second]]])
+   * The arguments are compatible with several forms:
+   *   - no args: the current moment
+   *   - Date: wraps the given Date object
+   *   - DateTime: clone
+   *   - string: parsed by parse (YYYY-MM-DD takes precedence)
+   *   - multiple numbers: (year, month, date[, hour[, minute[, second]]])
    *
    * @param {...*} args
    */
@@ -35,7 +36,8 @@ class DateTime {
       } else if (v instanceof Date) {
         this._d = new Date(v);
       } else if (typeof v === 'string') {
-        // 有意兜底：parse 仅认标准格式，回退 new Date(v) 兼容其可解析的其他格式（宽松解析，保留）
+        // Intentional fallback: parse only recognizes the standard format, so fall back to
+        // new Date(v) to stay compatible with other formats the engine can parse (lenient parsing, kept)
         const parsed = DateTime.parse(v);
         this._d = parsed ? new Date(parsed._d) : new Date(v);
       } else {
@@ -44,7 +46,7 @@ class DateTime {
       return;
     }
 
-    // 多参数：(year, month, date, hour, minute, second)
+    // Multiple args: (year, month, date, hour, minute, second)
     const year = args[0];
     const month = args[1];
     const date = args.length > 2 ? args[2] : 1;
@@ -54,36 +56,36 @@ class DateTime {
     this._d = new Date(year, month, date, hour, minute, second);
   }
 
-  // ── 只读属性 ────────────────────────────────────────────────────
+  // ── Read-only properties ────────────────────────────────────────
 
-  /** @returns {number} 年份（四位） */
+  /** @returns {number} Year (4 digits) */
   get year() { return this._d.getFullYear(); }
 
-  /** @returns {number} 月份（0-11） */
+  /** @returns {number} Month (0-11) */
   get month() { return this._d.getMonth(); }
 
-  /** @returns {number} 日期（1-31） */
+  /** @returns {number} Day of month (1-31) */
   get date() { return this._d.getDate(); }
 
-  /** @returns {number} 小时（0-23） */
+  /** @returns {number} Hour (0-23) */
   get hour() { return this._d.getHours(); }
 
-  /** @returns {number} 分钟（0-59） */
+  /** @returns {number} Minute (0-59) */
   get minute() { return this._d.getMinutes(); }
 
-  /** @returns {number} 秒（0-59） */
+  /** @returns {number} Second (0-59) */
   get second() { return this._d.getSeconds(); }
 
-  /** @returns {number} 星期几（0=周日, 1=周一, ...） */
+  /** @returns {number} Day of week (0=Sunday, 1=Monday, ...) */
   get day() { return this._d.getDay(); }
 
-  /** @returns {number} 时间戳（ms） */
+  /** @returns {number} Timestamp (ms) */
   get timestamp() { return this._d.getTime(); }
 
-  // ── 修改方法（原地修改，返回 this）─────────────────────────────
+  // ── Mutation methods (in-place, return this) ──────────────────
 
   /**
-   * 设置日期（1-31），跨月自动回滚。
+   * Set the day of month (1-31); rolls over automatically across months.
    * @param {number} n
    * @returns {this}
    */
@@ -93,7 +95,7 @@ class DateTime {
   }
 
   /**
-   * 设置月份（0-11）。
+   * Set the month (0-11).
    * @param {number} n
    * @returns {this}
    */
@@ -103,7 +105,7 @@ class DateTime {
   }
 
   /**
-   * 设置年份。
+   * Set the year.
    * @param {number} y
    * @returns {this}
    */
@@ -113,7 +115,7 @@ class DateTime {
   }
 
   /**
-   * 设置小时（0-23）。
+   * Set the hour (0-23).
    * @param {number} n
    * @returns {this}
    */
@@ -123,7 +125,7 @@ class DateTime {
   }
 
   /**
-   * 设置分钟（0-59）。
+   * Set the minute (0-59).
    * @param {number} n
    * @returns {this}
    */
@@ -133,7 +135,7 @@ class DateTime {
   }
 
   /**
-   * 加减天数（n 可为负）。
+   * Add (or subtract, if n is negative) days.
    * @param {number} n
    * @returns {this}
    */
@@ -142,10 +144,10 @@ class DateTime {
     return this;
   }
 
-  // ── 查询方法 ────────────────────────────────────────────────────
+  // ── Query methods ──────────────────────────────────────────────
 
   /**
-   * 比较两个 DateTime 是否同一天（仅比较年月日）。
+   * Compare whether two DateTime instances represent the same day (year/month/day only).
    * @param {DateTime|Date|null} other
    * @returns {boolean}
    */
@@ -156,7 +158,7 @@ class DateTime {
   }
 
   /**
-   * 是否早于 other（比较时间戳）。
+   * Whether this is before other (compares timestamps).
    * @param {DateTime|Date} other
    * @returns {boolean}
    */
@@ -166,7 +168,7 @@ class DateTime {
   }
 
   /**
-   * 是否晚于 other（比较时间戳）。
+   * Whether this is after other (compares timestamps).
    * @param {DateTime|Date} other
    * @returns {boolean}
    */
@@ -176,7 +178,7 @@ class DateTime {
   }
 
   /**
-   * 是否在 a 和 b 之间（不含两端）。
+   * Whether this is strictly between a and b (exclusive of both endpoints).
    * @param {DateTime|Date} a
    * @param {DateTime|Date} b
    * @returns {boolean}
@@ -187,10 +189,10 @@ class DateTime {
     return this.timestamp > ta.timestamp && this.timestamp < tb.timestamp;
   }
 
-  // ── 格式化 ──────────────────────────────────────────────────────
+  // ── Formatting ─────────────────────────────────────────────────
 
   /**
-   * 格式化为 YYYY-MM-DD。
+   * Format as YYYY-MM-DD.
    * @returns {string}
    */
   toDateString() {
@@ -201,8 +203,8 @@ class DateTime {
   }
 
   /**
-   * 按指定模板格式化日期。
-   * 占位符：YYYY、MM、DD、HH、mm、ss。
+   * Format the date according to the given template.
+   * Placeholders: YYYY, MM, DD, HH, mm, ss.
    * @param {string} fmt
    * @returns {string}
    */
@@ -218,10 +220,10 @@ class DateTime {
     return fmt.replace(/YYYY|MM|DD|HH|mm|ss/g, (m) => map[m]);
   }
 
-  // ── 工具方法 ────────────────────────────────────────────────────
+  // ── Utility methods ────────────────────────────────────────────
 
   /**
-   * 深拷贝。
+   * Deep copy.
    * @returns {DateTime}
    */
   clone() {
@@ -229,8 +231,8 @@ class DateTime {
   }
 
   /**
-   * 获取所在周的第一天。
-   * @param {boolean} sunFirst - true=周日起始, false=周一起始
+   * Get the first day of the week containing this date.
+   * @param {boolean} sunFirst - true=week starts on Sunday, false=week starts on Monday
    * @returns {DateTime}
    */
   startOfWeek(sunFirst) {
@@ -242,28 +244,29 @@ class DateTime {
   }
 
   /**
-   * 转换为原生 Date 对象。
+   * Convert to a native Date object.
    * @returns {Date}
    */
   toNativeDate() {
     return new Date(this._d);
   }
 
-  // ── 静态工厂 ────────────────────────────────────────────────────
+  // ── Static factories ───────────────────────────────────────────
 
   /**
-   * 从字符串解析 DateTime。
-   * 支持 YYYY-MM-DD 与 YYYY-MM-DD HH:mm[:ss]，均按本地时间构造，
-   * 避免 UTC 时区偏移与 Safari 对带空格时间字符串解析失败的问题。
+   * Parse a DateTime from a string.
+   * Supports YYYY-MM-DD and YYYY-MM-DD HH:mm[:ss], both constructed in local time,
+   * to avoid UTC timezone offset issues and Safari's failure to parse time strings
+   * containing spaces.
    * @param {string|null} s
    * @returns {DateTime|null}
    */
   static parse(s) {
     if (!s) return null;
-    // YYYY-MM-DD（按本地时间）
+    // YYYY-MM-DD (in local time)
     let m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(s);
     if (m) return new DateTime(+m[1], +m[2] - 1, +m[3]);
-    // YYYY-MM-DD HH:mm[:ss]（按本地时间；规避 Safari 解析差异）
+    // YYYY-MM-DD HH:mm[:ss] (in local time; avoids Safari parsing differences)
     m = /^(\d{4})-(\d{2})-(\d{2}) (\d{2}):(\d{2})(?::(\d{2}))?$/.exec(s);
     if (m) return new DateTime(+m[1], +m[2] - 1, +m[3], +m[4], +m[5], m[6] ? +m[6] : 0);
     const d = new Date(s);
@@ -271,7 +274,7 @@ class DateTime {
   }
 
   /**
-   * 当前时刻。
+   * The current moment.
    * @returns {DateTime}
    */
   static now() {
@@ -279,7 +282,7 @@ class DateTime {
   }
 
   /**
-   * 今日 00:00。
+   * Today at 00:00.
    * @returns {DateTime}
    */
   static today() {

@@ -1,20 +1,20 @@
 /**
- * DrawingArea — 作画区域。
- * 不渲染任何 SVG 元素，仅定义网格子区域并管理子格子。
- * 子格子使用相对坐标 (r, c, rs, cs)，超出区域范围的不绘制。
+ * DrawingArea — the drawing area.
+ * Renders no SVG elements itself; it only defines grid sub-areas and manages child cells.
+ * Child cells use relative coordinates (r, c, rs, cs); anything outside the area is not drawn.
  */
 class DrawingArea {
   /**
    * @param {Object} cfg
-   * @param {number}  cfg.r       — 绝对行号
-   * @param {number}  cfg.c       — 绝对列号
-   * @param {number}  cfg.rs      — 行跨度
-   * @param {number}  cfg.cs      — 列跨度
-   * @param {boolean} [cfg.scrollable=false] — 是否可滚动（CalendarArea）
-   * @param {SVGSVGElement} cfg.parentSvg — 父 SVG，用于创建内部容器
-   * @param {string}  cfg.containerId — 内部容器 id
-   * @param {Object}  cfg.grid    — 网格常量
-   * @param {dtrPicker} cfg.picker — 主实例引用
+   * @param {number}  cfg.r       — absolute row index
+   * @param {number}  cfg.c       — absolute column index
+   * @param {number}  cfg.rs      — row span
+   * @param {number}  cfg.cs      — column span
+   * @param {boolean} [cfg.scrollable=false] — whether scrollable (CalendarArea)
+   * @param {SVGSVGElement} cfg.parentSvg — parent SVG, used to create the inner container
+   * @param {string}  cfg.containerId — inner container id
+   * @param {Object}  cfg.grid    — grid constants
+   * @param {dtrPicker} cfg.picker — main instance reference
    */
   constructor(cfg) {
     this.r = cfg.r;
@@ -27,26 +27,26 @@ class DrawingArea {
     this._translateY = 0;
     this.children = [];
 
-    // 创建内部 SVG <g> 容器
+    // Create the inner SVG <g> container
     this.container = document.createElementNS(cfg.grid.svgNS, 'g');
     this.container.setAttribute('id', cfg.containerId);
     cfg.parentSvg.appendChild(this.container);
   }
 
   /**
-   * 向区域内添加一个子格子。
-   * 相对坐标超出区域范围则不创建。
+   * Add a child cell to this area.
+   * Skip creation when the relative coordinates fall outside the area.
    * @param {Object} cfg
-   * @param {Function} cfg.cellClass — Cell 子类构造函数
-   * @param {number} cfg.r  — 区域内相对行号
-   * @param {number} cfg.c  — 区域内相对列号
-   * @param {number} [cfg.rs=1] — 行跨度
-   * @param {number} [cfg.cs=1] — 列跨度
-   * @param {Object} [cfg.extra={}] — 传递给 Cell 构造函数的其他参数
+   * @param {Function} cfg.cellClass — Cell subclass constructor
+   * @param {number} cfg.r  — relative row index within the area
+   * @param {number} cfg.c  — relative column index within the area
+   * @param {number} [cfg.rs=1] — row span
+   * @param {number} [cfg.cs=1] — column span
+   * @param {Object} [cfg.extra={}] — extra arguments passed to the Cell constructor
    * @returns {Cell|null}
    */
   addChild(cfg) {
-    // 保留备用：当前库内无调用（用户确认保留，勿删）
+    // Kept for future use: no callers in the current codebase (user confirmed to keep, do not delete)
     const relR = cfg.r; const relC = cfg.c;
     const rs = cfg.rs || 1; const cs = cfg.cs || 1;
     if (relR < 0 || relR + rs > this.rs) return null;
@@ -68,7 +68,7 @@ class DrawingArea {
     return cell;
   }
 
-  /** 清空所有子格子 */
+  /** Clear all child cells. */
   clear() {
     this.children.forEach(function (c) { c.destroy(); });
     this.children = [];
@@ -77,7 +77,7 @@ class DrawingArea {
     }
   }
 
-  /** 销毁此区域：清空子格子 + 从父节点移除 <g> 容器 */
+  /** Destroy this area: clear child cells and remove the <g> container from its parent. */
   destroy() {
     this.clear();
     if (this.container && this.container.parentNode) {
@@ -85,14 +85,14 @@ class DrawingArea {
     }
   }
 
-  /** 设置滚动偏移（仅 scrollable=true 时有效） */
+  /** Set the scroll offset (only effective when scrollable=true). */
   setScroll(y) {
     if (!this.scrollable) return;
     this._translateY = y;
     this.container.setAttribute('transform', 'translate(0,' + y + ')');
   }
 
-  /** 获取当前滚动偏移 */
+  /** Get the current scroll offset. */
   getScroll() { return this._translateY; }
 }
 
