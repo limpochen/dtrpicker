@@ -4,72 +4,47 @@
 
 ### Added
 
-- Added build-time version injection: `src/config/version.js` reads the version from
-  `package.json` via an esbuild `define` (`__DTRPICKER_VERSION__`), so the runtime version
-  label (`DIM.VERSION`) always matches the published version.
-- Added CommonJS and IIFE bundles (`dist/dtrpicker.js`, `dist/dtrpicker.iife.js`) alongside
-  the ESM bundle (now `dist/dtrpicker.mjs`).
-- Added `src/dtrpicker.d.ts` to the build output (`dist/dtrpicker.d.ts`).
-- Added `LICENSE` (MIT) and full npm publish metadata to `package.json`
-  (`main`/`module`/`types`/`exports`/`files`/`unpkg`/`jsdelivr`).
+- Officially installable via npm.
+- Two more import styles alongside ES Module: CommonJS and direct `<script>` (CDN).
+- Full TypeScript type declarations.
+- MIT license.
+- The version badge on the component now stays in sync with the published version automatically.
 
 ### Changed
 
-- Production build now minifies output and targets ES2020 (`build.js`).
-- `build.js` now wipes `dist/` before rebuilding so stale artifacts never leak through.
-- Removed the hardcoded version from `index.html` (`title`, `demo.js?v=` cache-buster).
-- Demo bundle source switched to `dist/dtrpicker.mjs`.
+- Smaller bundle size, faster loading.
+- Better compatibility with modern mainstream browsers.
+- The demo page no longer hardcodes a version number.
 
 ### Maintenance
 
-- Unified the version number to `2.2.0` across the project (based on `package.json`).
+- Unified the project version to 2.2.0.
 
 ## [2.1.11] - 2026-08-23
 
 ### Fixed
 
-- Fixed the demo `getDemoLocale()` matching logic so `zh-TW` correctly resolves to the Traditional Chinese
-  locale pack instead of being captured by the `zh-CN` prefix match (exact match now takes priority).
-  Involved file: `js/demo.js` → `getDemoLocale()`
+- Fixed the demo page incorrectly showing Simplified Chinese when Traditional Chinese was selected.
 
 ### Added
 
-- Added `zh-TW` (Traditional Chinese), `ja-JP` (Japanese), and `ko-KR` (Korean) locale packs for the demo page.
-- Brought all demo page UI text into the i18n system: `title` hints, option texts (`Default`, `Auto`,
-  `Dev Code`, `Bundle Code`, etc.) now follow the selected demo language.
-  Involved files: `js/demo.js`, `index.html`
+- Added Traditional Chinese, Japanese, and Korean UI languages to the demo page.
+- All demo page texts now follow the selected language.
 
 ### Maintenance
 
-- Translated comments/docs to English: `README.md`, `docs/api-spec.md`, `docs/Changelog.md`, `server.js`, `js/demo.js`.
-- Moved `.github/` out of version control (added to `.gitignore`, removed from tracking).
-- Unified the version number to `2.1.11` across the project (based on `package.json`; synced to the header comments of each source file, `DIM.VERSION`, `index.html`, and `package-lock.json`).
+- Unified the project version to 2.1.11.
 
 ## [2.1.10] - 2026-08-21
 
 ### Fixed
 
-- Fixed an issue in single-date modes (`date` / `dateTime`) where clicking a different date a second time
-  mistakenly entered the "same-day range → expand" logic, causing the UI to render a date range selection
-  while the selected value was not updated.
-  Now, in single-date modes, clicking a date immediately replaces the selected date, and `end` is always `null`.
-  Involved file: `src/utils/datetime-value.js` → `handleDateClick()`
-- Fixed a compatibility concern in `DateTime.parse` where parsing `YYYY-MM-DD HH:mm` time strings relied on
-  `new Date(string)`, which fails on Safari and causes the time to be lost. A regex-based parsing branch that
-  constructs the date in local time has been added.
-  Involved file: `src/utils/date.js` → `static parse()`
-- Corrected the Thai (th-TH) translation for "hour": `'น.'` → `'ชม.'` (involved `src/config/i18n.js`).
-
-### Changed
-
-- `header-bar-cell.js`: creating `<stop>` now reuses `this.g.svgNS` (instead of a hardcoded namespace).
+- Fixed single-date modes where clicking a different date a second time could wrongly enter a range-selection
+  state without updating the value; clicking a date now replaces the selection immediately.
+- Fixed `YYYY-MM-DD HH:mm` time parsing on Safari, where the time part could be lost.
+- Corrected the Thai translation for "hour".
 
 ### Maintenance
 
-- Updated the header comment in `src/config/dimensions.js` (removed the description of the eliminated HTML+CSS mode).
-- Fallback code and dead/redundant code: kept as-is with reminder comments added (see sections 2 and 3 of `docs/一扫问题.md`).
-- Minor items handled (see section 5 of `docs/一扫问题.md`):
-  - `dtrpicker.destroy()` now also clears `_onOpenCallbacks` / `_onCloseCallbacks`.
-  - `color.js`, `time-cell.js`: added reminder comments.
-- Unified the version number to `2.1.10` across the project (based on `package.json`; synced to the header comments of each source file, `DIM.VERSION`, `index.html`, and `package-lock.json`).
-- Corrected the public docs/declarations to match the code: cleared the outdated `renderMode` / `zIndex` / `selecting` / UMD mentions in `docs/api-spec.md`, `src/dtrpicker.d.ts`, and `README.md`, corrected the `locale` default to auto-detection, and updated the import path and color scheme descriptions.
+- Unified the project version to 2.1.10.
+- Updated docs and type declarations to match current behavior.
