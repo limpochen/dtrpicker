@@ -2,7 +2,7 @@
  * dtrpicker.js — Date range picker core
  *
  * @file       Core script of the date range picker
- * @version    2.1.11
+ * @version    2.2.0
  * @license    MIT
  */
 

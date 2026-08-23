@@ -1,5 +1,29 @@
 # Changelog
 
+## [2.2.0] - 2026-08-23
+
+### Added
+
+- Added build-time version injection: `src/config/version.js` reads the version from
+  `package.json` via an esbuild `define` (`__DTRPICKER_VERSION__`), so the runtime version
+  label (`DIM.VERSION`) always matches the published version.
+- Added CommonJS and IIFE bundles (`dist/dtrpicker.js`, `dist/dtrpicker.iife.js`) alongside
+  the ESM bundle (now `dist/dtrpicker.mjs`).
+- Added `src/dtrpicker.d.ts` to the build output (`dist/dtrpicker.d.ts`).
+- Added `LICENSE` (MIT) and full npm publish metadata to `package.json`
+  (`main`/`module`/`types`/`exports`/`files`/`unpkg`/`jsdelivr`).
+
+### Changed
+
+- Production build now minifies output and targets ES2020 (`build.js`).
+- `build.js` now wipes `dist/` before rebuilding so stale artifacts never leak through.
+- Removed the hardcoded version from `index.html` (`title`, `demo.js?v=` cache-buster).
+- Demo bundle source switched to `dist/dtrpicker.mjs`.
+
+### Maintenance
+
+- Unified the version number to `2.2.0` across the project (based on `package.json`).
+
 ## [2.1.11] - 2026-08-23
 
 ### Fixed

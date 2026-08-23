@@ -23,8 +23,12 @@
 
 ## Quick Start
 
+```bash
+npm install dtrpicker
+```
+
 ```js
-import dtrPicker from 'dist/dtrpicker.js';
+import dtrPicker from 'dtrpicker';
 
 const picker = new dtrPicker('#my-input', {
   mode: 'dateRange',
@@ -81,7 +85,17 @@ const picker = new dtrPicker(trigger, options);
 npm run build
 ```
 
-The output goes to the `dist/` directory.
+The `dist/` directory contains four minified artifacts:
+
+| File | Format | Use |
+| --- | --- | --- |
+| `dist/dtrpicker.mjs` | ESM | `import` / modern bundlers |
+| `dist/dtrpicker.js` | CommonJS | `require()` / legacy tooling |
+| `dist/dtrpicker.iife.js` | IIFE | `<script>` / CDN (global `dtrPicker`) |
+| `dist/dtrpicker.d.ts` | TypeScript | type declarations |
+
+The runtime version is injected from `package.json` at build time, so the version label
+always matches the published version.
 
 ---
 
@@ -108,4 +122,4 @@ node server.js
 
 ## License
 
-MIT
+[MIT](LICENSE)

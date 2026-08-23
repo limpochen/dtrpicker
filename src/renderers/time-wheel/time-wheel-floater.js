@@ -6,7 +6,7 @@
  * of the SVG; does not depend on external DOM.
  *
  * @file       Time wheel magnifier floater
- * @version    2.1.11
+ * @version    2.2.0
  * @license    MIT
  */
 

@@ -6,7 +6,7 @@
  * and programmatic set/clear. No DOM dependency, holds no callbacks.
  *
  * @file       Selected-value object
- * @version    2.1.11
+ * @version    2.2.0
  * @license    MIT
  */
 

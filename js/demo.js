@@ -4,7 +4,7 @@ let dtrPicker = null;
 let currentPickerSource = '';
 const PICKER_SOURCES = {
   dev: '../src/dtrpicker.js',
-  bundle: '../dist/dtrpicker.js',
+  bundle: '../dist/dtrpicker.mjs',
 };
 import { locales } from '../src/config/i18n.js';
 
@@ -326,7 +326,7 @@ function updateParamsDisplay() {
 
 function generateCodeSnippet(params) {
   const source = document.getElementById('source-select')?.value || 'dev';
-  const importPath = source === 'bundle' ? 'dist/dtrpicker.js' : 'src/dtrpicker.js';
+  const importPath = source === 'bundle' ? 'dist/dtrpicker.mjs' : 'src/dtrpicker.js';
   const opts = [];
   const currentLocale = document.getElementById('lang-select').value;
   opts.push('  mode: "' + params.mode + '"');

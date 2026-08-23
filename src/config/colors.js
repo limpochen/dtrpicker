@@ -29,7 +29,7 @@
  * - textColorSubLabel: Used by the year/month headers, sidebar month labels, and the year animation.
  *
  * @file       Unified color configuration
- * @version    2.1.11
+ * @version    2.2.0
  * @license    MIT
  */
 

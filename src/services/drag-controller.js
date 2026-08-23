@@ -11,7 +11,7 @@
  * - Window listeners are automatically removed once all sessions are unregistered
  *
  * @file       Shared drag event layer
- * @version    2.1.11
+ * @version    2.2.0
  * @license    MIT
  */
 

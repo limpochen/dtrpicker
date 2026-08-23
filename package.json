@@ -1,7 +1,35 @@
 {
   "name": "dtrpicker",
-  "version": "2.1.11",
-  "private": true,
+  "version": "2.2.0",
+  "description": "A lightweight, fluid date/time range picker rendered with SVG.",
+  "license": "MIT",
+  "author": "Limpo",
+  "keywords": [
+    "datepicker",
+    "datetime",
+    "daterange",
+    "time-picker",
+    "svg",
+    "calendar"
+  ],
+  "main": "./dist/dtrpicker.js",
+  "module": "./dist/dtrpicker.mjs",
+  "types": "./dist/dtrpicker.d.ts",
+  "unpkg": "./dist/dtrpicker.iife.js",
+  "jsdelivr": "./dist/dtrpicker.iife.js",
+  "exports": {
+    ".": {
+      "types": "./dist/dtrpicker.d.ts",
+      "import": "./dist/dtrpicker.mjs",
+      "require": "./dist/dtrpicker.js",
+      "default": "./dist/dtrpicker.mjs"
+    },
+    "./package.json": "./package.json"
+  },
+  "files": [
+    "dist"
+  ],
+  "sideEffects": false,
   "scripts": {
     "build": "node build.js"
   },

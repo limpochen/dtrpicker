@@ -7,6 +7,8 @@
  *
  * @const {Object}
  */
+import VERSION from './version.js';
+
 export const DIM = {
 
   // ══════════════════════════════════════════════════════════════
@@ -38,8 +40,8 @@ export const DIM = {
   /** Number of buffer rows above and below (for virtual scrolling) */
   BUFFER_ROWS: 12,
 
-  /** Version number */
-  VERSION: 'v2.1.11',
+  /** Version number (injected from package.json at build time; falls back to 'dev' in dev mode) */
+  VERSION: 'v' + VERSION,
   /** Whether to display the version number in the bottom-left corner of the container */
   SHOW_VERSION: true,
 

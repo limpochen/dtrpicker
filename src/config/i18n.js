@@ -6,7 +6,7 @@
  * Automatically falls back to English (en-US) when no match is found.
  *
  * @file       Internationalization locale pack
- * @version    2.1.11
+ * @version    2.2.0
  * @license    MIT
  */
 

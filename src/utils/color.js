@@ -4,7 +4,7 @@
  * A pure color computation utility set with no DOM dependencies.
  *
  * @file       Color utility functions
- * @version    2.1.11
+ * @version    2.2.0
  * @license    MIT
  */
 

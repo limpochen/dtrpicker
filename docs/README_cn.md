@@ -22,7 +22,7 @@
 ## 快速开始
 
 ```js
-import dtrPicker from 'dist/dtrpicker.js';
+import dtrPicker from 'dtrpicker';
 
 const picker = new dtrPicker('#my-input', {
   mode: 'dateRange',
@@ -79,7 +79,16 @@ const picker = new dtrPicker(trigger, options);
 npm run build
 ```
 
-输出在 `dist/` 目录。
+`dist/` 目录包含四个压缩产物：
+
+| 文件 | 格式 | 用途 |
+| --- | --- | --- |
+| `dist/dtrpicker.mjs` | ESM | `import` / 现代打包器 |
+| `dist/dtrpicker.js` | CommonJS | `require()` / 旧工具链 |
+| `dist/dtrpicker.iife.js` | IIFE | `<script>` / CDN（全局 `dtrPicker`） |
+| `dist/dtrpicker.d.ts` | TypeScript | 类型声明 |
+
+运行时版本号在构建时从 `package.json` 注入，版本角标始终与发布版本一致。
 
 ---
 
@@ -106,4 +115,4 @@ node server.js
 
 ## 许可
 
-MIT
+[MIT](../LICENSE)
