@@ -25,6 +25,3 @@ npm-debug.log*
 .env
 .env.local
 .env.*.local
-
-# GitHub metadata
-.github/
