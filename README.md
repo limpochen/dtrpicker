@@ -4,6 +4,11 @@
 
 > A streaming date/time range picker component rendered with SVG, focused on being lightweight, fluid, and customizable.
 
+[![Live Demo](https://img.shields.io/badge/Live%20Demo-GitHub%20Pages-2ea44f)](https://limpochen.github.io/dtrpicker/)
+[![npm version](https://img.shields.io/npm/v/dtrpicker)](https://www.npmjs.com/package/dtrpicker)
+[![npm downloads](https://img.shields.io/npm/dm/dtrpicker)](https://www.npmjs.com/package/dtrpicker)
+[![License: MIT](https://img.shields.io/npm/l/dtrpicker)](https://github.com/limpochen/dtrpicker/blob/main/LICENSE)
+
 <!-- Screenshot: run `node server.js` and open http://localhost:16800/, capture the picker popup, and save it as docs/screenshots/picker.png -->
 ![Picker popup](docs/screenshots/picker.png)
 
@@ -39,6 +44,21 @@ picker.onChange((value, meta) => {
   console.log('Change source:', meta.source, 'Action:', meta.action);
 });
 ```
+
+### Direct `<script>` via CDN
+
+No build step needed — drop the IIFE bundle in and use the global `dtrPicker`:
+
+```html
+<script src="https://unpkg.com/dtrpicker@2.2.0/dist/dtrpicker.iife.js"></script>
+<script>
+  const picker = new dtrPicker('#my-input', {
+    mode: 'dateRange',
+  });
+</script>
+```
+
+Also available on [jsDelivr](https://cdn.jsdelivr.net/npm/dtrpicker@2.2.0/dist/dtrpicker.iife.js).
 
 > For the full API reference, see [`docs/api-spec.md`](docs/api-spec.md).
 
