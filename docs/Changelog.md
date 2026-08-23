@@ -1,33 +1,51 @@
 # Changelog
 
-本文件记录 dtrPicker 各版本的变更。版本号遵循 `.github/copilot-instructions.md` 的递增规则：
-问题修复 / 行级调整 +0.0.1，功能增强 / 模块级调整 +0.1.0，重大变更主版本 +1。
+## [2.1.11] - 2026-08-23
+
+### Fixed
+
+- Fixed the demo `getDemoLocale()` matching logic so `zh-TW` correctly resolves to the Traditional Chinese
+  locale pack instead of being captured by the `zh-CN` prefix match (exact match now takes priority).
+  Involved file: `js/demo.js` → `getDemoLocale()`
+
+### Added
+
+- Added `zh-TW` (Traditional Chinese), `ja-JP` (Japanese), and `ko-KR` (Korean) locale packs for the demo page.
+- Brought all demo page UI text into the i18n system: `title` hints, option texts (`Default`, `Auto`,
+  `Dev Code`, `Bundle Code`, etc.) now follow the selected demo language.
+  Involved files: `js/demo.js`, `index.html`
+
+### Maintenance
+
+- Translated comments/docs to English: `README.md`, `docs/api-spec.md`, `docs/Changelog.md`, `server.js`, `js/demo.js`.
+- Moved `.github/` out of version control (added to `.gitignore`, removed from tracking).
+- Unified the version number to `2.1.11` across the project (based on `package.json`; synced to the header comments of each source file, `DIM.VERSION`, `index.html`, and `package-lock.json`).
 
 ## [2.1.10] - 2026-08-21
 
-### 修复
+### Fixed
 
-- 修复单日期模式（`date` / `dateTime`）下第二次点击不同日期时，误走「同天范围 → 扩展」
-  逻辑，导致 UI 呈现日期范围选择、而选中值不更新的问题。
-  现单日期模式点击即替换选中日期，`end` 恒为 `null`。
-  涉及文件：`src/utils/datetime-value.js` → `handleDateClick()`
-- 修复 `DateTime.parse` 对 `YYYY-MM-DD HH:mm` 时间字符串依赖 `new Date(string)`、
-  Safari 解析失败导致时间丢失的兼容隐患。现补充按本地时间构造的正则解析分支。
-  涉及文件：`src/utils/date.js` → `static parse()`
-- 修正泰文（th-TH）「小时」翻译：`'น.'` → `'ชม.'`（涉及 `src/config/i18n.js`）。
+- Fixed an issue in single-date modes (`date` / `dateTime`) where clicking a different date a second time
+  mistakenly entered the "same-day range → expand" logic, causing the UI to render a date range selection
+  while the selected value was not updated.
+  Now, in single-date modes, clicking a date immediately replaces the selected date, and `end` is always `null`.
+  Involved file: `src/utils/datetime-value.js` → `handleDateClick()`
+- Fixed a compatibility concern in `DateTime.parse` where parsing `YYYY-MM-DD HH:mm` time strings relied on
+  `new Date(string)`, which fails on Safari and causes the time to be lost. A regex-based parsing branch that
+  constructs the date in local time has been added.
+  Involved file: `src/utils/date.js` → `static parse()`
+- Corrected the Thai (th-TH) translation for "hour": `'น.'` → `'ชม.'` (involved `src/config/i18n.js`).
 
-### 变更
+### Changed
 
-- 放弃阿拉伯语（ar-SA）支持：移除 `src/config/i18n.js` 中的 `ar-SA` 语言包
-  （RTL 布局未适配，暂不支持；demo 本无该语言）。
-- `header-bar-cell.js`：创建 `<stop>` 复用 `this.g.svgNS`（替代硬编码 namespace）。
+- `header-bar-cell.js`: creating `<stop>` now reuses `this.g.svgNS` (instead of a hardcoded namespace).
 
-### 维护
+### Maintenance
 
-- 更新 `src/config/dimensions.js` 头注释（去除已移除的 HTML+CSS 模式描述）。
-- 兜底代码与死代码/冗余：保持现状并补充注释提醒（详见 `docs/一扫问题.md` 二、三）。
-- 轻微项处理（详见 `docs/一扫问题.md` 五）：
-  - `dtrpicker.destroy()` 补清 `_onOpenCallbacks` / `_onCloseCallbacks`。
-  - `color.js`、`time-cell.js`：补充注释提醒。
-- 版本号全项目统一为 `2.1.10`（以 `package.json` 为准；同步各源文件头注释、`DIM.VERSION`、`index.html`、`package-lock.json`）。
-- 修正对外文档/声明与代码一致：`docs/api-spec.md`、`src/dtrpicker.d.ts`、`README.md` 清除过时的 `renderMode` / `zIndex` / `selecting` / UMD 说明，`locale` 默认值更正为自动检测，更新引入路径与色系说明。
+- Updated the header comment in `src/config/dimensions.js` (removed the description of the eliminated HTML+CSS mode).
+- Fallback code and dead/redundant code: kept as-is with reminder comments added (see sections 2 and 3 of `docs/一扫问题.md`).
+- Minor items handled (see section 5 of `docs/一扫问题.md`):
+  - `dtrpicker.destroy()` now also clears `_onOpenCallbacks` / `_onCloseCallbacks`.
+  - `color.js`, `time-cell.js`: added reminder comments.
+- Unified the version number to `2.1.10` across the project (based on `package.json`; synced to the header comments of each source file, `DIM.VERSION`, `index.html`, and `package-lock.json`).
+- Corrected the public docs/declarations to match the code: cleared the outdated `renderMode` / `zIndex` / `selecting` / UMD mentions in `docs/api-spec.md`, `src/dtrpicker.d.ts`, and `README.md`, corrected the `locale` default to auto-detection, and updated the import path and color scheme descriptions.

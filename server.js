@@ -1,9 +1,9 @@
 /**
- * HTTP 服务 — 为 dtrPicker 提供本地访问（Node.js 版）
+ * HTTP server — provides local access to dtrPicker (Node.js version)
  *
- * 用法：
+ * Usage:
  *   node server.js
- *   然后访问 http://localhost:16800/
+ *   Then visit http://localhost:16800/
  */
 
 const http = require('http');
@@ -13,7 +13,7 @@ const path = require('path');
 const PORT = 16800;
 const ROOT = __dirname;
 
-/** MIME 类型映射 */
+/** MIME type mapping */
 const MIME = {
   '.html': 'text/html; charset=utf-8',
   '.css': 'text/css; charset=utf-8',
@@ -27,14 +27,14 @@ const MIME = {
 };
 
 const server = http.createServer((req, res) => {
-  // 安全：拒绝路径遍历
+  // Security: reject path traversal
   const clean = decodeURIComponent(req.url).split('?')[0];
   const normalized = path.normalize(clean).replace(/^(\.\.(\/|\\|$))+/, '');
-  // 请求 '/' 时返回 index.html
+  // Serve index.html for requests to '/'
   const relative = normalized === '/' || normalized === '\\' ? 'index.html' : normalized;
   const filePath = path.join(ROOT, relative);
 
-  // 只服务 ROOT 下的文件
+  // Only serve files under ROOT
   if (!filePath.startsWith(ROOT)) {
     res.writeHead(403);
     res.end('Forbidden');
@@ -65,7 +65,7 @@ const server = http.createServer((req, res) => {
 });
 
 server.on('connection', (socket) => {
-  // 忽略客户端断连错误
+  // Ignore client disconnect errors
   socket.on('error', () => {});
 });
 

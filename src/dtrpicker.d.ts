@@ -1,7 +1,7 @@
 /**
  * dtrPicker — 日期范围选择器 TypeScript 类型声明
  *
- * @version 2.1.10
+ * @version 2.1.11
  * @license MIT
  */
 

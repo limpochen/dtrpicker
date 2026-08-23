@@ -15,10 +15,17 @@ const demoI18n = {
   'zh-CN': {
     subtitle: '由 Limpo@live.com 设计，由 DeepSeek V4 实施',
     demoPicker: '选择器演示',
+    sourceLabel: '代码来源',
+    sourceTitle: '选择器代码来源',
+    devCode: '开发代码',
+    bundleCode: '打包代码',
+    defaultLabel: '默认',
+    autoLabel: '自动',
     dateRangeLabel: '日期范围：',
     demoHint: '💡 点击输入框弹出日历 · 拖拽浏览月份 · 点击起止日期 · JSON 实时返回',
     paramConfig: '参数配置',
     colorSchemeLabel: '色系风格',
+    colorSchemeTitle: '色系风格',
     renderModeSvg: 'SVG',
     yearMonthModeLabel: '年月显示',
     yearMonthWatermark: '水印',
@@ -32,6 +39,7 @@ const demoI18n = {
     sun: '周日',
     mon: '周一',
     modeLabel: '选择模式',
+    modeTitle: '选择模式',
     modeDate: '日期',
     modeDateTime: '日期+时间',
     modeDateRange: '日期范围',
@@ -40,16 +48,24 @@ const demoI18n = {
     codeSample: '调用代码',
     returnValue: '返回值 (JSON)',
     localeLabel: '国际语言',
+    langTitle: '国际语言',
     clearTitle: '清除选择',
     placeholder: '请选择日期范围',
   },
   'en-US': {
     subtitle: 'Designed by Limpo@live.com, implemented by DeepSeek V4',
     demoPicker: 'Picker Demo',
+    sourceLabel: 'Code Source',
+    sourceTitle: 'Picker code source',
+    devCode: 'Dev Code',
+    bundleCode: 'Bundle Code',
+    defaultLabel: 'Default',
+    autoLabel: 'Auto',
     dateRangeLabel: 'Date Range:',
     demoHint: '💡 Click to open calendar · Drag to browse months · Click start/end dates · Real-time JSON',
     paramConfig: 'Configuration',
     colorSchemeLabel: 'Scheme',
+    colorSchemeTitle: 'Color scheme',
     renderModeSvg: 'SVG',
     yearMonthModeLabel: 'Year/Month',
     yearMonthWatermark: 'Watermark',
@@ -63,6 +79,7 @@ const demoI18n = {
     sun: 'Sun',
     mon: 'Mon',
     modeLabel: 'Mode',
+    modeTitle: 'Selection mode',
     modeDate: 'Date',
     modeDateTime: 'Date+Time',
     modeDateRange: 'Date Range',
@@ -71,8 +88,129 @@ const demoI18n = {
     codeSample: 'Code Sample',
     returnValue: 'Return Value (JSON)',
     localeLabel: 'Language',
+    langTitle: 'Language',
     clearTitle: 'Clear selection',
     placeholder: 'Please select a date range',
+  },
+  'zh-TW': {
+    subtitle: '由 Limpo@live.com 設計，由 DeepSeek V4 實作',
+    demoPicker: '選擇器示範',
+    sourceLabel: '程式碼來源',
+    sourceTitle: '選擇器程式碼來源',
+    devCode: '開發程式碼',
+    bundleCode: '打包程式碼',
+    defaultLabel: '預設',
+    autoLabel: '自動',
+    dateRangeLabel: '日期範圍：',
+    demoHint: '💡 點擊輸入框彈出日曆 · 拖拽瀏覽月份 · 點擊起止日期 · JSON 即時回傳',
+    paramConfig: '參數設定',
+    colorSchemeLabel: '色彩風格',
+    colorSchemeTitle: '色彩風格',
+    renderModeSvg: 'SVG',
+    yearMonthModeLabel: '年月顯示',
+    yearMonthWatermark: '浮水印',
+    yearMonthColumn: '欄',
+    schemeMorandi: '莫蘭迪',
+    schemeNature: '自然',
+    schemeOcean: '海天藍',
+    schemeForest: '森林綠',
+    schemeNight: '星夜黑',
+    firstDayLabel: '週起始日',
+    sun: '週日',
+    mon: '週一',
+    modeLabel: '選擇模式',
+    modeTitle: '選擇模式',
+    modeDate: '日期',
+    modeDateTime: '日期+時間',
+    modeDateRange: '日期範圍',
+    modeDateTimeRange: '日期時間範圍',
+    currentParams: '目前參數 (JSON)',
+    codeSample: '呼叫程式碼',
+    returnValue: '回傳值 (JSON)',
+    localeLabel: '國際語言',
+    langTitle: '國際語言',
+    clearTitle: '清除選擇',
+    placeholder: '請選擇日期範圍',
+  },
+  'ja-JP': {
+    subtitle: 'Limpo@live.com デザイン、DeepSeek V4 実装',
+    demoPicker: 'ピッカー デモ',
+    sourceLabel: 'コードソース',
+    sourceTitle: 'ピッカーコードソース',
+    devCode: '開発コード',
+    bundleCode: 'バンドルコード',
+    defaultLabel: 'デフォルト',
+    autoLabel: '自動',
+    dateRangeLabel: '日付範囲：',
+    demoHint: '💡 クリックでカレンダー表示 · ドラッグで月を移動 · 開始/終了日をクリック · JSON リアルタイム表示',
+    paramConfig: 'パラメータ設定',
+    colorSchemeLabel: 'カラースキーム',
+    colorSchemeTitle: 'カラースキーム',
+    renderModeSvg: 'SVG',
+    yearMonthModeLabel: '年月表示',
+    yearMonthWatermark: 'ウォーターマーク',
+    yearMonthColumn: '列',
+    schemeMorandi: 'モランディ',
+    schemeNature: 'ナチュラル',
+    schemeOcean: 'オーシャン',
+    schemeForest: 'フォレスト',
+    schemeNight: 'スターリーナイト',
+    firstDayLabel: '週の開始日',
+    sun: '日',
+    mon: '月',
+    modeLabel: 'モード',
+    modeTitle: '選択モード',
+    modeDate: '日付',
+    modeDateTime: '日付+時刻',
+    modeDateRange: '日付範囲',
+    modeDateTimeRange: '日付時刻範囲',
+    currentParams: '現在のパラメータ (JSON)',
+    codeSample: 'コードサンプル',
+    returnValue: '戻り値 (JSON)',
+    localeLabel: '言語',
+    langTitle: '言語',
+    clearTitle: '選択をクリア',
+    placeholder: '日付範囲を選択してください',
+  },
+  'ko-KR': {
+    subtitle: 'Limpo@live.com 디자인, DeepSeek V4 구현',
+    demoPicker: '피커 데모',
+    sourceLabel: '코드 소스',
+    sourceTitle: '피커 코드 소스',
+    devCode: '개발 코드',
+    bundleCode: '번들 코드',
+    defaultLabel: '기본',
+    autoLabel: '자동',
+    dateRangeLabel: '날짜 범위：',
+    demoHint: '💡 클릭하여 캘린더 열기 · 드래그로 월 탐색 · 시작/종료 날짜 클릭 · JSON 실시간 반환',
+    paramConfig: '매개변수 설정',
+    colorSchemeLabel: '색상 구성',
+    colorSchemeTitle: '색상 구성',
+    renderModeSvg: 'SVG',
+    yearMonthModeLabel: '년월 표시',
+    yearMonthWatermark: '워터마크',
+    yearMonthColumn: '열',
+    schemeMorandi: '모란디',
+    schemeNature: '내추럴',
+    schemeOcean: '오션',
+    schemeForest: '포레스트',
+    schemeNight: '스타리 나이트',
+    firstDayLabel: '주 시작일',
+    sun: '일',
+    mon: '월',
+    modeLabel: '모드',
+    modeTitle: '선택 모드',
+    modeDate: '날짜',
+    modeDateTime: '날짜+시간',
+    modeDateRange: '날짜 범위',
+    modeDateTimeRange: '날짜 시간 범위',
+    currentParams: '현재 매개변수 (JSON)',
+    codeSample: '코드 샘플',
+    returnValue: '반환값 (JSON)',
+    localeLabel: '언어',
+    langTitle: '언어',
+    clearTitle: '선택 지우기',
+    placeholder: '날짜 범위를 선택하세요',
   },
 };
 
@@ -81,9 +219,10 @@ const demoI18n = {
 // ================================================================
 
 function getDemoLocale(locale) {
+  if (demoI18n[locale]) return demoI18n[locale];
   const lang = locale.split('-')[0];
   for (const key of Object.keys(demoI18n)) {
-    if (key === locale || key.startsWith(lang)) return demoI18n[key];
+    if (key.startsWith(lang)) return demoI18n[key];
   }
   return demoI18n['en-US'];
 }
@@ -104,6 +243,10 @@ function applyDemoI18n(locale) {
         el.textContent = dict[key];
       }
     }
+  });
+  document.querySelectorAll('[data-i18n-title]').forEach(function (el) {
+    const key = el.getAttribute('data-i18n-title');
+    if (dict[key]) el.title = dict[key];
   });
   const clearBtn = document.getElementById('picker-clear-btn');
   if (clearBtn && dict.clearTitle) clearBtn.title = dict.clearTitle;
@@ -165,7 +308,7 @@ function getCurrentParams() {
   const params = {
     mode: currentMode,
   };
-  // 各选项为「默认」（空值）时不提供对应 JSON 项，由选择器使用内部默认值
+  // Omit the corresponding JSON keys when options are "default" (empty); the picker uses its internal defaults
   if (locale) params.locale = locale;
   if (yearMonthMode) params.yearMonthMode = yearMonthMode;
   if (firstDayRaw !== '') params.firstDay = parseInt(firstDayRaw, 10);
@@ -175,9 +318,9 @@ function getCurrentParams() {
 
 function updateParamsDisplay() {
   const el = document.getElementById('params-display');
-  el.innerHTML = '<span class="json-section">// 初始化参数</span>\n'
+  el.innerHTML = '<span class="json-section">// Init params</span>\n'
     + syntaxHighlightJSON(JSON.stringify(getCurrentParams(), null, 2))
-    + '\n\n<span class="json-section">// 弹出时传值</span>\n'
+    + '\n\n<span class="json-section">// Value passed on open</span>\n'
     + syntaxHighlightJSON(JSON.stringify(lastValue || null, null, 2));
 }
 
@@ -187,9 +330,9 @@ function generateCodeSnippet(params) {
   const opts = [];
   const currentLocale = document.getElementById('lang-select').value;
   opts.push('  mode: "' + params.mode + '"');
-  // 各选项为「默认」时不生成对应代码行；显式选择的具体值一律生成
+  // Omit code lines for "default" options; always emit explicitly selected values
   if (params.yearMonthMode) opts.push('  yearMonthMode: "' + params.yearMonthMode + '"');
-  // 「自动」（空值）与默认 en-US 均不提供 locale
+  // No locale is provided for "Auto" (empty) or the default en-US
   if (currentLocale && currentLocale !== 'en-US') opts.push('  locale: "' + currentLocale + '"');
   if (params.firstDay !== undefined) opts.push('  firstDay: ' + params.firstDay);
   if (params.colorScheme) opts.push('  colorScheme: "' + params.colorScheme + '"');
@@ -257,14 +400,14 @@ async function initAllPickers() {
   const pickerOpts = {
     mode: currentMode,
   };
-  // 各选项为「默认」（空值）时不传参，由选择器使用内部默认值
+  // Don't pass options that are "default" (empty); the picker uses its internal defaults
   if (yearMonthMode) pickerOpts.yearMonthMode = yearMonthMode;
   if (locale) pickerOpts.locale = locale;
   if (firstDayRaw !== '') pickerOpts.firstDay = parseInt(firstDayRaw, 10);
   if (colorScheme) pickerOpts.colorScheme = colorScheme;
   const p = new PickerClass(triggerEl, pickerOpts);
   p.onChange(onChangeHandler);
-  // 移除实例自带的 trigger 点击，由 demo 统一管理
+  // Remove the instance's own trigger click handler; the demo manages it centrally
   triggerEl.removeEventListener('click', p._onTriggerClick);
   pickers[currentMode] = p;
 }
@@ -291,10 +434,10 @@ document.querySelectorAll('input[name="param-firstDay"]').forEach(function (el) 
 document.getElementById('source-select').addEventListener('change', applyParams);
 
 /**
- * 将 trigger 显示文本解析为选择器 setValue 接受的 JSON 格式。
- * 消费方职责：格式错误返回 null，选择器不跨边界读取 trigger。
+ * Parses the trigger display text into the JSON format accepted by the picker's setValue.
+ * Caller responsibility: returns null on format errors; the picker does not read the trigger across boundaries.
  * @param {string} text - trigger.value
- * @param {string} mode - 当前选择模式
+ * @param {string} mode - the current selection mode
  * @returns {{start:string, end?:string}|null}
  */
 function parseTriggerValue(text, mode) {
@@ -308,7 +451,7 @@ function parseTriggerValue(text, mode) {
   return { start: parts[0].trim() };
 }
 
-// Trigger 输入变化：为空时清空当前 picker
+// Trigger input change: clear the current picker when empty
 document.getElementById('picker-trigger').addEventListener('input', function () {
   if (!this.value) {
     const picker = pickers[currentMode];
@@ -320,7 +463,7 @@ document.getElementById('picker-trigger').addEventListener('input', function () 
   }
 });
 
-// Trigger 点击：解析当前值传给选择器后再弹出
+// Trigger click: parse the current value, pass it to the picker, then toggle open
 document.getElementById('picker-trigger').addEventListener('click', function (e) {
   e.stopPropagation();
   const picker = pickers[currentMode];
@@ -338,7 +481,7 @@ document.getElementById('picker-trigger').addEventListener('click', function (e)
   picker.toggle();
 });
 
-// Mode 变化同其他配置参数：重新初始化全部实例
+// Mode changes reinitialize all instances like other config parameters
 document.getElementById('param-mode').addEventListener('change', applyParams);
 
 // ================================================================
@@ -353,7 +496,7 @@ const detectedLocale = (function () {
   return 'en-US';
 })();
 
-// 语言默认「自动」：页面文案用浏览器检测语言渲染，选择器 locale 由浏览器自动检测
+// Language defaults to "Auto": page copy renders in the browser-detected language; the picker locale is auto-detected by the browser
 applyDemoI18n(detectedLocale);
 initAllPickers();
 updateParamsDisplay();

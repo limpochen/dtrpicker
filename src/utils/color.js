@@ -4,7 +4,7 @@
  * 纯颜色运算工具集，无 DOM 依赖。
  *
  * @file       色彩工具函数
- * @version    2.1.10
+ * @version    2.1.11
  * @license    MIT
  */
 

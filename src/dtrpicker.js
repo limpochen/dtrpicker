@@ -2,7 +2,7 @@
  * dtrpicker.js — 日期范围选择器核心
  *
  * @file       日期范围选择器核心脚本
- * @version    2.1.10
+ * @version    2.1.11
  * @license    MIT
  */
 

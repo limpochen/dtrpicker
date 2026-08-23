@@ -38,7 +38,7 @@ export const DIM = {
   BUFFER_ROWS: 12,
 
   /** 版本号 */
-  VERSION: 'v2.1.10',
+  VERSION: 'v2.1.11',
   /** 是否在容器左下角显示版本号 */
   SHOW_VERSION: true,
 

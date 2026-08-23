@@ -6,7 +6,7 @@
  * 未匹配时自动回退到英语（en-US）。
  *
  * @file       国际化语言包
- * @version    2.1.10
+ * @version    2.1.11
  * @license    MIT
  */
 

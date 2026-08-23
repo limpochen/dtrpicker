@@ -6,7 +6,7 @@
  * 程序化赋值/清除。不依赖 DOM，不持有回调。
  *
  * @file       选中值对象
- * @version    2.1.10
+ * @version    2.1.11
  * @license    MIT
  */
 

@@ -28,7 +28,7 @@
  * - textColorSubLabel：被年/月表头、侧栏月份标签、年份动画多路径使用。
  *
  * @file       统一色彩配置
- * @version    2.1.10
+ * @version    2.1.11
  * @license    MIT
  */
 
