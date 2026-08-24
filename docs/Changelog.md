@@ -1,5 +1,21 @@
 # Changelog
 
+## [2.2.1] - 2026-08-24
+
+### Added
+
+- A version badge now appears on the demo page title, automatically matching the latest published version.
+- An online demo is now automatically deployed to GitHub Pages on every update.
+- Publishing a new version is now fully automated: tagging the release triggers the build and publish automatically.
+
+### Changed
+
+- The demo page no longer offers a source-code toggle and always uses the development code.
+
+### Maintenance
+
+- Unified the project version to 2.2.1.
+
 ## [2.2.0] - 2026-08-23
 
 ### Added
