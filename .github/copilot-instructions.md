@@ -82,8 +82,8 @@ Strong success criteria let you iterate independently. Weak ones ("just make it 
 ### Versioning
 
 - Bug fixes and line-level code adjustments: bump the version by `0.0.1` (e.g. 1.0.0 → 1.0.1).
-- Feature enhancements and module-level adjustments: bump by `0.1.0` (e.g. 1.0.0 → 1.1.0).
-- Major changes: bump the major version by 1 (e.g. 1.0.0 → 2.0.0).
+- Feature enhancements and module-level adjustments: bump by `0.1.0` (e.g. 1.0.0 → 1.1.0). **Requires approval.**
+- Major changes: bump the major version by 1 (e.g. 1.0.0 → 2.0.0). **Requires approval.**
 
 ### Code Style
 
