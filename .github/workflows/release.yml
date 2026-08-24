@@ -34,4 +34,16 @@ jobs:
       - name: Create GitHub Release
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: gh release create "${{ github.ref_name }}" --title "dtrPicker ${{ github.ref_name }}" --generate-notes
+        run: |
+          VERSION="${GITHUB_REF_NAME#v}"
+          NOTES_FILE="${RUNNER_TEMP}/release-notes.md"
+          # Extract the current version's section from docs/Changelog.md so the
+          # release notes stay user-facing and consistent with the changelog.
+          awk -v v="$VERSION" '
+            /^## \[/ { if (found) exit; if ($0 ~ "^## \\[" v "\\]") found = 1; next }
+            found { print }
+          ' docs/Changelog.md > "$NOTES_FILE"
+          if [ ! -s "$NOTES_FILE" ]; then
+            echo "# dtrPicker $GITHUB_REF_NAME" > "$NOTES_FILE"
+          fi
+          gh release create "$GITHUB_REF_NAME" --title "dtrPicker $GITHUB_REF_NAME" --notes-file "$NOTES_FILE"
