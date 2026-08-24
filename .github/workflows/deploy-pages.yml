@@ -38,6 +38,7 @@ jobs:
         run: |
           mkdir -p _site
           cp -r index.html css js src dist docs _site/
+          cp package.json _site/
           touch _site/.nojekyll
 
       - name: Configure Pages

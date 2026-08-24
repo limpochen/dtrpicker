@@ -1,24 +1,30 @@
 window.__esModuleLoaded = true;
 
 let dtrPicker = null;
-let currentPickerSource = '';
-const PICKER_SOURCES = {
-  dev: '../src/dtrpicker.js',
-  bundle: '../dist/dtrpicker.mjs',
-};
 import { locales } from '../src/config/i18n.js';
+
+// Load and display the version from package.json so the badge always matches
+// the published npm version. Non-critical: silently hidden on failure.
+async function loadPackageVersion() {
+  try {
+    const res = await fetch('package.json', { cache: 'no-store' });
+    if (!res.ok) return;
+    const pkg = await res.json();
+    const el = document.getElementById('demo-version');
+    if (el && pkg.version) el.textContent = 'v' + pkg.version;
+  } catch (err) {
+    // Ignore — version badge is optional.
+  }
+}
+loadPackageVersion();
 
 // ================================================================
 //  Demo page i18n dictionary
 // ================================================================
 const demoI18n = {
   'zh-CN': {
-    subtitle: '由 Limpo@live.com 设计，由 DeepSeek V4 实施',
+    subtitle: '由 Limpo@live.com 设计，并由 DeepSeek V4 实施',
     demoPicker: '选择器演示',
-    sourceLabel: '代码来源',
-    sourceTitle: '选择器代码来源',
-    devCode: '开发代码',
-    bundleCode: '打包代码',
     defaultLabel: '默认',
     autoLabel: '自动',
     dateRangeLabel: '日期范围：',
@@ -55,10 +61,6 @@ const demoI18n = {
   'en-US': {
     subtitle: 'Designed by Limpo@live.com, implemented by DeepSeek V4',
     demoPicker: 'Picker Demo',
-    sourceLabel: 'Code Source',
-    sourceTitle: 'Picker code source',
-    devCode: 'Dev Code',
-    bundleCode: 'Bundle Code',
     defaultLabel: 'Default',
     autoLabel: 'Auto',
     dateRangeLabel: 'Date Range:',
@@ -95,10 +97,6 @@ const demoI18n = {
   'zh-TW': {
     subtitle: '由 Limpo@live.com 設計，由 DeepSeek V4 實作',
     demoPicker: '選擇器示範',
-    sourceLabel: '程式碼來源',
-    sourceTitle: '選擇器程式碼來源',
-    devCode: '開發程式碼',
-    bundleCode: '打包程式碼',
     defaultLabel: '預設',
     autoLabel: '自動',
     dateRangeLabel: '日期範圍：',
@@ -135,10 +133,6 @@ const demoI18n = {
   'ja-JP': {
     subtitle: 'Limpo@live.com デザイン、DeepSeek V4 実装',
     demoPicker: 'ピッカー デモ',
-    sourceLabel: 'コードソース',
-    sourceTitle: 'ピッカーコードソース',
-    devCode: '開発コード',
-    bundleCode: 'バンドルコード',
     defaultLabel: 'デフォルト',
     autoLabel: '自動',
     dateRangeLabel: '日付範囲：',
@@ -175,10 +169,6 @@ const demoI18n = {
   'ko-KR': {
     subtitle: 'Limpo@live.com 디자인, DeepSeek V4 구현',
     demoPicker: '피커 데모',
-    sourceLabel: '코드 소스',
-    sourceTitle: '피커 코드 소스',
-    devCode: '개발 코드',
-    bundleCode: '번들 코드',
     defaultLabel: '기본',
     autoLabel: '자동',
     dateRangeLabel: '날짜 범위：',
@@ -325,8 +315,7 @@ function updateParamsDisplay() {
 }
 
 function generateCodeSnippet(params) {
-  const source = document.getElementById('source-select')?.value || 'dev';
-  const importPath = source === 'bundle' ? 'dist/dtrpicker.mjs' : 'src/dtrpicker.js';
+  const importPath = 'src/dtrpicker.js';
   const opts = [];
   const currentLocale = document.getElementById('lang-select').value;
   opts.push('  mode: "' + params.mode + '"');
@@ -361,11 +350,10 @@ function highlightCode(code) {
 //  Picker initialization
 // ================================================================
 
-async function ensurePickerSource(source) {
-  if (source === currentPickerSource && dtrPicker) return dtrPicker;
-  const mod = await import(PICKER_SOURCES[source] || PICKER_SOURCES.dev);
+async function ensurePickerSource() {
+  if (dtrPicker) return dtrPicker;
+  const mod = await import('../src/dtrpicker.js');
   dtrPicker = mod.default || mod;
-  currentPickerSource = source;
   return dtrPicker;
 }
 
@@ -388,8 +376,7 @@ function onChangeHandler(val) {
 async function initAllPickers() {
   destroyAllPickers();
 
-  const source = document.getElementById('source-select')?.value || 'dev';
-  const PickerClass = await ensurePickerSource(source);
+  const PickerClass = await ensurePickerSource();
   const yearMonthMode = document.querySelector('input[name="param-yearMonthMode"]:checked').value;
   const locale = document.getElementById('lang-select').value;
   const firstDayRaw = document.querySelector('input[name="param-firstDay"]:checked').value;
@@ -431,7 +418,6 @@ document.querySelectorAll('input[name="param-yearMonthMode"]').forEach(function 
 document.getElementById('param-colorScheme').addEventListener('change', applyParams);
 document.getElementById('lang-select').addEventListener('change', applyParams);
 document.querySelectorAll('input[name="param-firstDay"]').forEach(function (el) { el.addEventListener('change', applyParams); });
-document.getElementById('source-select').addEventListener('change', applyParams);
 
 /**
  * Parses the trigger display text into the JSON format accepted by the picker's setValue.
