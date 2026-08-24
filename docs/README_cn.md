@@ -21,55 +21,265 @@
 
 ## 快速开始
 
+```bash
+npm install dtrpicker
+```
+
 ```js
 import dtrPicker from 'dtrpicker';
 
+// 1. 创建实例
 const picker = new dtrPicker('#my-input', {
   mode: 'dateRange',
+  locale: 'zh-CN',
+  firstDay: 1,
+  colorScheme: 'nature',
 });
 
+// 2. 监听值变更
+//    注意：`value` 是一个对象 `{ start, end }`（字段为 `YYYY-MM-DD`
+//    或 `YYYY-MM-DD HH:mm` 字符串），并非单个字符串，请用
+//    `value.start` / `value.end` 展示。
 picker.onChange((value, meta) => {
-  console.log('选中值:', value);
-  console.log('变更来源:', meta.source, '动作:', meta.action);
+  if (value) {
+    console.log(`选中范围：${value.start} ~ ${value.end}`);
+  }
+  console.log('变更来源：', meta.source, '动作：', meta.action);
 });
+
+// 3. 面板开关通知
+picker.onOpen(() => console.log('面板已打开'));
+picker.onClose(() => console.log('面板已关闭'));
+
+// 4. 程序化操作
+picker.setValue({ start: '2026-07-01', end: '2026-07-10' });
+const val = picker.getValue('date');
+console.log(val.start.getFullYear()); // 2026
+
+// 5. 清理
+picker.destroy();
 ```
 
-> 详细 API 参考请见 [`docs/api-spec.md`](docs/api-spec.md)。
+### 直接使用 `<script>` 引入（CDN）
+
+无需构建步骤——直接引入 IIFE 产物并使用全局 `dtrPicker`：
+
+```html
+<script src="https://unpkg.com/dtrpicker@2.2.2/dist/dtrpicker.iife.js"></script>
+<script>
+  const picker = new dtrPicker('#my-input', {
+    mode: 'dateRange',
+  });
+</script>
+```
+
+也可通过 [jsDelivr](https://cdn.jsdelivr.net/npm/dtrpicker@2.2.2/dist/dtrpicker.iife.js) 引入。
 
 ---
 
-## API 概览
+## 安装与引入
 
-### 构造
+### ESM（推荐）
+
+```js
+import dtrPicker from 'dtrpicker';
+```
+
+### CommonJS
+
+```js
+const dtrPicker = require('dtrpicker').default;
+```
+
+### `<script>` 标签 / CDN（IIFE）
+
+```html
+<script src="dist/dtrpicker.iife.js"></script>
+<script>
+  const picker = new dtrPicker('#my-input', { mode: 'dateRange' });
+</script>
+```
+
+---
+
+## API 参考
+
+### 构造与选项
 
 ```js
 const picker = new dtrPicker(trigger, options);
 ```
 
-| 参数 | 说明 |
-| --- | --- |
-| `trigger` | 触发器元素或其 CSS 选择器，作为面板锚点与点击开关 |
-| `options.mode` | **必填**。`'date'` / `'dateTime'` / `'dateRange'` / `'dateTimeRange'` |
-| `options.locale` | BCP 47 语言标签（`'zh-CN'` / `'en-US'` / `'ja-JP'`），空串自动检测浏览器语言 |
-| `options.firstDay` | 周起始日：`0`=周日，`1`=周一 |
-| `options.colorScheme` | 色系：`'morandi'` / `'nature'` / `'ocean'` / `'forest'` / `'night'` |
-| 颜色选项 | `selectedColor`、`gridColor`、`textColor` 等，可逐项覆盖 |
+| 参数 | 类型 | 默认值 | 必填 | 说明 |
+| --- | --- | --- | --- | --- |
+| `trigger` | `HTMLElement \| string` | — | ✅ | 触发器元素或其 CSS 选择器，作为面板定位锚点与点击开关 |
+| `options` | `Object` | `{}` | — | 配置对象 |
+| `options.mode` | `string` | — | ✅ | 选择模式：`'date'` / `'dateTime'` / `'dateRange'` / `'dateTimeRange'` |
+| `options.yearMonthMode` | `'watermark' \| 'column'` | `'watermark'` | — | 年月显示方式：`'watermark'` 水印叠加 / `'column'` 独立列 |
+| `options.locale` | `string` | `''` | — | BCP 47 语言标签（`'zh-CN'` / `'en-US'` / `'ja-JP'` 等），空串自动检测浏览器语言 |
+| `options.firstDay` | `0 \| 1` | `0` | — | 每周起始日：`0`=周日，`1`=周一 |
+| `options.colorScheme` | `string` | `'morandi'` | — | 色系：`'morandi'` / `'nature'` / `'ocean'` / `'forest'` / `'night'` |
+| `options.todayBarHeight` | `number` | `6` | — | 今日标记条高度（px） |
+| `options.wheelStep` | `number` | `40` | — | 滚轮翻页步进系数 |
 
-### 方法
+> ⚠️ `mode`、`yearMonthMode`、`locale`、`firstDay`、`colorScheme` **构造后不可修改**。
 
-| 方法 | 说明 |
-| --- | --- |
-| `open()` / `close()` / `toggle()` | 打开 / 关闭 / 切换面板 |
-| `setValue(value)` | 程序化设置选中值（`{start, end}`） |
-| `getValue([format])` | 读取值：`'string'`（默认）/ `'date'` / `'object'` |
-| `clear([silent])` | 清除选中值，`silent=true` 时不触发回调 |
-| `onChange(cb)` | 监听值变更，回调 `(value, meta)` |
-| `onOpen(cb)` / `onClose(cb)` | 面板生命周期回调 |
-| `destroy()` | 销毁实例并清理 DOM |
+颜色选项：
 
-### 多实例
+| 参数 | 默认值（morandi） | 说明 |
+| --- | --- | --- |
+| `selectedColor` | `'#2f54eb'` | 选中/高亮颜色 |
+| `selectedTextColor` | `'#ffffff'` | 选中态文字颜色 |
+| `gridColor` | `'#d0d0d0'` | 网格线颜色 |
+| `cellColor` | `'#ffffff'` | 单元格背景色 |
+| `textColor` | `'#262626'` | 主文字颜色 |
+| `textColorDisabled` | `'#d9d9d9'` | 禁用日期文字颜色 |
+| `textColorSubLabel` | `'#595959'` | 次级标签颜色 |
+| `textColorWeekend` | `'#f04040'` | 周末日期文字颜色 |
+| `textColorWeekendTitle` | `'#f08080'` | 周末表头文字颜色 |
+| `todayBarColor` | `'#8c00ff'` | 今日标记条颜色 |
 
-`mode` 在构造后不可更改。同一页面需要不同模式 / 语言时，创建多个实例即可，支持同一 trigger 绑定多个实例。
+### ValueObject（值对象格式）
+
+```ts
+// 未选择
+null
+
+// date / dateTime
+{ start: "2026-07-01 10:30" }
+
+// dateRange / dateTimeRange
+{ start: "2026-07-01 10:30", end: "2026-07-15 14:00" }
+```
+
+### 公开方法
+
+#### `open()` / `close()` / `toggle()`
+
+```js
+picker.open();    // 打开面板，已打开时不重复
+picker.close();   // 关闭面板，已关闭时不重复
+picker.toggle();  // 切换面板开关状态
+```
+
+#### `setValue(value)`
+
+```js
+picker.setValue({ start: "2026-06-01", end: "2026-06-15" });
+// 或带时间
+picker.setValue({ start: "2026-06-01 08:30", end: "2026-06-15 17:00" });
+```
+
+- `value` 为 ValueObject（见上文）
+- 自动校验格式，非法日期会被静默清除
+- 会触发 `onChange` 回调（`meta.source = 'programmatic'`）
+
+> ⚠️ **组件不会跨边界读取触发输入框的显示文本**。`setValue()` 接受的是 ValueObject（`{start, end}`），而非触发输入框的原始字符串。调用方需自行把触发器的显示值解析成正确格式后再传入。
+
+#### `getValue([format])`
+
+```js
+picker.getValue();
+// → { start: "2026-06-01 00:00", end: "2026-06-15 23:59" } | null
+
+picker.getValue('string');
+// → 同上（默认格式）
+
+picker.getValue('date');
+// → { start: Date, end: Date | null } | null
+
+picker.getValue('object');
+// → { start: { year, month, day, hour, minute }, end: { ... } | null } | null
+```
+
+| format | 返回类型 | 说明 |
+| --- | --- | --- |
+| `'string'`（默认） | `ValueObject \| null` | `YYYY-MM-DD HH:mm` 格式字符串；单日模式无 `end` 字段 |
+| `'date'` | `{start:Date, end:Date\|null} \| null` | JavaScript Date 对象 |
+| `'object'` | `{start:DateParts, end:DateParts\|null} \| null` | 展开后的数值对象 |
+
+> ⚠️ 虽然格式名是 `'string'`，**`getValue()` 返回的仍是一个对象**（`{ start, end }`），而非拼接好的字符串——只有字段本身是字符串。展示文本请自行拼接，例如 `${value.start} ~ ${value.end}`。
+
+`DateParts`：
+
+```ts
+{ year: number, month: number, day: number, hour: number, minute: number }
+```
+
+#### `clear([silent])`
+
+```js
+picker.clear();       // 清除选中值并触发 onChange(null)
+picker.clear(true);   // 静默清除，不触发回调
+```
+
+#### `onChange(callback)`
+
+```js
+picker.onChange(function(value, meta) {
+  // value: ValueObject | null
+  // meta: { source: 'user' | 'programmatic', action: 'confirmed' | 'cleared' }
+});
+```
+
+| meta 字段 | 取值 | 说明 |
+| --- | --- | --- |
+| `source` | `'user'` | 由用户点击/交互触发 |
+| `source` | `'programmatic'` | 由 `setValue()` / `clear()` 触发 |
+| `action` | `'confirmed'` | 选择完成 |
+| `action` | `'cleared'` | 已清除 |
+
+#### `destroy()`
+
+```js
+picker.destroy();
+```
+
+- 关闭面板、解绑所有事件监听、清空回调列表并移除 DOM
+- 调用后实例不可再使用
+
+#### 生命周期回调
+
+```js
+picker.onOpen(function() { /* 面板已打开 */ });
+picker.onClose(function() { /* 面板已关闭 */ });
+```
+
+### 多实例模式
+
+组件的 `mode` 在构造时确定、不可更改。若同一页面需要使用不同模式（如 `date` 与 `dateRange` 并存，或一个中文一个英文），请创建多个独立实例。
+
+#### 多个触发器，多个实例
+
+每个实例绑定各自的触发器，互不干扰：
+
+```js
+const pickerA = new dtrPicker('#input-a', { mode: 'date' });
+const pickerB = new dtrPicker('#input-b', { mode: 'dateRange' });
+```
+
+#### 单个触发器，多个实例
+
+同一个触发器也可关联多个实例（例如在同一位置切换不同模式，或中英文混用）：
+
+```js
+const trigger = document.querySelector('#my-input');
+const instances = [];
+
+['dateTime', 'dateTimeRange'].forEach(function(mode) {
+  const p = new dtrPicker(trigger, { mode: mode });
+  instances.push(p);
+});
+
+function switchInstance(index) {
+  instances.forEach(function(p, i) {
+    if (i === index) p.open();
+    else p.close();
+  });
+}
+```
+
+> 单个触发器关联多个实例时，面板会重叠定位在同一位置，建议一次只打开一个实例，避免视觉冲突。
 
 ---
 

@@ -1,5 +1,16 @@
 # Changelog
 
+## [2.2.2] - 2026-08-24
+
+### Changed
+
+- The README now bundles the complete API reference, so all options, return types, and callback details are visible in one place.
+- The value object returned by the change callback is now clearly documented with an example, making it easier to display the selected range.
+
+### Maintenance
+
+- Unified the project version to 2.2.2.
+
 ## [2.2.1] - 2026-08-24
 
 ### Added

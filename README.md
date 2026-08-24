@@ -35,14 +35,36 @@ npm install dtrpicker
 ```js
 import dtrPicker from 'dtrpicker';
 
+// 1. Create
 const picker = new dtrPicker('#my-input', {
   mode: 'dateRange',
+  locale: 'zh-CN',
+  firstDay: 1,
+  colorScheme: 'nature',
 });
 
+// 2. Listen for value changes.
+//    NOTE: `value` is an object `{ start, end }` (strings in `YYYY-MM-DD`
+//    or `YYYY-MM-DD HH:mm` format), NOT a single string. Use `value.start`
+//    / `value.end` to display it.
 picker.onChange((value, meta) => {
-  console.log('Selected value:', value);
+  if (value) {
+    console.log(`Selected range: ${value.start} ~ ${value.end}`);
+  }
   console.log('Change source:', meta.source, 'Action:', meta.action);
 });
+
+// 3. Panel open/close notifications
+picker.onOpen(() => console.log('Panel opened'));
+picker.onClose(() => console.log('Panel closed'));
+
+// 4. Programmatic operations
+picker.setValue({ start: '2026-07-01', end: '2026-07-10' });
+const val = picker.getValue('date');
+console.log(val.start.getFullYear()); // 2026
+
+// 5. Cleanup
+picker.destroy();
 ```
 
 ### Direct `<script>` via CDN
@@ -50,7 +72,7 @@ picker.onChange((value, meta) => {
 No build step needed — drop the IIFE bundle in and use the global `dtrPicker`:
 
 ```html
-<script src="https://unpkg.com/dtrpicker@2.2.0/dist/dtrpicker.iife.js"></script>
+<script src="https://unpkg.com/dtrpicker@2.2.2/dist/dtrpicker.iife.js"></script>
 <script>
   const picker = new dtrPicker('#my-input', {
     mode: 'dateRange',
@@ -58,44 +80,213 @@ No build step needed — drop the IIFE bundle in and use the global `dtrPicker`:
 </script>
 ```
 
-Also available on [jsDelivr](https://cdn.jsdelivr.net/npm/dtrpicker@2.2.0/dist/dtrpicker.iife.js).
-
-> For the full API reference, see [`docs/api-spec.md`](docs/api-spec.md).
+Also available on [jsDelivr](https://cdn.jsdelivr.net/npm/dtrpicker@2.2.2/dist/dtrpicker.iife.js).
 
 ---
 
-## API Overview
+## Installation & Import
 
-### Constructor
+### ESM (recommended)
+
+```js
+import dtrPicker from 'dtrpicker';
+```
+
+### CommonJS
+
+```js
+const dtrPicker = require('dtrpicker').default;
+```
+
+### Script tag / CDN (IIFE)
+
+```html
+<script src="dist/dtrpicker.iife.js"></script>
+<script>
+  const picker = new dtrPicker('#my-input', { mode: 'dateRange' });
+</script>
+```
+
+---
+
+## API Reference
+
+### Constructor & Options
 
 ```js
 const picker = new dtrPicker(trigger, options);
 ```
 
-| Parameter | Description |
-| --- | --- |
-| `trigger` | The trigger element or its CSS selector, used as the panel anchor and click toggle |
-| `options.mode` | **Required**. `'date'` / `'dateTime'` / `'dateRange'` / `'dateTimeRange'` |
-| `options.locale` | BCP 47 language tag (`'zh-CN'` / `'en-US'` / `'ja-JP'`); an empty string auto-detects the browser language |
-| `options.firstDay` | First day of the week: `0` = Sunday, `1` = Monday |
-| `options.colorScheme` | Color scheme: `'morandi'` / `'nature'` / `'ocean'` / `'forest'` / `'night'` |
-| Color options | `selectedColor`, `gridColor`, `textColor`, etc., each can be overridden |
+| Parameter | Type | Default | Required | Description |
+| --- | --- | --- | --- | --- |
+| `trigger` | `HTMLElement \| string` | — | ✅ | The trigger element or its CSS selector. The component uses it as the panel positioning anchor and click toggle. |
+| `options` | `Object` | `{}` | — | The configuration object |
+| `options.mode` | `string` | — | ✅ | Selection mode: `'date'` / `'dateTime'` / `'dateRange'` / `'dateTimeRange'` |
+| `options.yearMonthMode` | `'watermark' \| 'column'` | `'watermark'` | — | Year/month display mode: `'watermark'` watermark overlay / `'column'` separate column |
+| `options.locale` | `string` | `''` | — | BCP 47 language tag: `'zh-CN'` `'en-US'` `'ja-JP'`, etc. Empty string = auto-detect browser language |
+| `options.firstDay` | `0 \| 1` | `0` | — | First day of the week: `0` = Sunday, `1` = Monday |
+| `options.colorScheme` | `string` | `'morandi'` | — | Color scheme: `'morandi'` / `'nature'` / `'ocean'` / `'forest'` / `'night'` |
+| `options.todayBarHeight` | `number` | `6` | — | Height of the today marker bar (px) |
+| `options.wheelStep` | `number` | `40` | — | Wheel paging step coefficient |
 
-### Methods
+> ⚠️ `mode`, `yearMonthMode`, `locale`, `firstDay`, `colorScheme` **cannot be changed after construction**.
 
-| Method | Description |
-| --- | --- |
-| `open()` / `close()` / `toggle()` | Open / close / toggle the panel |
-| `setValue(value)` | Programmatically set the selected value (`{start, end}`) |
-| `getValue([format])` | Read the value: `'string'` (default) / `'date'` / `'object'` |
-| `clear([silent])` | Clear the selected value; callbacks are not fired when `silent=true` |
-| `onChange(cb)` | Listen for value changes, callback `(value, meta)` |
-| `onOpen(cb)` / `onClose(cb)` | Panel lifecycle callbacks |
-| `destroy()` | Destroy the instance and clean up the DOM |
+Color options:
 
-### Multiple Instances
+| Parameter | Default (morandi) | Description |
+| --- | --- | --- |
+| `selectedColor` | `'#2f54eb'` | Selected/highlight color |
+| `selectedTextColor` | `'#ffffff'` | Selected-state text color |
+| `gridColor` | `'#d0d0d0'` | Grid line color |
+| `cellColor` | `'#ffffff'` | Cell background color |
+| `textColor` | `'#262626'` | Primary text color |
+| `textColorDisabled` | `'#d9d9d9'` | Disabled date text color |
+| `textColorSubLabel` | `'#595959'` | Secondary label color |
+| `textColorWeekend` | `'#f04040'` | Weekend date text color |
+| `textColorWeekendTitle` | `'#f08080'` | Weekend header text color |
+| `todayBarColor` | `'#8c00ff'` | Today marker bar color |
 
-`mode` cannot be changed after construction. When you need different modes / languages on the same page, simply create multiple instances; multiple instances bound to the same trigger are supported.
+### ValueObject (value object format)
+
+```ts
+// no selection
+null
+
+// date / dateTime
+{ start: "2026-07-01 10:30" }
+
+// dateRange / dateTimeRange
+{ start: "2026-07-01 10:30", end: "2026-07-15 14:00" }
+```
+
+### Public Methods
+
+#### `open()` / `close()` / `toggle()`
+
+```js
+picker.open();    // Opens the panel. No-op if already open.
+picker.close();   // Closes the panel. No-op if already closed.
+picker.toggle();  // Toggles the panel open/closed state.
+```
+
+#### `setValue(value)`
+
+```js
+picker.setValue({ start: "2026-06-01", end: "2026-06-15" });
+// or with time
+picker.setValue({ start: "2026-06-01 08:30", end: "2026-06-15 17:00" });
+```
+
+- `value` is a ValueObject (see above)
+- Automatically validates the format; invalid dates are silently cleared
+- Triggers the `onChange` callback (`meta.source = 'programmatic'`)
+
+> ⚠️ **The component does not read the trigger's display text across boundaries.** `setValue()` accepts a ValueObject (`{start, end}`), not the raw string from the trigger input. The caller is responsible for parsing the trigger's display value into the correct format before passing it in.
+
+#### `getValue([format])`
+
+```js
+picker.getValue();
+// → { start: "2026-06-01 00:00", end: "2026-06-15 23:59" } | null
+
+picker.getValue('string');
+// → same as above (default format)
+
+picker.getValue('date');
+// → { start: Date, end: Date | null } | null
+
+picker.getValue('object');
+// → { start: { year, month, day, hour, minute }, end: { ... } | null } | null
+```
+
+| format | Return type | Description |
+| --- | --- | --- |
+| `'string'` (default) | `ValueObject \| null` | YYYY-MM-DD HH:mm formatted strings. Single-day modes have no `end` field |
+| `'date'` | `{start:Date, end:Date\|null} \| null` | JavaScript Date objects |
+| `'object'` | `{start:DateParts, end:DateParts\|null} \| null` | Expanded numeric objects |
+
+> ⚠️ Despite the `'string'` format name, **`getValue()` returns an object** (`{ start, end }`), not a concatenated string — only its fields are strings. Build the display text yourself, e.g. `${value.start} ~ ${value.end}`.
+
+`DateParts`:
+
+```ts
+{ year: number, month: number, day: number, hour: number, minute: number }
+```
+
+#### `clear([silent])`
+
+```js
+picker.clear();       // Clears the selected value and triggers onChange(null)
+picker.clear(true);   // Silently clears without firing the callback
+```
+
+#### `onChange(callback)`
+
+```js
+picker.onChange(function(value, meta) {
+  // value: ValueObject | null
+  // meta: { source: 'user' | 'programmatic', action: 'confirmed' | 'cleared' }
+});
+```
+
+| meta field | Value | Description |
+| --- | --- | --- |
+| `source` | `'user'` | Triggered by user clicks/interactions |
+| `source` | `'programmatic'` | Triggered by `setValue()` / `clear()` |
+| `action` | `'confirmed'` | Selection completed |
+| `action` | `'cleared'` | Cleared |
+
+#### `destroy()`
+
+```js
+picker.destroy();
+```
+
+- Closes the panel, unbinds all event listeners, clears the callback list, and removes the DOM
+- The instance cannot be used after calling this
+
+#### Lifecycle callbacks
+
+```js
+picker.onOpen(function() { /* Panel opened */ });
+picker.onClose(function() { /* Panel closed */ });
+```
+
+### Multiple-Instance Mode
+
+The component's `mode` is determined at construction and cannot be changed. If a single page needs to use different modes (such as `date` and `dateRange` coexisting, or one instance in Chinese and one in English), create multiple independent instances.
+
+#### Multiple triggers, multiple instances
+
+Each instance binds to its own trigger element and works independently:
+
+```js
+const pickerA = new dtrPicker('#input-a', { mode: 'date' });
+const pickerB = new dtrPicker('#input-b', { mode: 'dateRange' });
+```
+
+#### Single trigger, multiple instances
+
+A single trigger element can also be associated with multiple instances (for example, switching between different modes at the same position, or mixing Chinese and English):
+
+```js
+const trigger = document.querySelector('#my-input');
+const instances = [];
+
+['dateTime', 'dateTimeRange'].forEach(function(mode) {
+  const p = new dtrPicker(trigger, { mode: mode });
+  instances.push(p);
+});
+
+function switchInstance(index) {
+  instances.forEach(function(p, i) {
+    if (i === index) p.open();
+    else p.close();
+  });
+}
+```
+
+> When a single trigger is associated with multiple instances, the panels will be positioned overlapping at the same location. It is recommended to open only one instance at a time to avoid visual conflicts.
 
 ---
 

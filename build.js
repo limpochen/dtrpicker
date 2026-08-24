@@ -6,7 +6,6 @@ const root = __dirname;
 const outdir = path.join(root, 'dist');
 const jsEntry = path.join(root, 'src', 'dtrpicker.js');
 const dtsSource = path.join(root, 'src', 'dtrpicker.d.ts');
-const apiSpecSource = path.join(root, 'docs', 'api-spec.md');
 const pkg = require(path.join(root, 'package.json'));
 
 /**
@@ -58,10 +57,8 @@ async function build() {
     footer: { js: IIFE_FOOTER },
   });
 
-  // Copy the TypeScript declarations and API spec alongside the bundles.
+  // Copy the TypeScript declarations alongside the bundles.
   fs.copyFileSync(dtsSource, path.join(outdir, 'dtrpicker.d.ts'));
-  fs.mkdirSync(path.join(outdir, 'docs'), { recursive: true });
-  fs.copyFileSync(apiSpecSource, path.join(outdir, 'docs', 'api-spec.md'));
 
   const files = ['dtrpicker.mjs', 'dtrpicker.js', 'dtrpicker.iife.js', 'dtrpicker.d.ts'];
   const sizes = files

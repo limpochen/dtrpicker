@@ -1,7 +1,7 @@
 /**
  * dtrPicker — TypeScript type declarations for the date range picker
  *
- * @version 2.2.0
+ * @version 2.2.2
  * @license MIT
  */
 
