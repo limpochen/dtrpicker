@@ -8,8 +8,8 @@ on:
       - 'v*'
 
 permissions:
-  id-token: write  # Required for OIDC (Trusted Publishing)
-  contents: read
+  id-token: write   # Required for OIDC (Trusted Publishing)
+  contents: write   # Required to create the GitHub Release (gh release create)
 
 jobs:
   publish:
